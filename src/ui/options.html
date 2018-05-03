@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="style.css" rel="stylesheet" type="text/css">
+    <title>BlockTube - Options</title>
+    <link rel="shortcut icon" type="image/png" href="../../assets/icons/16.png"/>
+  </head>
+  <body>
+    <h1>BlockTube</h1>
+    <div id="main">
+      <form id="login" style="display:none">
+        <p>Extension options are restricted, please login to continue.</p>
+        <div>
+          <label class="block-label" style="margin-right:5px">Password</label>
+          <input id="pass_login" type="password" size="32" autocomplete="off" class="form-text" />
+        </div>
+        <div>
+          <input type="submit" id="send_login" value="Login" />
+          <div class="status-text" id="status_login"></div>
+        </div>
+      </form>
+      <form id="options" style="display:none">
+        <p style="font-size:small">For usage instructions, read the wiki <a href="https://github.com/amitbl/blocktube/wiki">here</a></p>
+        <legend>Filters options</legend>
+        <fieldset>
+          <div>
+            <label class="block-label">Video title</label>
+            <textarea class="form-textarea" rows="5" id="title"></textarea>
+          </div>
+          <div>
+            <label class="block-label">Channel name</label>
+            <textarea class="form-textarea" rows="5" id="channelName"></textarea>
+          </div>
+          <div>
+            <label class="block-label">Channel ID</label>
+            <textarea class="form-textarea" rows="5" id="channelId"></textarea>
+          </div>
+          <div>
+            <label class="block-label">Comment content</label>
+            <textarea class="form-textarea" rows="5" id="comment"></textarea>
+          </div>
+        </fieldset>
+        <legend>Other options</legend>
+        <fieldset>
+          <div>
+            <label class="block-label">UI Password:</label>
+            <input id="pass_save" type="password" autocomplete="off" />
+          </div>
+          <div>
+            <label class="block-label">Video blocked message:</label>
+            <input id="block_message" type="text" autocomplete="off" />
+          </div>
+          <div>
+            <label class="block-label">Allow only videos between</label>
+            <input id="vidLength_0" type="number" min="0" max="99999" />
+            <small>-</small>
+            <input id="vidLength_1" type="number" min="0" max="99999" />
+            <span style="font-size:small; font-style:italic">seconds long</span>
+          </div>
+          <div>
+            <input id="disable_trending" type="checkbox" />
+            <label>Disable Trending page</label>
+          </div>
+          <div>
+            <input id="autoplay" type="checkbox" />
+            <label>Autoplay next video on block</label>
+          </div>
+        </fieldset>
+        <div class="buttons">
+          <input type="submit" id="save_btn" value="Save" />
+          <input type="button" id="export" value="Export" />
+          <input type="button" id="import" value="Import" />
+          <input type="file" id="myfile" accept="application/json" style="display:none" />
+          <div class="status-text" id="status_save"></div>
+        </div>
+      </form>
+    </div>
+    <script type="text/javascript" src="options.js"></script>
+  </body>
+</html>

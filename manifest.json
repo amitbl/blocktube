@@ -1,0 +1,38 @@
+{
+  "name": "BlockTube",
+  "version": "0.1",
+  "description": "Block content from YouTube™",
+  "manifest_version": 2,
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["src/scripts/content_script.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": ["src/scripts/inject.js"],
+  "browser_action": {
+    "default_title": "BlockTube Options",
+    "default_icon": {
+      "16": "assets/icons/16.png",
+      "48": "assets/icons/48.png",
+      "128": "assets/icons/128.png"
+    }
+  },
+  "options_ui": {
+    "page": "src/ui/options.html",
+    "open_in_tab": true
+  },
+  "permissions": [
+    "storage"
+  ],
+  "background": {
+    "scripts": ["src/scripts/background.js"]
+  },
+  "icons": {
+    "16": "assets/icons/16.png",
+    "48": "assets/icons/48.png",
+    "128": "assets/icons/128.png"
+  },
+  "homepage_url": "https://github.com/amitbl/blocktube"
+}

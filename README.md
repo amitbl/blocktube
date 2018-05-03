@@ -1,0 +1,66 @@
+# BlockTube
+
+WebExtension for Chrome and Firefox.  
+Filter and block unwanted content from YouTube™.
+
+## Extension features
+
+* Block videos via: **Video Title** / **Channel Name** / **Channel ID**
+* Block comments via **User** / **Comment content**
+* Blocked videos do not appear anywhere on the site
+* Block complete channels
+* Supports both keywords and raw Regex
+* Does not break or limit any features of YouTube like playlist or autoplay
+* Hide and block the Trending section
+* Protect extension options with a password
+* Filtering is done before any DOM rendering
+
+## Install
+
+* **Chrome Webstore**
+* **Firefox AMO** 
+
+## FAQ
+
+* What is the difference between "Channel ID" and "Channel Name"  
+  Channel names on YouTube are not unique and can be duplicated/changed  
+  whereas Channel ID is a unique identification string that never changes.  
+  If you want to block a specific single channel the preferred method is using it's ID,  
+  If you want to block multiple channels sharing similar name use it's name.
+
+* How can I get a channel's ID?  
+  Channel ID looks like this: UCXXXXXXXXXXXXXXXX  
+  To get it, simply browse to a channel page and look at the URL `/channel/UCXXXXXXXXXXXXXXXXXXXX`  
+  If the URL is `/user/BadChannelExample` use [This site](http://johnnythetank.github.io/youtube-channel-name-converter/) to convert the username to the channel ID
+
+* How to block comments from specific user?  
+  Blocked channels comments are removed as well, so just add the user's name/channel ID
+  to your filters
+
+* What is the behaviour when browsing blocked channel?  
+  User will be redirected to YouTube homepage.
+
+* What is the behaviour when browsing blocked video?  
+  You can choose between two options:
+  - Block the entire page and leave a custom message
+  - Auto redirect user to the next video
+
+* How can I ensure this extension cannot be bypassed?   
+  TODO
+  
+## Future work
+
+* User-friendly options UI
+* Sync options to cloud provider / enterprise policies
+* Context menu helper
+* Whitelist mode
+* YouTube Gaming support
+* Dynamic rules (match multiple rules to block a video)
+
+## License
+
+This project is licensed under the GPLv3 License - see the [LICENSE.txt](LICENSE.txt) file for details
+
+## Acknowledgments
+
+* Extension Icon from: http://www.designbolts.com/2013/09/08/40-free-shaded-social-media-icons/
