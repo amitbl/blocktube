@@ -17,8 +17,8 @@ Filter and block unwanted content from YouTube™.
 
 ## Install
 
-* **Chrome Webstore**
-* **Firefox AMO** 
+* **Chrome Webstore** - soon
+* [**Firefox AMO**](https://addons.mozilla.org/en-US/firefox/addon/blocktube/)
 
 ## FAQ
 
@@ -59,7 +59,7 @@ Filter and block unwanted content from YouTube™.
 
 ## License
 
-This project is licensed under the GPLv3 License - see the [LICENSE.txt](LICENSE.txt) file for details
+This project is licensed under the GPLv3 License - see the [LICENSE](LICENSE) file for details
 
 ## Acknowledgments
 
