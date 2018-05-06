@@ -208,7 +208,7 @@
         value = this.flattenRuns(value);
       }
 
-      if (regexProps.includes(h) && properties.some(prop => prop.test(value))) return true;
+      if (regexProps.includes(h) && properties.some(prop => prop && prop.test(value))) return true;
       else if (h === 'vidLength' && properties.length === 2) {
         const vidLen = parseTime(value);
         if ((vidLen > 0) &&
@@ -455,7 +455,14 @@
 
     regexProps.forEach((p) => {
       if (has.call(data.filterData, p)) {
-        data.filterData[p] = data.filterData[p].map(v => RegExp(v[0], v[1]));
+        data.filterData[p] = data.filterData[p].map((v) => {
+          try {
+            return RegExp(v[0], v[1]);
+          } catch (e) {
+            console.error(`RegExp parsing error: /${v[0]}/${v[1]}`);
+            return undefined;
+          }
+        });
       }
     });
   }

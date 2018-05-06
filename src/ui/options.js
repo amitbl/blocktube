@@ -90,7 +90,7 @@
   }
 
   function multilineToArray(text) {
-    return text.replace(/\r\n/g, '\n').split('\n').filter(x => !(x === ''));
+    return text.replace(/\r\n/g, '\n').split('\n').filter(x => !(x === '')).map(x => x.trim());
   }
 
   function get(path, def = undefined, obj = undefined) {

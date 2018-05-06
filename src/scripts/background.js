@@ -17,14 +17,12 @@
     const filtered = entriesArr.filter(x => !(x === '' || x.startsWith('//')));
 
     return filtered.map((v) => {
+      v = v.trim();
+
       // raw regex
       const parts = /^\/(.*)\/(.*)$/.exec(v);
       if (parts !== null) {
-        try {
-          return [parts[1], parts[2]];
-        } catch (e) {
-          return undefined;
-        }
+        return [parts[1], parts[2]];
       }
 
       // regular keyword
