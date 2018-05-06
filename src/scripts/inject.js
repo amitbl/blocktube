@@ -475,12 +475,9 @@
   }
 
   function filterXHR() {
-    // only operate if we got the full response
-    if (this.readyState !== 4) {
-      return;
-    }
-
     let url;
+    let ytDataArr;
+
     try {
       url = new URL(this.responseURL);
     } catch (e) {
@@ -493,7 +490,10 @@
       return;
     }
 
-    let ytDataArr;
+    // only operate if we got the full response
+    if (this.readyState !== 4) {
+      return;
+    }
 
     try {
       ytDataArr = JSON.parse(this.responseText);
