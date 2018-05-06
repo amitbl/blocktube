@@ -20,6 +20,7 @@
     'horizontalListRenderer',
     'verticalListRenderer',
     'shelfRenderer',
+    'gridRenderer',
     'expandedShelfContentsRenderer',
     'comment',
     'commentThreadRenderer',
