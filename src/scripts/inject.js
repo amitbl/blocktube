@@ -47,7 +47,7 @@
   // !! Filter Rules definitions
   const baseRules = {
     channelId: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
-    channelName: 'shortBylineText.runs',
+    channelName: ['shortBylineText.runs', 'shortBylineText.simpleText'],
     title: 'title.simpleText',
     vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text.simpleText',
   };
