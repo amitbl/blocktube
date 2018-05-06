@@ -505,9 +505,13 @@
 
     if (!(ytDataArr instanceof Array)) ytDataArr = [ytDataArr];
 
-    ytDataArr.map((obj) => {
+    ytDataArr.forEach((obj) => {
       if (has.call(obj, 'player')) {
         ObjectFilter(obj.player, ytPlayerRules);
+      }
+
+      if (has.call(obj, 'playerResponse')) {
+        ObjectFilter(obj.playerResponse, ytPlayerRules);
       }
 
       if (has.call(obj, 'response')) {
@@ -526,15 +530,8 @@
           default:
             rules = blockRules;
         }
-
         ObjectFilter(obj.response, rules, postActions);
       }
-
-      if (has.call(obj, 'playerResponse')) {
-        ObjectFilter(obj.playerResponse, ytPlayerRules);
-      }
-
-      return 0;
     }, this);
 
     // redefine responseText with filtered data
