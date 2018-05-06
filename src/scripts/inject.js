@@ -290,7 +290,7 @@
         customRet = r.customFunc.call(this, obj, r.name);
       }
       if (customRet === true) {
-        obj[r.name] = undefined;
+        delete obj[r.name];
         deletePrev = true;
       }
       return 0;
@@ -314,7 +314,7 @@
         deletePrev = true;
       } else if (childDel && deleteAllowed.includes(idx)) {
         // special childs that needs removing if they're empty
-        obj[idx] = undefined;
+        delete obj[idx];
         deletePrev = true;
       }
     }
