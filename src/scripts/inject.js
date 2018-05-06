@@ -202,7 +202,13 @@
       const properties = storageData.filterData[h];
       if (properties === undefined) return false;
 
-      let value = getObjectByPath(obj, filterPath);
+      const filterPathArr = filterPath instanceof Array ? filterPath : [filterPath];
+      let value;
+      for (let idx = 0; idx <= filterPathArr.length; idx += 1) {
+        value = getObjectByPath(obj, filterPathArr[idx]);
+        if (value !== undefined) break;
+      }
+
       if (value === undefined) return false;
 
       if (value instanceof Array) {
