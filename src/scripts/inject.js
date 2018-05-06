@@ -690,7 +690,7 @@
 
     transformToRegExp(event.data.data);
     storageData = event.data.data;
-    if (storageData.options.trending === true) blockTrending();
+    if (storageData.options.trending === true && !init) blockTrending();
 
     init = true;
   }, true);
