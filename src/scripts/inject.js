@@ -7,12 +7,12 @@
   let init = false;
 
   // extension storageData
-  let storageData = {
-    filterData: {},
-    options: {
-      trending: false,
-    },
-  };
+  let storageData;
+
+  // TODO: hack for blocking data in other objects
+  let currentBlock = false;
+
+  const contextMenuObjects = ['videoRenderer', 'gridVideoRenderer', 'compactVideoRenderer'];
 
   // those properties can be safely deleted when one of thier child got filtered
   const deleteAllowed = [
@@ -537,6 +537,8 @@
           default:
             rules = blockRules;
         }
+
+        addContextMenus(obj.response);
         ObjectFilter(obj.response, rules, postActions);
       }
     }, this);
@@ -596,7 +598,65 @@
     }
   }
 
+  function modifyMenu(obj) {
+    if (!has.call(obj, 'shortBylineText')) return;
+    if (!has.call(obj, 'menu')) obj.menu = { menuRenderer: { items: [] } };
+    const items = obj.menu.menuRenderer.items;
+    const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] } } };
+    const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] } } };
+    items.push(blockVid, blockCh);
+  }
+
+  function addContextMenus(o) {
+    const attr = contextMenuObjects.find(e => has.call(o, e));
+    if (attr !== undefined) {
+      modifyMenu(o[attr]);
+      return;
+    }
+    if (o instanceof Object) Object.keys(o).forEach(x => addContextMenus(o[x]));
+  }
+
+  function menuOnTap(event) {
+    let data;
+    let type;
+    const parentDom = this.parentComponent.eventSink_.parentComponent;
+    const parent = parentDom.data;
+
+    switch (this.getElementsByTagName('yt-formatted-string')[0].textContent) {
+      case 'Block Channel': {
+        type = 'channelId';
+        data = parent.shortBylineText.runs || parent.shortBylineText.simpleText;
+        break;
+      }
+      case 'Block Video': {
+        type = 'videoId';
+        data = parent;
+        break;
+      }
+    }
+
+    if (data && type) {
+      postMessage('contextBlockData', { type, info: data });
+      parentDom.setAttribute('is-dismissed', '');
+      // TODO: Menu does not close without this timeout
+      setTimeout(() => parentDom.parentElement.removeChild(parentDom), 100);
+    } else if (this.onTap_) {
+      return this.onTap_(event);
+    }
+  }
+
+  function setPolymerHook(v) {
+    return function () {
+      if (arguments[0].is === 'ytd-menu-service-item-renderer') {
+        arguments[0].onTapHook_ = menuOnTap;
+        arguments[0].listeners.tap = 'onTapHook_';
+      }
+      return v.apply(null, arguments);
+    }
+  }
+
   function startHook() {
+
     // hook ytInitialData
     Object.defineProperty(window, 'ytInitialData', {
       enumerable: true,
@@ -605,7 +665,10 @@
         return this._ytInitialData;
       },
       set(v) {
-        ObjectFilter(v, blockRules, [removeRvs, fixAutoplay]);
+        addContextMenus(v.contents);
+        let postActions = [removeRvs, fixAutoplay];
+        if (currentBlock) postActions.push(redirectToNext);
+        ObjectFilter(v, blockRules, postActions);
         this._ytInitialData = v;
       },
     });
@@ -685,15 +748,34 @@
   // listen for any changes in storageData
   window.addEventListener('message', (event) => {
     if (event.source !== window) return;
-    if (!event.data.type || event.data.type !== 'storageData') return;
-    if (event.data.data === undefined) return;
+    if (!event.data.from || event.data.from !== 'BLOCKTUBE_CONTENT') return;
 
-    transformToRegExp(event.data.data);
-    storageData = event.data.data;
-    if (storageData.options.trending === true && !init) blockTrending();
-
-    init = true;
+    switch (event.data.type) {
+      case 'storageData': {
+        if (event.data.data === undefined) break;
+        transformToRegExp(event.data.data);
+        storageData = event.data.data;
+        if (storageData.options.trending === true && !init) blockTrending();
+        break;
+      }
+    }
+    if (!init) {
+      startHook();
+      init = true;
+    }
   }, true);
 
-  startHook();
+  // hook polymer
+  Object.defineProperty(window, 'Polymer', {
+    get() {
+      return this._polymer;
+    },
+    set(v) {
+      if (v instanceof Function && v.name === 'bound ') this._polymer = setPolymerHook(v);
+      else this._polymer = v;
+    }
+  });
+
+  // signal content script
+  postMessage('ready');
 }());
