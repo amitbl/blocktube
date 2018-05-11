@@ -341,6 +341,18 @@
 
   // !! Custom filtering functions
 
+  function setPageBlock() {
+    if (/\/embed\/.*/.test(new URL(document.location).pathname)) {
+      window.addEventListener('load', () => {
+        const playerElem = document.getElementById('player');
+        if (playerElem) playerElem.parentElement.removeChild(playerElem);
+      });
+    } else {
+      currentBlock = true;
+    }
+    return true;
+  }
+
   function disablePlayer(ytData) {
     const message = (storageData.options.block_message) || 'Video Removed';
 
@@ -393,6 +405,8 @@
   }
 
   function redirectToNext() {
+    currentBlock = false;
+
     const twoColumn = getObjectByPath(this.object, 'contents.twoColumnWatchNextResults');
     if (twoColumn === undefined) return;
 
@@ -545,6 +559,7 @@
             break;
           case '/watch':
             postActions = [removeRvs, fixAutoplay];
+            if (currentBlock) postActions.push(redirectToNext);
           default:
             rules = blockRules;
         }
