@@ -210,7 +210,7 @@
       if (filterPath === undefined) return false;
 
       const properties = storageData.filterData[h];
-      if (properties === undefined) return false;
+      if (properties === undefined || properties.length === 0) return false;
 
       const filterPathArr = filterPath instanceof Array ? filterPath : [filterPath];
       let value;
@@ -251,6 +251,7 @@
 
   ObjectFilter.prototype.matchFilterRule = function (obj) {
     return Object.keys(this.filterRules).reduce((res, h) => {
+
       let properties;
       let customFunc;
       const filteredObject = obj[h];
