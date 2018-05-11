@@ -37,6 +37,7 @@
 
   // those filter properties require RegExp checking
   const regexProps = [
+    'videoId',
     'channelId',
     'channelName',
     'title',
@@ -46,6 +47,7 @@
   // TODO: add rules descriptions
   // !! Filter Rules definitions
   const baseRules = {
+    videoId: 'videoId',
     channelId: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
     channelName: ['shortBylineText.runs', 'shortBylineText.simpleText'],
     title: 'title.simpleText',
@@ -53,7 +55,6 @@
   };
 
   const blockRules = {
-
     gridVideoRenderer: baseRules,
     videoRenderer: baseRules,
     radioRenderer: baseRules,
@@ -130,18 +131,20 @@
   };
 
   const ytPlayerRules = {
-
     args: {
       properties: {
+        videoId: 'video_id',
         channelId: 'ucid',
         channelName: 'author',
         title: 'title',
         vidLength: 'length_seconds',
       },
+      customFunc: setPageBlock,
     },
 
     videoDetails: {
       properties: {
+        videoId: 'videoId',
         channelId: 'channelId',
         channelName: 'author',
         title: 'title',
@@ -152,7 +155,6 @@
   };
 
   const guideRules = {
-
     // sidemenu subscribed channels
     guideEntryRenderer: {
       properties: {

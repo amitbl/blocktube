@@ -25,7 +25,7 @@
   }
 
   function saveForm() {
-    ['title', 'channelName', 'channelId', 'comment'].forEach((v) => {
+    ['title', 'channelName', 'channelId', 'videoId', 'comment'].forEach((v) => {
       storageData.filterData[v] = multilineToArray($(v).value);
     });
 
@@ -58,7 +58,7 @@
   }
 
   function checkForLogin() {
-    if (storageData.uiPass !== '') {
+    if (has.call(storageData, 'uiPass') && storageData.uiPass !== '') {
       $('login').setAttribute('style', '');
     } else {
       isLoggedIn = true;
@@ -67,7 +67,7 @@
   }
 
   function populateForms(obj = undefined) {
-    ['title', 'channelName', 'channelId', 'comment'].forEach((v) => {
+    ['title', 'channelName', 'channelId', 'videoId', 'comment'].forEach((v) => {
       const content = get(`filterData.${v}`, [], obj);
       $(v).value = content.join('\n');
       const len = content.length + 5;
@@ -90,7 +90,7 @@
   }
 
   function multilineToArray(text) {
-    return text.replace(/\r\n/g, '\n').split('\n').filter(x => !(x === '')).map(x => x.trim());
+    return text.replace(/\r\n/g, '\n').split('\n').map(x => x.trim());
   }
 
   function get(path, def = undefined, obj = undefined) {
