@@ -440,6 +440,10 @@
 
   // !! Utils
 
+  function postMessage(type, data) {
+    window.postMessage({ from: 'BLOCKTUBE_PAGE', type, data }, `https://${document.domain}`);
+  }
+
   function getObjectByPath(obj, path, def = undefined) {
     const paths = (path instanceof Array) ? path : path.split('.');
     let nextObj = obj;
