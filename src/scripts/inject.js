@@ -192,8 +192,16 @@
   }
 
   ObjectFilter.prototype.isDataEmpty = function () {
-    return Object.keys(storageData.filterData).length === 0
-            && storageData.options.trending === false;
+    if (storageData.options.trending === true) return false;
+
+    if (!isNaN(storageData.filterData.vidLength[0]) ||
+        !isNaN(storageData.filterData.vidLength[1])) return false;
+
+    for (let idx = 0; idx < regexProps.length; idx += 1) {
+      if (storageData.filterData[regexProps[idx]].length > 0) return false;
+    }
+
+    return true;
   };
 
   ObjectFilter.prototype.matchFilterData = function (filters, obj) {
