@@ -587,9 +587,6 @@
       document.location = '/';
     }
 
-    if (!has.call(storageData.filterData, 'channelId')) {
-      storageData.filterData.channelId = [];
-    }
     storageData.filterData.channelId.push(/^FEtrending$/);
   }
 
