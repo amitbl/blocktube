@@ -128,6 +128,15 @@
         channelName: 'header.watchCardRichHeaderRenderer.title.simpleText',
       },
     },
+
+    playlist: {
+      properties: {
+        channelId: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
+        channelName: ['shortBylineText.runs', 'shortBylineText.simpleText'],
+        title: 'title',
+      },
+      customFunc: redirectToIndex,
+    }
   };
 
   const ytPlayerRules = {
