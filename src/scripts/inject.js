@@ -411,6 +411,8 @@
   function redirectToIndex() {
     this.object = undefined;
     document.location = '/';
+    // TODO: Hack for stoping execution
+    throw 0;
   }
 
   function redirectToNext() {
