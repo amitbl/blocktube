@@ -646,115 +646,93 @@
     if (obj instanceof Object) Object.keys(obj).forEach(x => addContextMenus(obj[x]));
   }
 
-  function menuOnTap(event) {
-    let data;
-    let type;
-    const parentDom = this.parentComponent.eventSink_.parentComponent;
-    const parent = parentDom.data;
-
-    switch (this.getElementsByTagName('yt-formatted-string')[0].textContent) {
-      case 'Block Channel': {
-        type = 'channelId';
-        data = parent.shortBylineText.runs || parent.shortBylineText.simpleText;
-        break;
-      }
-      case 'Block Video': {
-        type = 'videoId';
-        data = parent;
-        break;
-      }
-    }
-
-    if (data && type) {
-      postMessage('contextBlockData', { type, info: data });
-      parentDom.setAttribute('is-dismissed', '');
-      // TODO: Menu does not close without this timeout
-      setTimeout(() => parentDom.parentElement.removeChild(parentDom), 100);
-    } else if (this.onTap_) {
-      return this.onTap_(event);
-    }
-  }
-
-  function setPolymerHook(v) {
-    return function () {
-      if (arguments[0].is === 'ytd-menu-service-item-renderer') {
-        arguments[0].onTapHook_ = menuOnTap;
-        arguments[0].listeners.tap = 'onTapHook_';
-      }
-      return v.apply(null, arguments);
-    }
-  }
-
   function startHook() {
-
-    // hook ytInitialData
-    Object.defineProperty(window, 'ytInitialData', {
-      enumerable: true,
-      configurable: true,
-      get() {
-        return this._ytInitialData;
-      },
-      set(v) {
-        addContextMenus(v.contents);
-        let postActions = [removeRvs, fixAutoplay];
-        if (currentBlock) postActions.push(redirectToNext);
-        ObjectFilter(v, blockRules, postActions);
-        this._ytInitialData = v;
-      },
-    });
-
-    // hook ytInitialPlayerResponse
-    Object.defineProperty(window, 'ytInitialPlayerResponse', {
-      enumerable: true,
-      configurable: true,
-      get() {
-        return this._ytInitialPlayerResponse;
-      },
-      set(v) {
-        ObjectFilter(v, ytPlayerRules);
-        this._ytInitialPlayerResponse = v;
-      },
-    });
-
-    Object.defineProperty(window.ytplayer, 'config', {
-      enumerable: true,
-      configurable: true,
-      get() {
-        return this._ytplayer;
-      },
-      set(v) {
-        ObjectFilter(v, ytPlayerRules);
-        this._ytplayer = v;
-      },
-    });
-
-    // hook sidemenu
-    Object.defineProperty(window, 'ytInitialGuideData', {
-      enumerable: true,
-      configurable: true,
-      get() {
-        return this._ytInitialGuideData;
-      },
-      set(v) {
-        if (!has.call(this, '_ytInitialGuideData')) {
-          ObjectFilter(v, guideRules);
-          this._ytInitialGuideData = v;
-        }
-      },
-    });
-
-    if (/\/embed\/.*/.test(new URL(document.location).pathname)) {
-      Object.defineProperty(window.yt, 'setConfig', {
-        set(v) {
-          this._setConfig = v;
-        },
-        get() {
-          return filterEmbed(this._setConfig);
-        }
-      });
+    const currentUrl = new URL(document.location);
+    if (currentUrl.pathname.startsWith('/embed/')) {
+      window.yt = window.yt || {};
+      window.yt.config_ = window.yt.config_ || {};
+      if (!window.yt.config_.PLAYER_CONFIG) {
+        Object.defineProperty(window.yt.config_, 'PLAYER_CONFIG', {
+          get() {
+            return this.PLAYER_CONFIG_;
+          },
+          set(val) {
+            ObjectFilter(val, ytPlayerRules);
+            this.PLAYER_CONFIG_ = val;
+          },
+        });
+      } else {
+        ObjectFilter(window.yt.config_.PLAYER_CONFIG, ytPlayerRules);
+      }
     }
 
-    // hook onreadystatechange
+    window.ytplayer = window.ytplayer || {};
+    if (!window.ytplayer.config) {
+      Object.defineProperty(window.ytplayer, 'config', {
+        get() {
+          return this.config_;
+        },
+        set(val) {
+          ObjectFilter(val, ytPlayerRules);
+          this.config_ = val;
+        },
+      });
+    } else {
+      ObjectFilter(window.ytplayer.config, ytPlayerRules);
+    }
+
+    if (!window.ytInitialGuideData) {
+      Object.defineProperty(window, 'ytInitialGuideData', {
+        get() {
+          return this.ytInitialGuideData_;
+        },
+        set(val) {
+          ObjectFilter(val, guideRules);
+          this.ytInitialGuideData_ = val;
+        },
+      });
+    } else {
+      ObjectFilter(window.ytInitialGuideData, guideRules);
+    }
+
+    if (!window.ytInitialPlayerResponse) {
+      Object.defineProperty(window, 'ytInitialPlayerResponse', {
+        get() {
+          return this.ytInitialPlayerResponse_;
+        },
+        set(val) {
+          ObjectFilter(val, ytPlayerRules);
+          this.ytInitialPlayerResponse_ = val;
+        },
+      });
+    } else {
+      ObjectFilter(window.ytInitialPlayerResponse, ytPlayerRules);
+    }
+
+    const postActions = [removeRvs, fixAutoplay];
+    if (!window.ytInitialData) {
+      Object.defineProperty(window, 'ytInitialData', {
+        get() {
+          return this.ytInitialData_;
+        },
+        set(val) {
+          if (val.contents) {
+            if (currentBlock) postActions.push(redirectToNext);
+            else addContextMenus(val.contents);
+          }
+          ObjectFilter(val, dataRules, postActions);
+          this.ytInitialData_ = val;
+        },
+      });
+    } else {
+      if (window.ytInitialData.contents) {
+        if (currentBlock) postActions.push(redirectToNext);
+        else addContextMenus(window.ytInitialData.contents);
+      }
+      ObjectFilter(window.ytInitialData, dataRules, postActions);
+    }
+
+    // future XHR requests
     const desc = Object.getOwnPropertyDescriptor(XMLHttpRequest.prototype, 'onreadystatechange');
     Object.defineProperty(XMLHttpRequest.prototype, 'onreadystatechange', {
       get() {
@@ -765,47 +743,38 @@
         desc.set.call(this, filterXHR);
       },
     });
+
+    window.btDispatched = true;
+    window.dispatchEvent(new Event('blockTubeReady'));
+  }
+
+  function storageRecieved(data) {
+    if (data === undefined) return;
+    transformToRegExp(data);
+    if (data.options.trending) blockTrending(data);
+    if (storageData === undefined) {
+      storageData = data;
+      startHook();
+    } else {
+      storageData = data;
+    }
   }
 
   // !! Start
   console.info('BlockTube Init');
-  window.ytInitialData = {};
-  window.ytplayer = {};
-  window.ytInitialGuideData = {};
-  window.ytInitialPlayerResponse = {};
-  if (!has.call(window, 'yt')) window.yt = { setConfig: undefined };
 
-  // listen for any changes in storageData
+  // listen for messages from content script
   window.addEventListener('message', (event) => {
     if (event.source !== window) return;
     if (!event.data.from || event.data.from !== 'BLOCKTUBE_CONTENT') return;
 
     switch (event.data.type) {
       case 'storageData': {
-        if (event.data.data === undefined) break;
-        transformToRegExp(event.data.data);
-        storageData = event.data.data;
-        if (storageData.options.trending === true && !init) blockTrending();
+        storageRecieved(event.data.data);
         break;
       }
-    }
-    if (!init) {
-      startHook();
-      init = true;
+      default:
+        break;
     }
   }, true);
-
-  // hook polymer
-  Object.defineProperty(window, 'Polymer', {
-    get() {
-      return this._polymer;
-    },
-    set(v) {
-      if (v instanceof Function && v.name === 'bound ') this._polymer = setPolymerHook(v);
-      else this._polymer = v;
-    }
-  });
-
-  // signal content script
-  postMessage('ready');
 }());
