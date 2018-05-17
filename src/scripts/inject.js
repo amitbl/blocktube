@@ -347,14 +347,7 @@
   // !! Custom filtering functions
 
   function setPageBlock() {
-    if (/\/embed\/.*/.test(new URL(document.location).pathname)) {
-      window.addEventListener('load', () => {
-        const playerElem = document.getElementById('player');
-        if (playerElem) playerElem.parentElement.removeChild(playerElem);
-      });
-    } else {
-      currentBlock = true;
-    }
+    currentBlock = true;
     return true;
   }
 
@@ -522,13 +515,6 @@
         });
       }
     });
-  }
-
-  function filterEmbed(real) {
-    return function (val) {
-      if (has.call(val, 'PLAYER_CONFIG')) ObjectFilter(val.PLAYER_CONFIG, ytPlayerRules);
-      real(val);
-    };
   }
 
   function filterXHR() {
