@@ -35,6 +35,7 @@
 
     storageData.uiPass = $('pass_save').value;
     storageData.options.trending = $('disable_trending').checked;
+    storageData.options.mixes = $('disable_mixes').checked;
     storageData.options.autoplay = $('autoplay').checked;
     storageData.options.block_message = $('block_message').value;
 
@@ -80,6 +81,7 @@
 
     $('pass_save').value          = get('uiPass', '', obj);
     $('disable_trending').checked = get('options.trending', false, obj);
+    $('disable_mixes').checked    = get('options.mixes', false, obj);
     $('autoplay').checked         = get('options.autoplay', false, obj);
     $('block_message').value      = get('options.block_message', '', obj);
   }

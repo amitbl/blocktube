@@ -15,6 +15,7 @@ let storage = {
   },
   options: {
     trending: false,
+    mixes: false,
   },
 };
 

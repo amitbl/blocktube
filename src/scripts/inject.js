@@ -593,6 +593,10 @@
     if (this._orgCallback) this._orgCallback();
   }
 
+  function blockMixes(data) {
+    data.filterData.channelName.push(/^YouTube$/);
+  }
+
   function blockTrending(data) {
     if (document.location.pathname === '/feed/trending') {
       redirectToIndex();
@@ -756,6 +760,7 @@
     if (data === undefined) return;
     transformToRegExp(data);
     if (data.options.trending) blockTrending(data);
+    if (data.options.mixes) blockMixes(data);
     if (storageData === undefined) {
       storageData = data;
       startHook();
