@@ -1,10 +1,8 @@
 (function blockTube() {
+  'use strict';
   const has = Object.prototype.hasOwnProperty;
 
   // !! Globals
-
-  // hooks already set in place?
-  let init = false;
 
   // extension storageData
   let storageData;
@@ -12,6 +10,7 @@
   // TODO: hack for blocking data in other objects
   let currentBlock = false;
 
+  // add context menu to following objects
   const contextMenuObjects = ['videoRenderer', 'gridVideoRenderer', 'compactVideoRenderer'];
 
   // those properties can be safely deleted when one of thier child got filtered
@@ -54,7 +53,7 @@
     vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text.simpleText',
   };
 
-  const blockRules = {
+  const dataRules = {
     gridVideoRenderer: baseRules,
     videoRenderer: baseRules,
     radioRenderer: baseRules,
@@ -136,7 +135,7 @@
         title: 'title',
       },
       customFunc: redirectToIndex,
-    }
+    },
   };
 
   const ytPlayerRules = {
@@ -190,7 +189,7 @@
   function ObjectFilter(object, filterRules, postActions = []) {
     if (!(this instanceof ObjectFilter)) return new ObjectFilter(object, filterRules, postActions);
 
-    if (init === false || this.isDataEmpty()) return this;
+    if (this.isDataEmpty() || !object) return this;
 
     this.object = object;
     this.filterRules = filterRules;
@@ -201,7 +200,7 @@
   }
 
   ObjectFilter.prototype.isDataEmpty = function () {
-    if (storageData.options.trending === true) return false;
+    if (storageData.options.trending) return false;
 
     if (!isNaN(storageData.filterData.vidLength[0]) ||
         !isNaN(storageData.filterData.vidLength[1])) return false;
@@ -260,7 +259,6 @@
 
   ObjectFilter.prototype.matchFilterRule = function (obj) {
     return Object.keys(this.filterRules).reduce((res, h) => {
-
       let properties;
       let customFunc;
       const filteredObject = obj[h];
@@ -283,7 +281,6 @@
           });
         }
       }
-
       return res;
     }, []);
   };
@@ -315,11 +312,10 @@
       if (r.customFunc !== undefined) {
         customRet = r.customFunc.call(this, obj, r.name);
       }
-      if (customRet === true) {
+      if (customRet) {
         delete obj[r.name];
         deletePrev = true;
       }
-      return 0;
     });
 
     // loop backwards for easier splice
@@ -363,7 +359,7 @@
   }
 
   function disablePlayer(ytData) {
-    const message = (storageData.options.block_message) || 'Video Removed';
+    const message = (storageData.options.block_message);
 
     ytData.playabilityStatus.status = 'ERROR';
     ytData.playabilityStatus.reason = '';
@@ -388,7 +384,7 @@
 
   function blockPlaylistVid(pl) {
     const vid = pl.playlistPanelVideoRenderer;
-    const message = (storageData.options.block_message) || 'Video Removed';
+    const message = (storageData.options.block_message);
 
     vid.videoId = 'undefined';
 
@@ -576,7 +572,7 @@
             postActions = [removeRvs, fixAutoplay];
             if (currentBlock) postActions.push(redirectToNext);
           default:
-            rules = blockRules;
+            rules = dataRules;
         }
 
         addContextMenus(obj.response);
@@ -593,12 +589,12 @@
     if (this._orgCallback) this._orgCallback();
   }
 
-  function blockTrending() {
+  function blockTrending(data) {
     if (document.location.pathname === '/feed/trending') {
-      document.location = '/';
+      redirectToIndex();
     }
 
-    storageData.filterData.channelId.push(/^FEtrending$/);
+    data.filterData.channelId.push(/^FEtrending$/);
   }
 
   function removeRvs() {
