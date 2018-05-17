@@ -166,14 +166,14 @@
   });
 
   $('export').addEventListener('click', () => {
-    if (isLoggedIn === true) {
+    if (isLoggedIn) {
       saveForm();
       saveFile(storageData, 'blocktube_backup.json');
     }
   });
 
   $('import').addEventListener('click', () => {
-    if (isLoggedIn === true) {
+    if (isLoggedIn) {
       $('myfile').click();
     }
   });

@@ -2,6 +2,10 @@ body {
   font: 14px sans-serif;
 }
 
+#options {
+  margin-top: 10px;
+}
+
 .form-textarea {
   border-width: 1px;
   border-color: #ccc;
