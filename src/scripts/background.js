@@ -1,3 +1,5 @@
+'use strict';
+
 const has = Object.prototype.hasOwnProperty;
 const unicodeBoundry = "[ \n\r\t!@#$%^&*()_\\-=+\\[\\]\\\\\\|;:'\",\\.\\/<>\\?`~:]+";
 const ports = {};
@@ -66,7 +68,7 @@ const utils = {
 
   sendFilters(port) {
     port.postMessage({ type: 'filtersData', data: { storage, compiledStorage } });
-  }
+  },
 };
 
 chrome.storage.local.get('storageData', (data) => {
