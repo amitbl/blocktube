@@ -646,22 +646,18 @@
     }
   }
 
-  function modifyMenu(obj) {
-    if (!has.call(obj, 'shortBylineText')) return;
-    if (!has.call(obj, 'menu')) obj.menu = { menuRenderer: { items: [] } };
-    const items = obj.menu.menuRenderer.items;
-    const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] } } };
-    const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] } } };
-    items.push(blockVid, blockCh);
-  }
-
-  function addContextMenus(o) {
-    const attr = contextMenuObjects.find(e => has.call(o, e));
+  function addContextMenus(obj) {
+    const attr = contextMenuObjects.find(e => has.call(obj, e));
     if (attr !== undefined) {
-      modifyMenu(o[attr]);
+      if (!has.call(obj[attr], 'shortBylineText')) return;
+      if (!has.call(obj[attr], 'menu')) obj[attr].menu = { menuRenderer: { items: [] } };
+      const { items } = obj[attr].menu.menuRenderer;
+      const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] } } };
+      const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] } } };
+      items.push(blockVid, blockCh);
       return;
     }
-    if (o instanceof Object) Object.keys(o).forEach(x => addContextMenus(o[x]));
+    if (obj instanceof Object) Object.keys(obj).forEach(x => addContextMenus(obj[x]));
   }
 
   function menuOnTap(event) {
