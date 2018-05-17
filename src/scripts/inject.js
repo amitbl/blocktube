@@ -411,8 +411,22 @@
     throw 0;
   }
 
+  function censorTitle() {
+    const listener = function () {
+      document.title = 'YouTube';
+      window.removeEventListener('yt-update-title', listener);
+    };
+    window.addEventListener('yt-update-title', listener);
+
+    window.addEventListener('load', () => {
+      document.title = 'YouTube';
+    });
+  }
+
   function redirectToNext() {
     currentBlock = false;
+
+    censorTitle();
 
     const twoColumn = getObjectByPath(this.object, 'contents.twoColumnWatchNextResults');
     if (twoColumn === undefined) return;
