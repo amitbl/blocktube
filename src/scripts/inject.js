@@ -356,7 +356,7 @@
   }
 
   function disablePlayer(ytData) {
-    const message = (storageData.options.block_message);
+    const message = (storageData.options.block_message) || '';
 
     ytData.playabilityStatus.status = 'ERROR';
     ytData.playabilityStatus.reason = '';
@@ -381,12 +381,12 @@
 
   function blockPlaylistVid(pl) {
     const vid = pl.playlistPanelVideoRenderer;
-    const message = (storageData.options.block_message);
+    const message = (storageData.options.block_message) || '';
 
     vid.videoId = 'undefined';
 
     vid.unplayableText = {
-      simpleText: `[${message}]`,
+      simpleText: `${message}`,
     };
 
     vid.thumbnail = {
