@@ -48,7 +48,11 @@
   const baseRules = {
     videoId: 'videoId',
     channelId: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
-    channelName: ['shortBylineText.runs', 'shortBylineText.simpleText'],
+    channelName: [
+      'shortBylineText.runs',
+      'shortBylineText.simpleText',
+      'longBylineText.simpleText',
+    ],
     title: 'title.simpleText',
     vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text.simpleText',
   };
