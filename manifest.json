@@ -7,7 +7,8 @@
     {
       "matches": ["https://www.youtube.com/*"],
       "js": ["src/scripts/content_script.js"],
-      "run_at": "document_start"
+      "run_at": "document_start",
+      "all_frames": true
     }
   ],
   "web_accessible_resources": ["src/scripts/inject.js"],
