@@ -12,8 +12,10 @@ build:
 	uglifyjs --ecma 8 -o seed_.js seed.js; \
 	sed -i -e "s/{SEED_CONTENTS}/$$(sed 's:[/\\&]:\\&:g' seed_.js)/" content_script.js; \
 	rm -f seed*.js; \
-	popd;
-	zip ${DEST}/blocktube.zip -qjr ${DEST}/*
+	popd; \
+	pushd ${DEST}; \
+	zip ../blocktube.zip -qr ./*;
 
 clean:
 	rm -rf ${DEST}
+	rm -f blocktube.zip
