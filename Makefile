@@ -13,7 +13,7 @@ build:
 	sed -i -e "s/{SEED_CONTENTS}/$$(sed 's:[/\\&]:\\&:g' seed_.js)/" content_script.js; \
 	rm -f seed*.js; \
 	popd;
-	zip ${DEST}/blocktube.zip -qr ${DEST}/*
+	zip ${DEST}/blocktube.zip -qjr ${DEST}/*
 
 clean:
 	rm -rf ${DEST}
