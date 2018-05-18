@@ -204,8 +204,6 @@
   }
 
   ObjectFilter.prototype.isDataEmpty = function () {
-    if (storageData.options.trending) return false;
-
     if (!isNaN(storageData.filterData.vidLength[0]) ||
         !isNaN(storageData.filterData.vidLength[1])) return false;
 
