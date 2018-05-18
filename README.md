@@ -54,7 +54,7 @@ Filter and block unwanted content from YouTube™.
 
 * User-friendly options UI
 * Sync options to cloud provider / enterprise policies
-* Context menu helper
+* ~~Context menu helper~~ Done
 * Whitelist mode
 * YouTube Gaming support
 * Dynamic rules (match multiple rules to block a video)
