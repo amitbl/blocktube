@@ -46,7 +46,7 @@
           // TODO: Menu does not close without this timeout
           setTimeout(() => parentDom.parentElement.removeChild(parentDom), 100);
         } else {
-          document.getElementById('movie_player').destroy();
+          document.getElementById('movie_player').stopVideo();
         }
       } else if (this.onTap_) {
         this.onTap_(event);
