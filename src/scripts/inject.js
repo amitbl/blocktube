@@ -651,12 +651,15 @@
         items = obj[attr].videoActions.menuRenderer.items;
       } else {
         if (!has.call(obj[attr], 'shortBylineText')) return;
-        if (!has.call(obj[attr], 'menu')) obj[attr].menu = { menuRenderer: { items: [] } };
-        items = obj[attr].menu.menuRenderer.items;
+        items = getObjectByPath(obj[attr], 'menu.menuRenderer.items');
+        if (!items) {
+          obj[attr].menu = { menuRenderer: { items: [] } };
+          items = getObjectByPath(obj[attr], 'menu.menuRenderer.items');
+        }
       }
       const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] } } };
       const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] } } };
-      items.push(blockVid, blockCh);
+      if(items instanceof Array) items.push(blockVid, blockCh);
       return;
     }
     if (obj instanceof Object) Object.keys(obj).forEach(x => addContextMenus(obj[x]));
