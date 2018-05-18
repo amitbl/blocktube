@@ -11,7 +11,12 @@
   let currentBlock = false;
 
   // add context menu to following objects
-  const contextMenuObjects = ['videoRenderer', 'gridVideoRenderer', 'compactVideoRenderer'];
+  const contextMenuObjects = [
+    'videoRenderer',
+    'gridVideoRenderer',
+    'compactVideoRenderer',
+    'videoPrimaryInfoRenderer',
+  ];
 
   // those properties can be safely deleted when one of thier child got filtered
   const deleteAllowed = [
@@ -640,10 +645,15 @@
 
   function addContextMenus(obj) {
     const attr = contextMenuObjects.find(e => has.call(obj, e));
+    let items;
     if (attr !== undefined) {
-      if (!has.call(obj[attr], 'shortBylineText')) return;
-      if (!has.call(obj[attr], 'menu')) obj[attr].menu = { menuRenderer: { items: [] } };
-      const { items } = obj[attr].menu.menuRenderer;
+      if (has.call(obj[attr], 'videoActions')) {
+        items = obj[attr].videoActions.menuRenderer.items;
+      } else {
+        if (!has.call(obj[attr], 'shortBylineText')) return;
+        if (!has.call(obj[attr], 'menu')) obj[attr].menu = { menuRenderer: { items: [] } };
+        items = obj[attr].menu.menuRenderer.items;
+      }
       const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] } } };
       const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] } } };
       items.push(blockVid, blockCh);

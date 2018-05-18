@@ -13,6 +13,16 @@
       let type;
       const parentDom = this.parentComponent.eventSink_.parentComponent;
       const parent = parentDom.data;
+      let removeParent = true;
+
+      // Video player context menu
+      if (!parent.shortBylineText) {
+        parent.shortBylineText = {
+          runs: document.getElementsByTagName('ytd-video-owner-renderer')[0].data.title.runs,
+        };
+        parent.videoId = document.getElementsByTagName('ytd-watch')[0].videoId;
+        removeParent = false;
+      }
 
       switch (this.getElementsByTagName('yt-formatted-string')[0].textContent) {
         case 'Block Channel': {
@@ -31,9 +41,13 @@
 
       if (data && type) {
         postMessage('contextBlockData', { type, info: data });
-        parentDom.setAttribute('is-dismissed', '');
-        // TODO: Menu does not close without this timeout
-        setTimeout(() => parentDom.parentElement.removeChild(parentDom), 100);
+        if (removeParent) {
+          parentDom.setAttribute('is-dismissed', '');
+          // TODO: Menu does not close without this timeout
+          setTimeout(() => parentDom.parentElement.removeChild(parentDom), 100);
+        } else {
+          document.getElementById('movie_player').destroy();
+        }
       } else if (this.onTap_) {
         this.onTap_(event);
       }
