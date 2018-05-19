@@ -76,6 +76,7 @@
     endScreenVideoRenderer: baseRules,
     endScreenPlaylistRenderer: baseRules,
     gridPlaylistRenderer: baseRules,
+    watchCardCompactVideoRenderer: baseRules,
 
     shelfRenderer: {
       channelId: 'endpoint.browseEndpoint.browseId',
