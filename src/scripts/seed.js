@@ -9,30 +9,59 @@
 
   const hooks = {
     menuOnTap(event) {
-      let data;
+      const menuAction = this.getElementsByTagName('yt-formatted-string')[0].textContent;
+      if (!['Block Channel', 'Block Video'].includes(menuAction)) {
+        if (this.onTap_) this.onTap_(event);
+        return;
+      }
+
       let type;
+      let data;
+      let videoData;
+      let channelData;
       const parentDom = this.parentComponent.eventSink_.parentComponent;
-      const parent = parentDom.data;
+      const parentData = parentDom.data;
       let removeParent = true;
 
       // Video player context menu
-      if (!parent.shortBylineText) {
-        parent.shortBylineText = {
-          runs: document.getElementsByTagName('ytd-video-owner-renderer')[0].data.title.runs,
+      if (parentDom.tagName === 'YTD-VIDEO-PRIMARY-INFO-RENDERER') {
+        const player = document.getElementsByTagName('ytd-page-manager')[0].data.player;
+        const owner = document.getElementsByTagName('ytd-video-owner-renderer')[0].data;
+        const ownerUCID = owner.title.runs[0].navigationEndpoint.browseEndpoint.browseId;
+        let playerUCID = player.args.ucid;
+        if (playerUCID !== ownerUCID) {
+          playerUCID = [playerUCID, ownerUCID];
+        }
+        channelData = {
+          text: player.args.author,
+          id: playerUCID,
         };
-        parent.videoId = document.getElementsByTagName('ytd-watch')[0].videoId;
+        videoData = {
+          text: player.args.title,
+          id: player.args.video_id,
+        };
+
         removeParent = false;
+      } else {
+        channelData = {
+          text: parentData.shortBylineText.runs[0].text,
+          id: parentData.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId,
+        };
+        videoData = {
+          text: parentData.title.simpleText,
+          id: parentData.videoId,
+        };
       }
 
-      switch (this.getElementsByTagName('yt-formatted-string')[0].textContent) {
+      switch (menuAction) {
         case 'Block Channel': {
           type = 'channelId';
-          data = parent.shortBylineText.runs || parent.shortBylineText.simpleText;
+          data = channelData;
           break;
         }
         case 'Block Video': {
           type = 'videoId';
-          data = parent;
+          data = videoData;
           break;
         }
         default:
@@ -48,8 +77,6 @@
         } else {
           document.getElementById('movie_player').stopVideo();
         }
-      } else if (this.onTap_) {
-        this.onTap_(event);
       }
     },
     genericHook(cb) {

@@ -31,30 +31,18 @@
 
   const events = {
     contextBlock(data) {
-      const entries = blockHandlers[data.type](data.info);
+      const entries = [`// Blocked by context menu (${data.info.text})`];
+      if (!(data.info.id instanceof Array)) {
+        data.info.id = [data.info.id];
+      }
+      entries.push(...data.info.id);
+      entries.push('');
       globalStorage.filterData[data.type].push(...entries);
       storage.set(globalStorage);
     },
     ready() {
       utils.sendStorage();
       ready = true;
-    },
-  };
-
-  const blockHandlers = {
-    channelId(data) {
-      return [
-        `// Blocked by context menu (${data[0].text})`,
-        data[0].navigationEndpoint.browseEndpoint.browseId,
-        '',
-      ];
-    },
-    videoId(data) {
-      return [
-        `// Blocked by context menu (${data.title.simpleText})`,
-        data.videoId,
-        '',
-      ];
     },
   };
 
