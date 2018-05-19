@@ -37,6 +37,7 @@
     '/related_ajax',
     '/list_ajax',
     '/guide_ajax',
+    '/live_chat/get_live_chat',
   ];
 
   // those filter properties require RegExp checking
@@ -572,7 +573,7 @@
             rules = guideRules;
             break;
           case '/comment_service_ajax':
-          case '/get_live_chat':
+          case '/live_chat/get_live_chat':
             rules = commentsRules;
             break;
           case '/watch':
@@ -739,7 +740,7 @@
             if (currentBlock) postActions.push(redirectToNext);
             else addContextMenus(val.contents);
           }
-          ObjectFilter(val, dataRules, postActions);
+          ObjectFilter(val, Object.assign(dataRules, commentsRules), postActions);
           this.ytInitialData_ = val;
         },
       });
@@ -748,7 +749,7 @@
         if (currentBlock) postActions.push(redirectToNext);
         else addContextMenus(window.ytInitialData.contents);
       }
-      ObjectFilter(window.ytInitialData, dataRules, postActions);
+      ObjectFilter(window.ytInitialData, Object.assign(dataRules, commentsRules), postActions);
     }
 
     // future XHR requests
