@@ -407,7 +407,7 @@
   }
 
   function redirectToIndex() {
-    this.object = undefined;
+    if (this && this.object) this.object = undefined;
     document.location = '/';
     // TODO: Hack for stoping execution
     throw 0;
