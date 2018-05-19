@@ -514,7 +514,7 @@
       if (has.call(data.filterData, p)) {
         data.filterData[p] = data.filterData[p].map((v) => {
           try {
-            return RegExp(v[0], v[1]);
+            return RegExp(v[0], v[1].replace('g', ''));
           } catch (e) {
             console.error(`RegExp parsing error: /${v[0]}/${v[1]}`);
             return undefined;
