@@ -31,11 +31,8 @@
 
   const events = {
     contextBlock(data) {
-      let id = data.info.id;
       const entries = [`// Blocked by context menu (${data.info.text})`];
-      if (!(data.info.id instanceof Array)) {
-        id = [data.info.id];
-      }
+      const id = Array.isArray(data.info.id) ? data.info.id : [data.info.id];
       entries.push(...id);
       entries.push('');
       globalStorage.filterData[data.type].push(...entries);
