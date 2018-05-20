@@ -5,8 +5,9 @@ Filter and block unwanted content from YouTube™.
 
 ## Extension features
 
-* Block videos via: **Video Title** / **Channel Name** / **Channel ID**
+* Block videos via: **Video Title** / **Channel Name** / **Channel ID** / **Video ID**
 * Block comments via **User** / **Comment content**
+* Block videos within YouTube using context menus
 * Blocked videos do not appear anywhere on the site
 * Block complete channels
 * Supports both keywords and raw Regex
