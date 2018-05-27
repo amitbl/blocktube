@@ -50,7 +50,7 @@
         from: 'BLOCKTUBE_CONTENT',
         type: 'storageData',
         data: compiledStorage || globalStorage,
-      }, `https://${document.domain}`);
+      }, document.location.origin);
     },
     inject() {
       const s = document.createElement('script');

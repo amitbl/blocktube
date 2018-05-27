@@ -116,7 +116,7 @@
   }
 
   function postMessage(type, data) {
-    window.postMessage({ from: 'BLOCKTUBE_PAGE', type, data }, `https://${document.domain}`);
+    window.postMessage({ from: 'BLOCKTUBE_PAGE', type, data }, document.location.origin);
   }
 
   if (window.writeEmbed || window.ytplayer || window.Polymer) {

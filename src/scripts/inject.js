@@ -464,7 +464,7 @@
   // !! Utils
 
   function postMessage(type, data) {
-    window.postMessage({ from: 'BLOCKTUBE_PAGE', type, data }, `https://${document.domain}`);
+    window.postMessage({ from: 'BLOCKTUBE_PAGE', type, data }, document.locaion.origin);
   }
 
   function getObjectByPath(obj, path, def = undefined) {
