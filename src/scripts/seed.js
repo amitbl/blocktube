@@ -81,9 +81,12 @@
       if (data && type) {
         postMessage('contextBlockData', { type, info: data });
         if (removeParent) {
+          parentDom.dismissedRenderer = {
+            notificationMultiActionRenderer: {
+              responseText: {simpleText: 'Blocked'},
+            }
+          };
           parentDom.setAttribute('is-dismissed', '');
-          // TODO: Menu does not close without this timeout
-          setTimeout(() => parentDom.parentElement.removeChild(parentDom), 100);
         } else {
           document.getElementById('movie_player').stopVideo();
         }
