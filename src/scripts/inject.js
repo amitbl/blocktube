@@ -314,18 +314,6 @@
       return deletePrev;
     }
 
-    let len = 0;
-    let keys;
-
-    // If object is an array len is the number of it's members
-    if (obj instanceof Array) {
-      len = obj.length;
-      // otherwise, this is a plain object, len is number of keys
-    } else {
-      keys = Object.keys(obj);
-      len = keys.length;
-    }
-
     // object filtering
     const matchedRules = this.matchFilterRule(obj);
     matchedRules.forEach((r) => {
@@ -338,6 +326,18 @@
         deletePrev = true;
       }
     });
+
+    let len = 0;
+    let keys;
+
+    // If object is an array len is the number of it's members
+    if (obj instanceof Array) {
+      len = obj.length;
+      // otherwise, this is a plain object, len is number of keys
+    } else {
+      keys = Object.keys(obj);
+      len = keys.length;
+    }
 
     // loop backwards for easier splice
     for (let i = len - 1; i >= 0; i -= 1) {
