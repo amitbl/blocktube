@@ -7,6 +7,16 @@
 
   window.btDispatched = false;
 
+  // need to filter following XHR requests
+  const uris = [
+    '/browse_ajax',
+    '/related_ajax',
+    '/service_ajax',
+    '/list_ajax',
+    '/guide_ajax',
+    '/live_chat/get_live_chat',
+  ];
+
   const hooks = {
     menuOnTap(event) {
       const menuAction = this.getElementsByTagName('yt-formatted-string')[0].textContent;
@@ -115,10 +125,40 @@
     };
   }
 
+  function isUrlMatch(url) {
+    if (!(url instanceof URL)) url = new URL(url);
+    return uris.some(uri => uri === url.pathname) || url.searchParams.has('pbj');
+  }
+
+  function onPart(url, next) {
+    return function(resp) {
+      if(window.btDispatched) {
+        window.btExports.spfFilter(url, resp);
+        next(resp);
+      } else window.addEventListener('blockTubeReady', () => {
+        window.btExports.spfFilter(url, resp);
+        next(resp);
+      });
+    }
+  }
+
+  function spfRequest(cb) {
+    return function(...args) {
+      if (args.length < 2) return cb.apply(null, args);
+      let url = new URL(args[0], document.location.origin);
+      if (isUrlMatch(url)) {
+        args[1].onDone = onPart(url, args[1].onDone);
+        args[1].onPartDone = onPart(url, args[1].onPartDone);
+      }
+      return cb.apply(null, args);
+    }
+  }
+
   function postMessage(type, data) {
     window.postMessage({ from: 'BLOCKTUBE_PAGE', type, data }, document.location.origin);
   }
 
+  // Start
   if (window.writeEmbed || window.ytplayer || window.Polymer) {
     console.error('We may have lost the battle, but not the war');
     return;
@@ -155,7 +195,6 @@
 
   // load builds the player in regular video pages
   window.ytplayer_ = {};
-
   Object.defineProperty(window, 'ytplayer', {
     get() {
       return this.ytplayer_;
@@ -163,7 +202,6 @@
     set() {
     },
   });
-
   Object.defineProperty(window.ytplayer, 'load', {
     get() {
       return this.load_;
@@ -173,6 +211,17 @@
         if (window.btDispatched) v.apply(this);
         else window.addEventListener('blockTubeReady', v.bind(this));
       };
+    },
+  });
+
+  // spfjs is responsible for XHR requests
+  window.spf = {};
+  Object.defineProperty(window.spf, 'request', {
+    get() {
+      return this.request_;
+    },
+    set(v) {
+      this.request_ = spfRequest(v);
     },
   });
 }());

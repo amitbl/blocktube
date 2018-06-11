@@ -517,11 +517,6 @@
     }
   }
 
-  function isUrlMatch(url) {
-    if (!(url instanceof URL)) url = new URL(url);
-    return uris.some(uri => uri === url.pathname) || url.searchParams.has('pbj');
-  }
-
   function transformToRegExp(data) {
     if (!has.call(data, 'filterData')) return;
 
@@ -539,44 +534,17 @@
     });
   }
 
-  function filterXHR() {
-    let url;
-    let ytDataArr;
-
-    try {
-      url = new URL(this.responseURL);
-    } catch (e) {
-      if (this._orgCallback) this._orgCallback();
-      return;
-    }
-
-    if (!isUrlMatch(url)) {
-      if (this._orgCallback) this._orgCallback();
-      return;
-    }
-
-    // only operate if we got the full response
-    if (this.readyState !== 4) {
-      return;
-    }
-
-    try {
-      ytDataArr = JSON.parse(this.responseText);
-    } catch (e) {
-      console.error('Decoding JSON failed');
-      if (this._orgCallback) this._orgCallback();
-      return;
-    }
-
-    if (!(ytDataArr instanceof Array)) ytDataArr = [ytDataArr];
+  function spfFilter(url, resp) {
+    let ytDataArr = resp.part || resp.response.parts || resp.response;
+    ytDataArr = (ytDataArr instanceof Array) ? ytDataArr : [ytDataArr];
 
     ytDataArr.forEach((obj) => {
       if (has.call(obj, 'player')) {
-        ObjectFilter(obj.player, ytPlayerRules);
+        ObjectFilter(obj.player, filterRules.ytPlayer);
       }
 
       if (has.call(obj, 'playerResponse')) {
-        ObjectFilter(obj.playerResponse, ytPlayerRules);
+        ObjectFilter(obj.playerResponse, filterRules.ytPlayer);
       }
 
       if (has.call(obj, 'response')) {
@@ -584,29 +552,21 @@
         let postActions = [];
         switch (url.pathname) {
           case '/guide_ajax':
-            rules = guideRules;
+            rules = filterRules.guide;
             break;
           case '/comment_service_ajax':
           case '/live_chat/get_live_chat':
-            rules = commentsRules;
+            rules = filterRules.comments;
             break;
           case '/watch':
             postActions = [removeRvs, fixAutoplay];
             if (currentBlock) postActions.push(redirectToNext);
           default:
-            rules = dataRules;
+            rules = filterRules.main;
         }
         ObjectFilter(obj.response, rules, postActions, true);
       }
-    }, this);
-
-    // redefine responseText with filtered data
-    Object.defineProperty(this, 'responseText', {
-      writable: false,
-      value: JSON.stringify(ytDataArr),
     });
-
-    if (this._orgCallback) this._orgCallback();
   }
 
   function blockMixes(data) {
@@ -762,18 +722,6 @@
       ObjectFilter(window.ytInitialData, Object.assign(dataRules, commentsRules), postActions);
     }
 
-    // future XHR requests
-    const desc = Object.getOwnPropertyDescriptor(XMLHttpRequest.prototype, 'onreadystatechange');
-    Object.defineProperty(XMLHttpRequest.prototype, 'onreadystatechange', {
-      get() {
-        return filterXHR;
-      },
-      set(v) {
-        this._orgCallback = v;
-        desc.set.call(this, filterXHR);
-      },
-    });
-
     window.btDispatched = true;
     window.dispatchEvent(new Event('blockTubeReady'));
   }
@@ -808,4 +756,8 @@
         break;
     }
   }, true);
+
+  window.btExports = {
+    spfFilter,
+  }
 }());
