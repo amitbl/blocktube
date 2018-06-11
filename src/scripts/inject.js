@@ -207,13 +207,13 @@
   }
 
   // !! ObjectFilter
-  function ObjectFilter(object, filterRules, postActions = []) {
-    if (!(this instanceof ObjectFilter)) return new ObjectFilter(object, filterRules, postActions);
-
-    if (this.isDataEmpty() || !object) return this;
+  function ObjectFilter(object, filterRules, postActions = [], contextMenus = false) {
+    if (!(this instanceof ObjectFilter))
+      return new ObjectFilter(object, filterRules, postActions, contextMenus);
 
     this.object = object;
     this.filterRules = filterRules;
+    this.contextMenus = contextMenus;
 
     this.filter();
     postActions.forEach(x => x.call(this));
@@ -277,6 +277,8 @@
   };
 
   ObjectFilter.prototype.matchFilterRule = function (obj) {
+    if (this.isDataEmpty()) return [];
+
     return Object.keys(this.filterRules).reduce((res, h) => {
       let properties;
       let customFunc;
@@ -360,6 +362,7 @@
       }
     }
 
+    if (this.contextMenus) addContextMenus(obj);
     return deletePrev;
   };
 
@@ -593,9 +596,7 @@
           default:
             rules = dataRules;
         }
-
-        addContextMenus(obj.response);
-        ObjectFilter(obj.response, rules, postActions);
+        ObjectFilter(obj.response, rules, postActions, true);
       }
     }, this);
 
@@ -657,24 +658,22 @@
 
   function addContextMenus(obj) {
     const attr = contextMenuObjects.find(e => has.call(obj, e));
+    if (attr === undefined) return;
+
     let items;
-    if (attr !== undefined) {
-      if (has.call(obj[attr], 'videoActions')) {
-        items = obj[attr].videoActions.menuRenderer.items;
-      } else {
-        if (!has.call(obj[attr], 'shortBylineText')) return;
-        items = getObjectByPath(obj[attr], 'menu.menuRenderer.items');
-        if (!items) {
-          obj[attr].menu = { menuRenderer: { items: [] } };
-          items = getObjectByPath(obj[attr], 'menu.menuRenderer.items');
-        }
+    if (has.call(obj[attr], 'videoActions')) {
+      items = obj[attr].videoActions.menuRenderer.items;
+    } else {
+      if (!has.call(obj[attr], 'shortBylineText')) return;
+      items = getObjectByPath(obj[attr], 'menu.menuRenderer.items');
+      if (!items) {
+        obj[attr].menu = { menuRenderer: { items: [] } };
+        items = obj[attr].menu.menuRenderer.items;
       }
-      const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] } } };
-      const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] } } };
-      if(items instanceof Array) items.push(blockVid, blockCh);
-      return;
     }
-    if (obj instanceof Object) Object.keys(obj).forEach(x => addContextMenus(obj[x]));
+    const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] } } };
+    const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] } } };
+    if(items instanceof Array) items.push(blockVid, blockCh);
   }
 
   function startHook() {
