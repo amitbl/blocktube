@@ -647,12 +647,12 @@
             return this.PLAYER_CONFIG_;
           },
           set(val) {
-            ObjectFilter(val, ytPlayerRules);
+            ObjectFilter(val, filterRules.ytPlayer);
             this.PLAYER_CONFIG_ = val;
           },
         });
       } else {
-        ObjectFilter(window.yt.config_.PLAYER_CONFIG, ytPlayerRules);
+        ObjectFilter(window.yt.config_.PLAYER_CONFIG, filterRules.ytPlayer);
       }
     }
 
@@ -663,12 +663,12 @@
           return this.config_;
         },
         set(val) {
-          ObjectFilter(val, ytPlayerRules);
+          ObjectFilter(val, filterRules.ytPlayer);
           this.config_ = val;
         },
       });
     } else {
-      ObjectFilter(window.ytplayer.config, ytPlayerRules);
+      ObjectFilter(window.ytplayer.config, filterRules.ytPlayer);
     }
 
     if (!window.ytInitialGuideData) {
@@ -677,12 +677,12 @@
           return this.ytInitialGuideData_;
         },
         set(val) {
-          ObjectFilter(val, guideRules);
+          ObjectFilter(val, filterRules.guide);
           this.ytInitialGuideData_ = val;
         },
       });
     } else {
-      ObjectFilter(window.ytInitialGuideData, guideRules);
+      ObjectFilter(window.ytInitialGuideData, filterRules.guide);
     }
 
     if (!window.ytInitialPlayerResponse) {
@@ -691,12 +691,12 @@
           return this.ytInitialPlayerResponse_;
         },
         set(val) {
-          ObjectFilter(val, ytPlayerRules);
+          ObjectFilter(val, filterRules.ytPlayer);
           this.ytInitialPlayerResponse_ = val;
         },
       });
     } else {
-      ObjectFilter(window.ytInitialPlayerResponse, ytPlayerRules);
+      ObjectFilter(window.ytInitialPlayerResponse, filterRules.ytPlayer);
     }
 
     const postActions = [removeRvs, fixAutoplay];
@@ -706,20 +706,14 @@
           return this.ytInitialData_;
         },
         set(val) {
-          if (val.contents) {
-            if (currentBlock) postActions.push(redirectToNext);
-            else addContextMenus(val.contents);
-          }
-          ObjectFilter(val, Object.assign(dataRules, commentsRules), postActions);
+          if (val.contents && currentBlock) postActions.push(redirectToNext);
+          ObjectFilter(val, Object.assign(filterRules.main, filterRules.comments), postActions, true);
           this.ytInitialData_ = val;
         },
       });
     } else {
-      if (window.ytInitialData.contents) {
-        if (currentBlock) postActions.push(redirectToNext);
-        else addContextMenus(window.ytInitialData.contents);
-      }
-      ObjectFilter(window.ytInitialData, Object.assign(dataRules, commentsRules), postActions);
+      if (window.ytInitialData.contents && currentBlock) postActions.push(redirectToNext);
+      ObjectFilter(window.ytInitialData, Object.assign(filterRules.main, filterRules.comments), postActions, true);
     }
 
     window.btDispatched = true;
