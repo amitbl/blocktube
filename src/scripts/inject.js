@@ -31,15 +31,6 @@
     'itemSectionRenderer',
   ];
 
-  // need to filter following XHR requests
-  const uris = [
-    '/browse_ajax',
-    '/related_ajax',
-    '/list_ajax',
-    '/guide_ajax',
-    '/live_chat/get_live_chat',
-  ];
-
   // those filter properties require RegExp checking
   const regexProps = [
     'videoId',
@@ -63,138 +54,157 @@
     vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text.simpleText',
   };
 
-  const dataRules = {
-    gridVideoRenderer: baseRules,
-    videoRenderer: baseRules,
-    radioRenderer: baseRules,
-    channelRenderer: baseRules,
-    playlistRenderer: baseRules,
-    gridRadioRenderer: baseRules,
-    compactVideoRenderer: baseRules,
-    compactRadioRenderer: baseRules,
-    playlistVideoRenderer: baseRules,
-    endScreenVideoRenderer: baseRules,
-    endScreenPlaylistRenderer: baseRules,
-    gridPlaylistRenderer: baseRules,
-    watchCardCompactVideoRenderer: baseRules,
+  const filterRules = {
+    main: {
+      gridVideoRenderer: baseRules,
+      videoRenderer: baseRules,
+      radioRenderer: baseRules,
+      channelRenderer: baseRules,
+      playlistRenderer: baseRules,
+      gridRadioRenderer: baseRules,
+      compactVideoRenderer: baseRules,
+      compactRadioRenderer: baseRules,
+      playlistVideoRenderer: baseRules,
+      endScreenVideoRenderer: baseRules,
+      endScreenPlaylistRenderer: baseRules,
+      gridPlaylistRenderer: baseRules,
 
-    shelfRenderer: {
-      channelId: 'endpoint.browseEndpoint.browseId',
-    },
-
-    channelVideoPlayerRenderer: {
-      title: 'title.runs',
-    },
-
-    playlistPanelVideoRenderer: {
-      properties: baseRules,
-      customFunc: blockPlaylistVid,
-    },
-
-    videoPrimaryInfoRenderer: {
-      properties: {
-        title: 'title.simpleText',
+      watchCardCompactVideoRenderer: {
+        title: 'title.runs',
+        channelId: 'subtitles.runs.navigationEndpoint.browseEndpoint.browseId',
+        channelName: 'subtitles.runs',
+        videoId: 'navigationEndpoint.watchEndpoint.videoId',
       },
-      customFunc: redirectToNext,
-    },
 
-    videoSecondaryInfoRenderer: {
-      properties: {
-        channelId: 'owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId',
-        channelName: 'owner.videoOwnerRenderer.title.runs',
+      shelfRenderer: {
+        channelId: 'endpoint.browseEndpoint.browseId',
       },
-      customFunc: redirectToNext,
-    },
 
-    // channel page header
-    c4TabbedHeaderRenderer: {
-      properties: {
+      channelVideoPlayerRenderer: {
+        title: 'title.runs',
+      },
+
+      playlistPanelVideoRenderer: {
+        properties: baseRules,
+        customFunc: blockPlaylistVid,
+      },
+
+      videoPrimaryInfoRenderer: {
+        properties: {
+          title: 'title.simpleText',
+        },
+        customFunc: redirectToNext,
+      },
+
+      videoSecondaryInfoRenderer: {
+        properties: {
+          channelId: 'owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId',
+          channelName: 'owner.videoOwnerRenderer.title.runs',
+        },
+        customFunc: redirectToNext,
+      },
+
+      // channel page header
+      c4TabbedHeaderRenderer: {
+        properties: {
+          channelId: 'channelId',
+          channelName: 'title',
+        },
+        customFunc: redirectToIndex,
+      },
+
+      superTitleLink: {
+        properties: {
+          channelId: 'runs.navigationEndpoint.browseEndpoint.browseId',
+        },
+        customFunc: redirectToNext,
+      },
+
+      // related channels
+      gridChannelRenderer: {
         channelId: 'channelId',
-        channelName: 'title',
+        channelName: 'title.simpleText',
       },
-      customFunc: redirectToIndex,
-    },
 
-    // related channels
-    gridChannelRenderer: {
-      channelId: 'channelId',
-      channelName: 'title.simpleText',
-    },
-
-    miniChannelRenderer: {
-      channelId: 'channelId',
-      channelName: 'title.runs',
-    },
-
-    // sidemenu subscribed channels
-    guideEntryRenderer: {
-      channelId: 'navigationEndpoint.browseEndpoint.browseId',
-      channelName: 'title',
-    },
-
-    universalWatchCardRenderer: {
-      properties: {
-        channelId: 'header.watchCardRichHeaderRenderer.titleNavigationEndpoint.browseEndpoint.browseId',
-        channelName: 'header.watchCardRichHeaderRenderer.title.simpleText',
-      },
-    },
-
-    playlist: {
-      properties: {
-        channelId: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
-        channelName: ['shortBylineText.runs', 'shortBylineText.simpleText'],
-        title: 'title',
-      },
-      customFunc: redirectToIndex,
-    },
-  };
-
-  const ytPlayerRules = {
-    args: {
-      properties: {
-        videoId: 'video_id',
-        channelId: 'ucid',
-        channelName: 'author',
-        title: 'title',
-        vidLength: 'length_seconds',
-      },
-      customFunc: setPageBlock,
-    },
-
-    videoDetails: {
-      properties: {
-        videoId: 'videoId',
+      miniChannelRenderer: {
         channelId: 'channelId',
-        channelName: 'author',
-        title: 'title',
-        vidLength: 'lengthSeconds',
+        channelName: 'title.runs',
       },
-      customFunc: disablePlayer,
-    },
-  };
 
-  const guideRules = {
-    // sidemenu subscribed channels
-    guideEntryRenderer: {
-      properties: {
+      // sidemenu subscribed channels
+      guideEntryRenderer: {
         channelId: 'navigationEndpoint.browseEndpoint.browseId',
         channelName: 'title',
       },
-    },
-  };
 
-  const commentsRules = {
-    commentRenderer: {
-      channelId: 'authorEndpoint.browseEndpoint.browseId',
-      channelName: 'authorText.simpleText',
-      comment: 'contentText.runs',
+      universalWatchCardRenderer: {
+        properties: {
+          channelId: 'header.watchCardRichHeaderRenderer.titleNavigationEndpoint.browseEndpoint.browseId',
+          channelName: 'header.watchCardRichHeaderRenderer.title.simpleText',
+        },
+      },
+
+      playlist: {
+        properties: {
+          channelId: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
+          channelName: ['shortBylineText.runs', 'shortBylineText.simpleText'],
+          title: 'title',
+        },
+        customFunc: redirectToIndex,
+      },
+
+      compactChannelRecommendationCardRenderer: {
+        properties: {
+          channelId: 'channelEndpoint.browseEndpoint.browseId',
+          channelName: ['channelTitle.simpleText', 'channelTitle.runs'],
+        },
+      },
     },
-    liveChatTextMessageRenderer: {
-      channelId: 'authorExternalChannelId',
-      channelName: 'authorName.simpleText',
-      comment: 'message.runs',
+    ytPlayer: {
+      args: {
+        properties: {
+          videoId: 'video_id',
+          channelId: 'ucid',
+          channelName: 'author',
+          title: 'title',
+          vidLength: 'length_seconds',
+        },
+        customFunc: setPageBlock,
+      },
+
+      videoDetails: {
+        properties: {
+          videoId: 'videoId',
+          channelId: 'channelId',
+          channelName: 'author',
+          title: 'title',
+          vidLength: 'lengthSeconds',
+        },
+        customFunc: disablePlayer,
+      },
     },
-  };
+    guide: {
+      // sidemenu subscribed channels
+      guideEntryRenderer: {
+        properties: {
+          channelId: 'navigationEndpoint.browseEndpoint.browseId',
+          channelName: 'title',
+        },
+      },
+    },
+    comments: {
+      commentRenderer: {
+        channelId: 'authorEndpoint.browseEndpoint.browseId',
+        channelName: 'authorText.simpleText',
+        comment: 'contentText.runs',
+      },
+      liveChatTextMessageRenderer: {
+        channelId: 'authorExternalChannelId',
+        channelName: 'authorName.simpleText',
+        comment: 'message.runs',
+      },
+    }
+  }
 
   // !! ObjectFilter
   function ObjectFilter(object, filterRules, postActions = []) {
