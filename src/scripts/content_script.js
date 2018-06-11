@@ -3,6 +3,7 @@
 
   // Do not run on already opened YouTube tabs
   if (document.body) {
+    document.location.reload();
     console.info('Please refresh this tab to activate BlockTube');
     return;
   }
@@ -76,6 +77,9 @@
         break;
     }
   });
+
+  // Reload page on extension update/uninstall
+  port.onDisconnect.addListener(() => document.location.reload());
 
   // Listen for messages from injected page script
   window.addEventListener('message', (event) => {
