@@ -626,14 +626,19 @@
     } else {
       if (!has.call(obj[attr], 'shortBylineText')) return;
       items = getObjectByPath(obj[attr], 'menu.menuRenderer.items');
-      if (!items) {
+      const topLevel = getObjectByPath(obj[attr], 'menu.menuRenderer.topLevelButtons');
+      if (!items && !topLevel) {
         obj[attr].menu = { menuRenderer: { items: [] } };
+        items = obj[attr].menu.menuRenderer.items;
+      }
+      if (topLevel) {
+        obj[attr].menu.menuRenderer.items = [];
         items = obj[attr].menu.menuRenderer.items;
       }
     }
     const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] } } };
     const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] } } };
-    if(items instanceof Array) items.push(blockVid, blockCh);
+    if (items instanceof Array) items.push(blockVid, blockCh);
   }
 
   function startHook() {
