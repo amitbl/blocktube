@@ -113,13 +113,6 @@
         customFunc: redirectToIndex,
       },
 
-      superTitleLink: {
-        properties: {
-          channelId: 'runs.navigationEndpoint.browseEndpoint.browseId',
-        },
-        customFunc: redirectToNext,
-      },
-
       // related channels
       gridChannelRenderer: {
         channelId: 'channelId',
