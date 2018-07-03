@@ -576,7 +576,7 @@
 
   function removeRvs() {
     if (has.call(this.object, 'webWatchNextResponseExtensionData')) {
-      this.object.webWatchNextResponseExtensionData = undefined;
+      delete this.object.webWatchNextResponseExtensionData;
     }
   }
 
