@@ -1,7 +1,7 @@
 .PHONY: build clean
 SHELL := /usr/bin/env bash
 DEST = dist
-VERSION = 0.2.7
+VERSION = 0.2.8
 
 # npm install uglify-es
 build:
