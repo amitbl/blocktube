@@ -59,7 +59,6 @@
       gridVideoRenderer: baseRules,
       videoRenderer: baseRules,
       radioRenderer: baseRules,
-      channelRenderer: baseRules,
       playlistRenderer: baseRules,
       gridRadioRenderer: baseRules,
       compactVideoRenderer: baseRules,
@@ -82,6 +81,11 @@
 
       channelVideoPlayerRenderer: {
         title: 'title.runs',
+      },
+
+      channelRenderer: {
+        properties: baseRules,
+        related: 'shelfRenderer'
       },
 
       playlistPanelVideoRenderer: {
@@ -275,6 +279,7 @@
     return Object.keys(this.filterRules).reduce((res, h) => {
       let properties;
       let customFunc;
+      let related;
       const filteredObject = obj[h];
 
       if (filteredObject) {
@@ -282,9 +287,11 @@
         if (has.call(filterRule, 'properties')) {
           properties = filterRule.properties;
           customFunc = filterRule.customFunc;
+          related = filterRule.related;
         } else {
           properties = filterRule;
           customFunc = undefined;
+          related = undefined;
         }
 
         const isMatch = this.matchFilterData(properties, filteredObject);
@@ -292,6 +299,7 @@
           res.push({
             name: h,
             customFunc,
+            related,
           });
         }
       }
@@ -316,7 +324,7 @@
       }
       if (customRet) {
         delete obj[r.name];
-        deletePrev = true;
+        deletePrev = r.related || true;
       }
     });
 
@@ -343,6 +351,10 @@
       if (childDel && keys === undefined) {
         deletePrev = true;
         obj.splice(idx, 1);
+        // Hack for deleting related objects with missing data
+        if (typeof childDel === "string" && obj.length > 0 && obj[idx] && obj[idx][childDel]) {
+          obj.splice(idx, 1);
+        }
       }
 
       // if next child is an empty array that we filtered, mark parent for removal.
