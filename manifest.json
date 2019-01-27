@@ -35,5 +35,10 @@
     "48": "assets/icons/48.png",
     "128": "assets/icons/128.png"
   },
+  "applications": {
+    "gecko": {
+    "id": "blocktube@amitbl.org"
+    }
+  },
   "homepage_url": "https://github.com/amitbl/blocktube"
 }
