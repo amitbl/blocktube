@@ -37,7 +37,7 @@
   },
   "applications": {
       "gecko": {
-          "id": "blocktube@amitbl.org"
+          "id": "{58204f8b-01c2-4bbc-98f8-9a90458fd9ef}"
       }
   },
   "homepage_url": "https://github.com/amitbl/blocktube"
