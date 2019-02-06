@@ -55,7 +55,7 @@
   function unlockPage() {
     populateForms();
     $('options').setAttribute('style', '');
-    $('login').setAttribute('style', 'display: none;');
+    $('login').setAttribute('style', 'display: none');
   }
 
   function checkForLogin() {
