@@ -193,7 +193,7 @@
       commentRenderer: {
         channelId: 'authorEndpoint.browseEndpoint.browseId',
         channelName: 'authorText.simpleText',
-        comment: 'contentText.runs',
+        comment: ['contentText.runs', 'contentText.simpleText'],
       },
       liveChatTextMessageRenderer: {
         channelId: 'authorExternalChannelId',
