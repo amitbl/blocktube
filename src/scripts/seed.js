@@ -218,13 +218,14 @@
   });
 
   // spfjs is responsible for XHR requests
-  window.spf = {};
-  Object.defineProperty(window.spf, 'request', {
-    get() {
-      return this.request_;
-    },
-    set(v) {
-      this.request_ = spfRequest(v);
-    },
+  document.addEventListener('spfready', function(e) {
+      Object.defineProperty(window.spf, 'request', {
+        get() {
+          return this.request_;
+        },
+        set(v) {
+          this.request_ = spfRequest(v);
+        },
+      });
   });
 }());
