@@ -80,9 +80,9 @@ chrome.storage.local.get('storageData', (data) => {
 
   chrome.runtime.onConnect.addListener((port) => {
     port.onDisconnect.addListener((port) => {
-      delete ports[port.sender.tab.id];
+      delete ports[port.sender.contextId];
     });
-    ports[port.sender.tab.id] = port;
+    ports[port.sender.contextId] = port;
     utils.sendFilters(port);
   });
 

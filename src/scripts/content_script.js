@@ -40,7 +40,6 @@
       storage.set(globalStorage);
     },
     ready() {
-      utils.sendStorage();
       ready = true;
     },
   };
