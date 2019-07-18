@@ -57,7 +57,7 @@
   const filterRules = {
     main: {
       gridVideoRenderer: baseRules,
-      videoRenderer: baseRules,
+      videoRenderer: {...baseRules, title: ['title.runs', 'title.simpleText']},
       radioRenderer: baseRules,
       playlistRenderer: baseRules,
       gridRadioRenderer: baseRules,
@@ -84,7 +84,7 @@
       },
 
       channelRenderer: {
-        properties: baseRules,
+        properties: {...baseRules, title: undefined},
         related: 'shelfRenderer'
       },
 
