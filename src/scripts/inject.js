@@ -374,11 +374,19 @@
   // !! Custom filtering functions
 
   function setPageBlock() {
+    if (storageData.options.suggestions_only) {
+      return false;
+    }
+
     currentBlock = true;
     return true;
   }
 
   function disablePlayer(ytData) {
+    if (storageData.options.suggestions_only) {
+      return false;
+    }
+
     const message = (storageData.options.block_message) || '';
 
     ytData.playabilityStatus.status = 'ERROR';
@@ -425,6 +433,10 @@
   }
 
   function redirectToIndex() {
+    if (storageData && storageData.options.suggestions_only) {
+      return false;
+    }
+
     if (this && this.object) this.object = undefined;
     document.location = '/';
     // TODO: Hack for stoping execution
@@ -445,6 +457,10 @@
 
   function redirectToNext() {
     currentBlock = false;
+
+    if (storageData.options.suggestions_only) {
+      return false;
+    }
 
     censorTitle();
 

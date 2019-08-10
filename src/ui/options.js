@@ -37,6 +37,7 @@
     storageData.options.trending = $('disable_trending').checked;
     storageData.options.mixes = $('disable_mixes').checked;
     storageData.options.autoplay = $('autoplay').checked;
+    storageData.options.suggestions_only = $('suggestions_only').checked;
     storageData.options.block_message = $('block_message').value;
 
     saveData('status_save');
@@ -83,6 +84,7 @@
     $('disable_trending').checked = get('options.trending', false, obj);
     $('disable_mixes').checked    = get('options.mixes', false, obj);
     $('autoplay').checked         = get('options.autoplay', false, obj);
+    $('suggestions_only').checked = get('options.suggestions_only', false, obj);
     $('block_message').value      = get('options.block_message', '', obj);
   }
 
