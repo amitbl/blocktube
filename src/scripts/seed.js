@@ -35,20 +35,20 @@
 
       // Video player context menu
       if (parentDom.tagName === 'YTD-VIDEO-PRIMARY-INFO-RENDERER') {
-        const player = document.getElementsByTagName('ytd-page-manager')[0].data.player;
+        const player = document.getElementsByTagName('ytd-page-manager')[0].data.playerResponse;
         const owner = document.getElementsByTagName('ytd-video-owner-renderer')[0].data;
         const ownerUCID = owner.title.runs[0].navigationEndpoint.browseEndpoint.browseId;
-        let playerUCID = player.args.ucid;
+        let playerUCID = player.videoDetails.channelId;
         if (playerUCID !== ownerUCID) {
           playerUCID = [playerUCID, ownerUCID];
         }
         channelData = {
-          text: player.args.author,
+          text: player.videoDetails.author,
           id: playerUCID,
         };
         videoData = {
-          text: player.args.title,
-          id: player.args.video_id,
+          text: player.videoDetails.title,
+          id: player.videoDetails.videoId,
         };
 
         removeParent = false;
@@ -58,7 +58,7 @@
           id: parentData.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId,
         };
         videoData = {
-          text: parentData.title.simpleText,
+          text: parentData.title.simpleText || parentData.title.runs[0].text,
           id: parentData.videoId,
         };
       }
