@@ -160,15 +160,14 @@
     ytPlayer: {
       args: {
         properties: {
-          videoId: 'video_id',
-          channelId: 'ucid',
-          channelName: 'author',
-          title: 'title',
-          vidLength: 'length_seconds',
+          videoId: ['video_id', 'player_response_parsed.videoDetails.videoId'],
+          channelId: ['ucid', 'player_response_parsed.videoDetails.channelId'],
+          channelName: ['author', 'player_response_parsed.videoDetails.author'],
+          title: ['title', 'player_response_parsed.videoDetails.title'],
+          vidLength: ['length_seconds', 'player_response_parsed.videoDetails.lengthSeconds']
         },
-        customFunc: setPageBlock,
+        customFunc: setPageBlock
       },
-
       videoDetails: {
         properties: {
           videoId: 'videoId',
@@ -390,7 +389,7 @@
     const message = (storageData.options.block_message) || '';
 
     ytData.playabilityStatus.status = 'ERROR';
-    ytData.playabilityStatus.reason = '';
+    ytData.playabilityStatus.reason = message;
     ytData.playabilityStatus.errorScreen = {
       playerErrorMessageRenderer: {
         reason: {
@@ -689,6 +688,13 @@
           return this.config_;
         },
         set(val) {
+          const player_resp = getObjectByPath(val, 'args.player_response');
+          if (player_resp) {
+              try {
+                  val.args.player_response_parsed = JSON.parse(player_resp);
+              } catch (e) {
+              }
+          }
           ObjectFilter(val, filterRules.ytPlayer);
           this.config_ = val;
         },
