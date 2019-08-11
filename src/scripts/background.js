@@ -3,6 +3,7 @@
 const has = Object.prototype.hasOwnProperty;
 const unicodeBoundry = "[ \n\r\t!@#$%^&*()_\\-=+\\[\\]\\\\\\|;:'\",\\.\\/<>\\?`~:]+";
 const ports = {};
+let initStorage = false;
 let compiledStorage;
 let storage = {
   filterData: {
@@ -71,37 +72,44 @@ const utils = {
   sendFilters(port) {
     port.postMessage({ type: 'filtersData', data: { storage, compiledStorage } });
   },
+
+  sendFiltersToAll() {
+    Object.keys(ports).forEach((p) => {
+      try {
+        ports[p].postMessage({ type: 'filtersData', data: { storage, compiledStorage } });
+      } catch (e) {
+        console.error('Where are you my child?');
+      }
+    });
+  }
 };
+
+chrome.runtime.onConnect.addListener((port) => {
+    port.onDisconnect.addListener((port) => {
+        const key = port.sender.contextId || port.sender.frameId;
+        delete ports[key];
+    });
+    const key = port.sender.contextId || port.sender.frameId;
+    ports[key] = port;
+    if (initStorage) utils.sendFilters(port);
+});
 
 chrome.storage.local.get('storageData', (data) => {
   if (data !== undefined && Object.keys(data).length > 0) {
     storage = data.storageData;
     compiledStorage = utils.compileAll(data.storageData);
+    utils.sendFiltersToAll();
   }
-
-  chrome.runtime.onConnect.addListener((port) => {
-    port.onDisconnect.addListener((port) => {
-      const key = port.sender.contextId || port.sender.frameId;
-      delete ports[key];
-    });
-    const key = port.sender.contextId || port.sender.frameId;
-    ports[key] = port;
-    utils.sendFilters(port);
-  });
 
   chrome.storage.onChanged.addListener((changes) => {
     if (has.call(changes, 'storageData')) {
       storage = changes.storageData.newValue;
       compiledStorage = utils.compileAll(changes.storageData.newValue);
-      Object.keys(ports).forEach((p) => {
-        try {
-          utils.sendFilters(ports[p]);
-        } catch (e) {
-          console.error('Where are you my child?');
-        }
-      });
+      utils.sendFiltersToAll();
     }
   });
+
+  initStorage = true;
 });
 
 // TODO: Popup UI

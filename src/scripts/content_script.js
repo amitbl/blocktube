@@ -17,7 +17,7 @@
   let globalStorage;
   let compiledStorage;
   let ready = false;
-  const port = chrome.runtime.connect();
+  let port = null;
 
   const storage = {
     set(data) {
@@ -62,24 +62,37 @@
     },
   };
 
-  // Listen for messages from background page
-  port.onMessage.addListener((msg) => {
-    switch (msg.type) {
-      case 'filtersData': {
-        if (msg.data) {
-          globalStorage = msg.data.storage;
-          compiledStorage = msg.data.compiledStorage;
-        }
-        if (ready) utils.sendStorage();
-        break;
-      }
-      default:
-        break;
-    }
-  });
+  function connectToPort() {
+    port = chrome.runtime.connect();
 
-  // Reload page on extension update/uninstall
-  port.onDisconnect.addListener(() => document.location.reload());
+    // Listen for messages from background page
+    port.onMessage.addListener((msg) => {
+      switch (msg.type) {
+        case 'filtersData': {
+          if (msg.data) {
+            globalStorage = msg.data.storage;
+            compiledStorage = msg.data.compiledStorage;
+          }
+          if (ready) utils.sendStorage();
+          break;
+        }
+        default:
+          break;
+      }
+    });
+
+    // Reload page on extension update/uninstall
+    port.onDisconnect.addListener(() => {
+      if (chrome.runtime.lastError) {
+        console.log('Port error', chrome.runtime.lastError);
+        connectToPort();
+      } else {
+        document.location.reload();
+      }
+    });
+  }
+
+  connectToPort();
 
   // Listen for messages from injected page script
   window.addEventListener('message', (event) => {

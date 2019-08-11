@@ -560,6 +560,10 @@
 
     ytDataArr.forEach((obj) => {
       if (has.call(obj, 'player')) {
+        try {
+          const player_resp = getObjectByPath(obj.player, 'args.player_response');
+          obj.player.args.player_response_parsed = JSON.parse(player_resp);
+        } catch (e) {}
         ObjectFilter(obj.player, filterRules.ytPlayer);
       }
 
