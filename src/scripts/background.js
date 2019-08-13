@@ -98,7 +98,6 @@ chrome.storage.local.get('storageData', (data) => {
   if (data !== undefined && Object.keys(data).length > 0) {
     storage = data.storageData;
     compiledStorage = utils.compileAll(data.storageData);
-    utils.sendFiltersToAll();
   }
 
   chrome.storage.onChanged.addListener((changes) => {
@@ -110,6 +109,7 @@ chrome.storage.local.get('storageData', (data) => {
   });
 
   initStorage = true;
+  utils.sendFiltersToAll();
 });
 
 // TODO: Popup UI
