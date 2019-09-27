@@ -50,14 +50,14 @@
       'shortBylineText.simpleText',
       'longBylineText.simpleText',
     ],
-    title: 'title.simpleText',
+    title: ['title.runs', 'title.simpleText'],
     vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text.simpleText',
   };
 
   const filterRules = {
     main: {
       gridVideoRenderer: baseRules,
-      videoRenderer: {...baseRules, title: ['title.runs', 'title.simpleText']},
+      videoRenderer: baseRules,
       radioRenderer: baseRules,
       playlistRenderer: baseRules,
       gridRadioRenderer: baseRules,
