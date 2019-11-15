@@ -20,6 +20,7 @@
 
   // those properties can be safely deleted when one of thier child got filtered
   const deleteAllowed = [
+    'richItemRenderer',
     'content',
     'horizontalListRenderer',
     'verticalListRenderer',
