@@ -29,7 +29,6 @@
     'expandedShelfContentsRenderer',
     'comment',
     'commentThreadRenderer',
-    'itemSectionRenderer',
   ];
 
   // those filter properties require RegExp checking
