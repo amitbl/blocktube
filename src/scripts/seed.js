@@ -7,6 +7,17 @@
 
   window.btDispatched = false;
 
+  const deepGet = (p, o) => p.reduce((xs, x) => (xs && xs[x]) ? xs[x] : null, o);
+
+  function deepGetFirst(paths, o) {
+    for (let i = 0; i < paths.length; i++) {
+      let res = deepGet(paths[i], o);
+      if (res) {
+        return res;
+      }
+    }
+  }
+
   // need to filter following XHR requests
   const uris = [
     '/browse_ajax',
@@ -54,11 +65,18 @@
         removeParent = false;
       } else {
         channelData = {
-          text: parentData.shortBylineText.runs[0].text,
-          id: parentData.shortBylineText.runs[0].navigationEndpoint.browseEndpoint.browseId,
+          text: deepGetFirst([
+            ['shortBylineText', 'runs', 0, 'text'],
+            ['authorText', 'simpleText'],
+            ['authorText', 'runs', 0, 'text']], parentData),
+          id: deepGetFirst([
+            ['shortBylineText', 'runs', 0 ,'navigationEndpoint', 'browseEndpoint', 'browseId'],
+            ['authorEndpoint', 'browseEndpoint', 'browseId']], parentData),
         };
         videoData = {
-          text: parentData.title.simpleText || parentData.title.runs[0].text,
+          text: deepGetFirst([
+            ['title', 'simpleText'],
+            ['title', 'runs', 0, 'text']], parentData),
           id: parentData.videoId,
         };
       }
@@ -81,12 +99,20 @@
       if (data && type) {
         postMessage('contextBlockData', { type, info: data });
         if (removeParent) {
-          parentDom.dismissedRenderer = {
-            notificationMultiActionRenderer: {
-              responseText: {simpleText: 'Blocked'},
-            }
-          };
-          parentDom.setAttribute('is-dismissed', '');
+          if (parentDom.tagName === 'YTD-COMMENT-RENDERER') {
+            parentDom.parentNode.remove();
+          }
+          else if (parentDom.tagName === 'YTD-MOVIE-RENDERER') {
+            parentDom.remove();
+          }
+          else {
+            parentDom.dismissedRenderer = {
+              notificationMultiActionRenderer: {
+                responseText: {simpleText: 'Blocked'},
+              }
+            };
+            parentDom.setAttribute('is-dismissed', '');
+          }
         } else {
           document.getElementById('movie_player').stopVideo();
         }

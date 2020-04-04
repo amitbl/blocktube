@@ -17,6 +17,7 @@
     'gridVideoRenderer',
     'compactVideoRenderer',
     'videoPrimaryInfoRenderer',
+    'commentRenderer',
   ];
 
   // those properties can be safely deleted when one of thier child got filtered
@@ -647,8 +648,19 @@
     if (attr === undefined) return;
 
     let items;
+    let hasChannel = false;
+    let hasVideo = false;
     if (has.call(obj[attr], 'videoActions')) {
       items = obj[attr].videoActions.menuRenderer.items;
+      hasChannel = true;
+      hasVideo = true;
+    } else if (has.call(obj[attr], 'actionMenu')) {
+      items = obj[attr].actionMenu.menuRenderer.items;
+      hasChannel = true;
+    } else if (attr === 'commentRenderer') {
+      obj[attr].actionMenu = {menuRenderer: {items: [] } };
+      items = obj[attr].actionMenu.menuRenderer.items;
+      hasChannel = true;
     } else {
       if (!has.call(obj[attr], 'shortBylineText')) return;
       items = getObjectByPath(obj[attr], 'menu.menuRenderer.items');
@@ -661,10 +673,15 @@
         obj[attr].menu.menuRenderer.items = [];
         items = obj[attr].menu.menuRenderer.items;
       }
+      hasChannel = true;
+      hasVideo = true;
     }
     const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] } } };
     const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] } } };
-    if (items instanceof Array) items.push(blockVid, blockCh);
+    if (items instanceof Array){
+      if (hasChannel) items.push(blockCh);
+      if (hasVideo) items.push(blockVid);
+    }
   }
 
   function startHook() {
