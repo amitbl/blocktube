@@ -12,6 +12,7 @@
 
   // add context menu to following objects
   const contextMenuObjects = [
+    'movieRenderer',
     'videoRenderer',
     'gridVideoRenderer',
     'compactVideoRenderer',
@@ -56,6 +57,7 @@
 
   const filterRules = {
     main: {
+      movieRenderer: baseRules,
       gridVideoRenderer: baseRules,
       videoRenderer: baseRules,
       radioRenderer: baseRules,
