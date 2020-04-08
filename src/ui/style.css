@@ -1,21 +1,102 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --red: #FF4444;
+  --redhover: #FFA1A1;
+  --gray: #E9E9E9;
+  --darkgray: #5C5C5C;
+  --teal: #4B99AD;
+  --tealhover: #346B79;
+  --darkteal: #224444;
+  --darktealhover: #4E6969;
+  --border: #bcbcbc;
+}
+
 body {
-  font: 14px sans-serif;
+  font: 16px sans-serif;
+  margin: 0;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-evenly;
+}
+
+nav {
+  flex: 0 1 auto;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background-color: var(--gray);
+  border-bottom: 1px var(--darkgray) solid;
+  height: 10vh;
+  padding: 10px;
+  -webkit-box-shadow: 0px 4px 4px 0px rgba(222,222,222,1);
+-moz-box-shadow: 0px 4px 4px 0px rgba(222,222,222,1);
+box-shadow: 0px 4px 4px 0px rgba(222,222,222,1);
+}
+
+h1 {
+  font-size: 1.5em;
+}
+
+.nav-menu {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+}
+
+.nav-link {
+  padding: 5px 10px;
+  background-color: var(--red);
+  color: #fff;
+  text-decoration: none;
+  text-align: center;
+  font-weight: 500;
+  text-transform: capitalize;
+  margin-right: 10px;
+  display: flex;
+  flex-flow: row;
+}
+
+.nav-link:hover {
+  background-color: var(--redhover);
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 5px;
+}
+
+.stacked {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+}
+
+.ext {
+  align-self: flex-end;
+  font-size: 0.7em;
+  margin: 0;
 }
 
 #options {
-  margin-top: 10px;
+  padding: 5% 3%;
 }
 
 .form-textarea {
-  border-width: 1px;
-  border-color: #ccc;
+  border: 1px var(--border) solid;
   width: 100%;
   resize: vertical;
   overflow-wrap: normal;
+  margin-bottom: 10px;
 }
 
 .status-text {
-  padding-top:5px;
+  padding-top: 5px;
   font-size: larger;
   font-weight:bold;
 }
@@ -27,9 +108,9 @@ form fieldset {
 
 form legend {
   margin-bottom: 10px;
-  font-size: larger;
+  font-size: 1.2em;
   font-weight: bold;
-  margin-top:5px;
+  margin-top: 5px;
 }
 
 .block-label {
@@ -39,16 +120,20 @@ form legend {
 }
 
 form label {
-  font-size:small;
+  font-size: 0.9em;
+  font-weight: 500;
+
 }
 
 form input[type=checkbox] {
   margin: 0 0 0 0;
+  border: 1px var(--border) solid;
+  background-color: #333;
 }
 
 form input[type=submit],
 form input[type=button]{
-  background: #4B99AD;
+  background: var(--teal);
   padding: 5px 15px 5px 15px;
   border: none;
   color: #fff;
@@ -57,14 +142,14 @@ form input[type=button]{
 
 form input[type=submit]:hover,
 form input[type=button]:hover{
-  background: #4691A4;
+  background: var(--tealhover);
   box-shadow:none;
   -moz-box-shadow:none;
   -webkit-box-shadow:none;
 }
 
 #export {
-  background: #FF4444;
+  background: var(--red);
   padding: 5px 15px 5px 15px;
   border: none;
   color: #fff;
@@ -72,14 +157,14 @@ form input[type=button]:hover{
 }
 
 #export:hover{
-  background: #FF5555;
+  background: var(--redhover);
   box-shadow:none;
   -moz-box-shadow:none;
   -webkit-box-shadow:none;
 }
 
 #import {
-  background: #224444;
+  background: var(--darkteal);
   padding: 5px 15px 5px 15px;
   border: none;
   color: #fff;
@@ -87,7 +172,7 @@ form input[type=button]:hover{
 }
 
 #import:hover{
-  background: #225555;
+  background: var(--darktealhover);
   box-shadow:none;
   -moz-box-shadow:none;
   -webkit-box-shadow:none;
@@ -100,22 +185,36 @@ form div {
 form input[type="text"],
 form input[type="password"],
 form input[type="number"] {
-  border-width: 1px;
-  border-color: #ccc;
+  border: 1px var(--border) solid;
   padding: 3px;
+  margin-bottom: 5px;
 }
 
 #main {
   margin-left: 5px;
 }
 
-h1 {
-  border-bottom: 1px solid #ccc;
-  margin: 0;
-  margin-bottom: 10px;
+.buttons {
+  border-top: 1px solid var(--darkgray);
+  padding-top:5px;
 }
 
-.buttons {
-  border-top: 1px solid #ccc;
-  padding-top:5px;
+@media (max-width: 560px) {
+  nav {
+    height: 15vh;
+    padding-top: 10px;
+  }
+
+  .nav-menu {
+    flex-flow: column nowrap;
+  }
+
+  li {
+    margin-bottom: 8px;
+  }
+
+  .ext {
+    align-self: center;
+  }
+
 }

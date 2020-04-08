@@ -8,11 +8,17 @@
     <link rel="shortcut icon" type="image/png" href="../../assets/icons/16.png"/>
   </head>
   <body>
-    <div style="border-bottom: 1px solid #ccc">
-      <h1 style="display:inline">BlockTube</h1>
-      <span style="float:right">[<a target="_blank" href="https://github.com/amitbl/blocktube/wiki">How to use</a>]
-        [<a target="_blank" href="https://github.com/amitbl/blocktube/wiki/Changelog">Changelog</a>]<br /><small style="float:right">v{EXT_VERSION}</small></span>
-    </div>
+      <nav>
+          <div><h1>BlockTube</h1>
+          </div>
+          <div class="stacked">
+          <ul class="nav-menu">
+            <li><a class="nav-link" target="_blank" href="https://github.com/amitbl/blocktube/wiki">How to use</a></li>
+            <li><a class="nav-link" target="_blank" href="https://github.com/amitbl/blocktube/wiki/Changelog">Changelog</a></li>
+          </ul>
+          <div class="ext">v{EXT_VERSION}</div>
+          </div>
+      </nav>
     <div id="main">
       <form id="login" style="display:none">
         <p>Extension options are restricted, please login to continue.</p>
@@ -25,7 +31,7 @@
           <div class="status-text" id="status_login"></div>
         </div>
       </form>
-      <form id="options" style="display:none">
+      <form id="options" style="display: none;">
         <legend>Filters options</legend>
         <fieldset>
           <div>
@@ -92,6 +98,7 @@
         </div>
       </form>
     </div>
+    </div>  
     <script type="text/javascript" src="options.js"></script>
   </body>
 </html>
