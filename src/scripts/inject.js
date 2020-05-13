@@ -70,6 +70,10 @@
       endScreenVideoRenderer: baseRules,
       endScreenPlaylistRenderer: baseRules,
       gridPlaylistRenderer: baseRules,
+      postRenderer: {
+        channelId: 'navigationEndpoint.browseEndpoint.browseId',
+        channelName: ['authorText.runs', 'authorText.simpleText']
+      },
 
       watchCardCompactVideoRenderer: {
         title: 'title.runs',
