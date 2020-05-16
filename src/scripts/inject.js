@@ -584,7 +584,7 @@
         ObjectFilter(obj.playerResponse, filterRules.ytPlayer);
       }
 
-      if (has.call(obj, 'response')) {
+      if (has.call(obj, 'response') || has.call(obj, 'data')) {
         let rules;
         let postActions = [];
         switch (url.pathname) {
@@ -601,7 +601,7 @@
           default:
             rules = filterRules.main;
         }
-        ObjectFilter(obj.response, rules, postActions, true);
+        ObjectFilter(obj.response || obj.data, rules, postActions, true);
       }
     });
   }
