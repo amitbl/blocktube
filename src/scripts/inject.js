@@ -12,6 +12,8 @@
 
   // add context menu to following objects
   const contextMenuObjects = [
+    'backstagePostRenderer',
+    'postRenderer',
     'movieRenderer',
     'videoRenderer',
     'gridVideoRenderer',
@@ -71,6 +73,10 @@
       endScreenPlaylistRenderer: baseRules,
       gridPlaylistRenderer: baseRules,
       postRenderer: {
+        channelId: 'navigationEndpoint.browseEndpoint.browseId',
+        channelName: ['authorText.runs', 'authorText.simpleText']
+      },
+      backstagePostRenderer: {
         channelId: 'navigationEndpoint.browseEndpoint.browseId',
         channelName: ['authorText.runs', 'authorText.simpleText']
       },

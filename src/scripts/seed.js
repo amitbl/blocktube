@@ -99,7 +99,7 @@
       if (data && type) {
         postMessage('contextBlockData', { type, info: data });
         if (removeParent) {
-          if (parentDom.tagName === 'YTD-COMMENT-RENDERER') {
+          if (['YTD-COMMENT-RENDERER', 'YTD-BACKSTAGE-POST-RENDERER', 'YTD-POST-RENDERER'].includes(parentDom.tagName)) {
             parentDom.parentNode.remove();
           }
           else if (parentDom.tagName === 'YTD-MOVIE-RENDERER') {
