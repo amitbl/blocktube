@@ -19,13 +19,18 @@
   }
 
   // need to filter following XHR requests
-  const uris = [
+  const spf_uris = [
     '/browse_ajax',
     '/related_ajax',
     '/service_ajax',
     '/list_ajax',
     '/guide_ajax',
     '/live_chat/get_live_chat',
+  ];
+
+  const fetch_uris = [
+    '/youtubei/v1/search',
+    '/youtubei/v1/guide'
   ];
 
   const hooks = {
@@ -156,7 +161,7 @@
 
   function isUrlMatch(url) {
     if (!(url instanceof URL)) url = new URL(url);
-    return uris.some(uri => uri === url.pathname) || url.searchParams.has('pbj');
+    return spf_uris.some(uri => uri === url.pathname) || url.searchParams.has('pbj');
   }
 
   function onPart(url, next) {
@@ -191,6 +196,30 @@
   if (window.writeEmbed || window.ytplayer || window.Polymer) {
     console.error('We may have lost the battle, but not the war');
     return;
+  }
+
+  // Youtube started using vanilla "fetch" for some endpoints (search and guide for now) :\
+  // I'm forced to hook that one too
+  const org_fetch = window.fetch;
+  window.fetch = function(resource, init=undefined) {
+    if (!fetch_uris.some(u => resource.url.includes(u))) {
+      return org_fetch(resource, init);
+    }
+
+    return new Promise((resolve, reject) => {
+      org_fetch(resource, init=init).then(function(resp) {
+          const url = new URL(resource.url);
+          resp.json().then(function (jsonResp) {
+            if(window.btDispatched) {
+              window.btExports.fetchFilter(url, jsonResp);
+              resolve(new Response(JSON.stringify(jsonResp)));
+            } else window.addEventListener('blockTubeReady', () => {
+              window.btExports.fetchFilter(url, jsonResp);
+              resolve(new Response(JSON.stringify(jsonResp)));
+            });
+          }).catch(reject);
+      }).catch(reject);
+    });
   }
 
   // Polymer elements modifications

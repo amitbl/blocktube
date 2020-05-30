@@ -567,6 +567,15 @@
     });
   }
 
+  function fetchFilter(url, resp) {
+    if (url.pathname === '/youtubei/v1/search') {
+      ObjectFilter(resp.onResponseReceivedCommands, filterRules.main, [], true);
+    }
+    if (url.pathname === '/youtubei/v1/guide') {
+      ObjectFilter(resp.items, filterRules.guide, [], true);
+    }
+  }
+
   function spfFilter(url, resp) {
     let ytDataArr = resp.part || resp.response.parts || resp.response;
     ytDataArr = (ytDataArr instanceof Array) ? ytDataArr : [ytDataArr];
@@ -818,5 +827,6 @@
 
   window.btExports = {
     spfFilter,
+    fetchFilter
   }
 }());
