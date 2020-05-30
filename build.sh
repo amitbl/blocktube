@@ -2,7 +2,7 @@
 
 SCRIPT=`realpath $0`
 BASEDIR=`dirname $SCRIPT`
-VERSION=0.3.11
+VERSION=0.3.12
 
 copy_files() {
     mkdir -p $DEST
