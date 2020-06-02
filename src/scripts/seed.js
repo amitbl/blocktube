@@ -202,7 +202,7 @@
   // I'm forced to hook that one too
   const org_fetch = window.fetch;
   window.fetch = function(resource, init=undefined) {
-    if (!fetch_uris.some(u => resource.url.includes(u))) {
+    if (!(resource instanceof Request) || !fetch_uris.some(u => resource.url.includes(u))) {
       return org_fetch(resource, init);
     }
 
