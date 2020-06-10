@@ -724,7 +724,7 @@
     }
 
     window.ytplayer = window.ytplayer || {};
-    if (!window.ytplayer.config) {
+    if (!has.call(window.ytplayer, 'config')) {
       Object.defineProperty(window.ytplayer, 'config', {
         get() {
           return this.config_;
@@ -745,7 +745,7 @@
       ObjectFilter(window.ytplayer.config, filterRules.ytPlayer);
     }
 
-    if (!window.ytInitialGuideData) {
+    if (!has.call(window, 'ytInitialGuideData')) {
       Object.defineProperty(window, 'ytInitialGuideData', {
         get() {
           return this.ytInitialGuideData_;
@@ -759,7 +759,7 @@
       ObjectFilter(window.ytInitialGuideData, filterRules.guide);
     }
 
-    if (!window.ytInitialPlayerResponse) {
+    if (!has.call(window, 'ytInitialPlayerResponse')) {
       Object.defineProperty(window, 'ytInitialPlayerResponse', {
         get() {
           return this.ytInitialPlayerResponse_;
@@ -774,7 +774,7 @@
     }
 
     const postActions = [removeRvs, fixAutoplay];
-    if (!window.ytInitialData) {
+    if (!has.call(window, 'ytInitialData')) {
       Object.defineProperty(window, 'ytInitialData', {
         get() {
           return this.ytInitialData_;
