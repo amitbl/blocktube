@@ -3,7 +3,6 @@
 
   // Do not run on already opened YouTube tabs
   if (document.body) {
-    document.location.reload();
     console.info('Please refresh this tab to activate BlockTube');
     return;
   }
