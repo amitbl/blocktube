@@ -30,7 +30,8 @@
 
   const fetch_uris = [
     '/youtubei/v1/search',
-    '/youtubei/v1/guide'
+    '/youtubei/v1/guide',
+    '/youtubei/v1/browse'
   ];
 
   const hooks = {

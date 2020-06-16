@@ -568,11 +568,11 @@
   }
 
   function fetchFilter(url, resp) {
-    if (url.pathname === '/youtubei/v1/search') {
-      ObjectFilter(resp.onResponseReceivedCommands, filterRules.main, [], true);
+    if (['/youtubei/v1/search', '/youtubei/v1/browse'].includes(url.pathname)) {
+      ObjectFilter(resp, filterRules.main, [], true);
     }
-    if (url.pathname === '/youtubei/v1/guide') {
-      ObjectFilter(resp.items, filterRules.guide, [], true);
+    else if (url.pathname === '/youtubei/v1/guide') {
+      ObjectFilter(resp, filterRules.guide, [], true);
     }
   }
 
