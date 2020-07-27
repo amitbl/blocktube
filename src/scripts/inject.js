@@ -510,7 +510,7 @@
   // !! Utils
 
   function postMessage(type, data) {
-    window.postMessage({ from: 'BLOCKTUBE_PAGE', type, data }, document.locaion.origin);
+    window.postMessage({ from: 'BLOCKTUBE_PAGE', type, data }, document.location.origin);
   }
 
   function getObjectByPath(obj, path, def = undefined) {
@@ -794,7 +794,7 @@
     window.dispatchEvent(new Event('blockTubeReady'));
   }
 
-  function storageRecieved(data) {
+  function storageReceived(data) {
     if (data === undefined) return;
     transformToRegExp(data);
     if (data.options.trending) blockTrending(data);
@@ -817,7 +817,7 @@
 
     switch (event.data.type) {
       case 'storageData': {
-        storageRecieved(event.data.data);
+        storageReceived(event.data.data);
         break;
       }
       default:
