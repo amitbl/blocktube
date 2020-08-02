@@ -306,7 +306,7 @@
           related = undefined;
         }
 
-        const isMatch = this.matchFilterData(properties, filteredObject);
+        const isMatch = storageData.options.mixes && h === 'radioRenderer' || this.matchFilterData(properties, filteredObject);
         if (isMatch) {
           res.push({
             name: h,
