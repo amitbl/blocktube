@@ -60,10 +60,15 @@
             <input id="block_message" type="text" autocomplete="off" />
           </div>
           <div>
-            <label class="block-label" for="vidLength_0">Allow only videos between</label>
-            <input id="vidLength_0" type="number" min="0" max="99999" />
+            <label class="block-label" for="vidLength_0">Runtime blocking</label>
+            <select id="vidLength_type" class="select">
+              <option value="block">Block</option>
+              <option value="allow">Allow</option>
+            </select>
+            <span style="font-size:small; font-style:italic">videos between</span>
+            <input id="vidLength_0" type="number" min="0" max="99999" size="5" />
             <small>-</small>
-            <input id="vidLength_1" type="number" min="0" max="99999" />
+            <input id="vidLength_1" type="number" min="0" max="99999" size="5" />
             <span style="font-size:small; font-style:italic">seconds long</span>
           </div>
           <div>

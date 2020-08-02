@@ -39,6 +39,7 @@
     storageData.options.autoplay = $('autoplay').checked;
     storageData.options.suggestions_only = $('suggestions_only').checked;
     storageData.options.block_message = $('block_message').value;
+    storageData.options.vidLength_type = $('vidLength_type').value;
 
     saveData('status_save');
   }
@@ -79,6 +80,7 @@
     const vidLength = get('filterData.vidLength', [NaN, NaN], obj);
     $('vidLength_0').value        = vidLength[0];
     $('vidLength_1').value        = vidLength[1];
+    $('vidLength_type').value     = get('options.vidLength_type', 'allow', obj);
 
     $('pass_save').value          = get('uiPass', '', obj);
     $('disable_trending').checked = get('options.trending', false, obj);
