@@ -15,6 +15,7 @@ body {
 }
 
 .status-text {
+  margin: 1em;
   padding-top:5px;
   font-size: larger;
   font-weight:bold;
