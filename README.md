@@ -34,7 +34,7 @@ Filter and block unwanted content from YouTube™.
 * How can I get a channel's ID?  
   Channel ID looks like this: UCXXXXXXXXXXXXXXXX  
   To get it, simply browse to a channel page and look at the URL `/channel/UCXXXXXXXXXXXXXXXXXXXX`  
-  If the URL is `/user/BadChannelExample` use [This site](http://johnnythetank.github.io/youtube-channel-name-converter/) to convert the username to the channel ID
+  If the URL is `/user/BadChannelExample` use [This site](https://vabs.github.io/youtube-channel-name-converter/) to convert the username to the channel ID
 
 * How to block comments from specific user?  
   Blocked channels comments are removed as well, so just add the user's name/channel ID
