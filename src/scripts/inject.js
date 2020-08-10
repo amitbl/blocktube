@@ -265,10 +265,10 @@
       else if (h === 'vidLength' && properties.length === 2) {
         const vidLen = parseTime(value);
         if (vidLen > 0) {
-            if (storageData.options.vidLength_type === 'allow') {
-                if ((properties[0] !== null && vidLen < properties[0]) || (properties[1] !== null && vidLen > properties[1])) return true;
-            } else {
+            if (storageData.options.vidLength_type === 'block') {
                 if ((properties[0] !== null && vidLen >= properties[0]) && (properties[1] !== null && vidLen <= properties[1])) return true;
+            } else {
+                if ((properties[0] !== null && vidLen < properties[0]) || (properties[1] !== null && vidLen > properties[1])) return true;
             }
         }
       }
