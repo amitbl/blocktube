@@ -18,6 +18,38 @@
     }
   }
 
+  function createProxyHook(path, hookKeys) {
+    path = path.split('.');
+
+    function getHandler(nextPath, enableHook) {
+      return {
+        get: function(target, key) {
+          if (key === nextPath[0] && typeof target[key] === 'object' && target[key] !== null && !target[key].isProxy_) {
+            nextPath.shift();
+            target[key] = new Proxy(target[key], getHandler(nextPath, nextPath.length == 0));
+            target[key].isProxy_ = true;
+          }
+          return target[key];
+        },
+        set: function(target, key, value) {
+          if (enableHook && hookKeys.includes(key)) {
+            function hook_() {
+              if (window.btDispatched) return value.apply(null, arguments);
+              else window.addEventListener('blockTubeReady', value.bind(null, arguments));
+            }
+            target[key] = hook_;
+          }
+          else {
+            target[key] = value;
+          }
+          return true;
+      }
+      };
+    }
+
+    return new Proxy({}, getHandler(path, path.length == 1));
+  }
+
   // need to filter following XHR requests
   const spf_uris = [
     '/browse_ajax',
@@ -252,26 +284,8 @@
     },
   });
 
-  // load builds the player in regular video pages
-  window.ytplayer_ = {};
-  Object.defineProperty(window, 'ytplayer', {
-    get() {
-      return this.ytplayer_;
-    },
-    set() {
-    },
-  });
-  Object.defineProperty(window.ytplayer, 'load', {
-    get() {
-      return this.load_;
-    },
-    set(v) {
-      this.load_ = () => {
-        if (window.btDispatched) v.apply(this);
-        else window.addEventListener('blockTubeReady', v.bind(this));
-      };
-    },
-  });
+  // player init has moved to window.yt.player.Application.create
+  window.yt = createProxyHook('player.Application', ['create', 'createAlternate']);
 
   // spfjs is responsible for XHR requests
   document.addEventListener('spfready', function(e) {
