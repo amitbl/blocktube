@@ -7,6 +7,10 @@
   // extension storageData
   let storageData;
 
+  // JavaScript filtering
+  let jsFilter;
+  let jsFilterEnabled = false;
+
   // TODO: hack for blocking data in other objects
   let currentBlock = false;
 
@@ -237,16 +241,17 @@
       if (storageData.filterData[regexProps[idx]].length > 0) return false;
     }
 
-    return true;
+    return !jsFilterEnabled;
   };
 
   ObjectFilter.prototype.matchFilterData = function (filters, obj) {
-    return Object.keys(filters).some((h) => {
+    let friendlyVideoObj = {};
+    let doBlock = Object.keys(filters).some((h) => {
       const filterPath = filters[h];
       if (filterPath === undefined) return false;
 
       const properties = storageData.filterData[h];
-      if (properties === undefined || properties.length === 0) return false;
+      if (!jsFilterEnabled && (properties === undefined || properties.length === 0)) return false;
 
       const filterPathArr = filterPath instanceof Array ? filterPath : [filterPath];
       let value;
@@ -261,9 +266,18 @@
         value = this.flattenRuns(value);
       }
 
+      if (jsFilterEnabled) {
+        friendlyVideoObj[h] = value;
+      }
+
       if (regexProps.includes(h) && properties.some(prop => prop && prop.test(value))) return true;
       else if (h === 'vidLength' && properties.length === 2) {
         const vidLen = parseTime(value);
+
+        if (jsFilterEnabled) {
+          friendlyVideoObj[h] = vidLen;
+        }
+
         if (vidLen > 0) {
             if (storageData.options.vidLength_type === 'block') {
                 if ((properties[0] !== null && vidLen >= properties[0]) && (properties[1] !== null && vidLen <= properties[1])) return true;
@@ -274,6 +288,13 @@
       }
       return false;
     });
+
+    if (!doBlock && jsFilterEnabled) {
+      // force return value into boolean just in case someone tries returning something else
+      doBlock = !!jsFilter(friendlyVideoObj);
+    }
+
+    return doBlock;
   };
 
   ObjectFilter.prototype.flattenRuns = function (arr) {
@@ -799,11 +820,23 @@
     transformToRegExp(data);
     if (data.options.trending) blockTrending(data);
     if (data.options.mixes) blockMixes(data);
-    if (storageData === undefined) {
-      storageData = data;
+
+    let shouldStartHook = (storageData === undefined);
+    storageData = data;
+
+    // Enable JS filtering only if function has something in it
+    if (storageData.options.enable_javascript && storageData.filterData.javascript) {
+      try {
+        jsFilter = eval(storageData.filterData.javascript);
+        jsFilterEnabled = storageData.options.enable_javascript;
+      } catch (e) {
+        console.error("Couldn't load JS filter", e);
+        jsFilterEnabled = false;
+      }
+    }
+
+    if (shouldStartHook) {
       startHook();
-    } else {
-      storageData = data;
     }
   }
 
