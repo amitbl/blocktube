@@ -53,6 +53,7 @@
   const baseRules = {
     videoId: 'videoId',
     channelId: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
+    channelBadges: 'ownerBadges',
     channelName: [
       'shortBylineText.runs',
       'shortBylineText.simpleText',
@@ -264,7 +265,8 @@
 
       if (value === undefined) return false;
 
-      if (value instanceof Array) {
+      // channelBadges are also an array, but it's processed later on.
+      if (h !== 'channelBadges' && value instanceof Array) {
         value = this.flattenRuns(value);
       }
 
@@ -290,6 +292,19 @@
       } else if (jsFilterEnabled && h === 'viewCount') {
           const viewCount = parseViewCount(value);
           friendlyVideoObj[h] = viewCount;
+      } else if (jsFilterEnabled && h === 'channelBadges') {
+          // Just in case YouTube decides to use multiple badges.
+          let badges = [];
+
+          value.forEach(br => {
+            if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_VERIFIED") {
+                badges.push("verified");
+            } else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_VERIFIED_ARTIST") {
+                badges.push("artist");
+            }
+          });
+
+          friendlyVideoObj[h] = badges;
       }
 
       return false;
