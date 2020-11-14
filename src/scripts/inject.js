@@ -61,6 +61,7 @@
     title: ['title.runs', 'title.simpleText'],
     vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text.simpleText',
     viewCount: 'viewCountText.simpleText',
+    publishTimeText: 'publishedTimeText.simpleText',
   };
 
   const filterRules = {
