@@ -61,7 +61,11 @@
     ],
     title: ['title.runs', 'title.simpleText'],
     vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text.simpleText',
-    viewCount: 'viewCountText.simpleText',
+    viewCount: [
+        'viewCountText.simpleText',
+        'viewCountText.runs'
+    ],
+    badges: 'badges',
     publishTimeText: 'publishedTimeText.simpleText',
   };
 
@@ -265,8 +269,8 @@
 
       if (value === undefined) return false;
 
-      // channelBadges are also an array, but it's processed later on.
-      if (h !== 'channelBadges' && value instanceof Array) {
+      // badges are also arrays, but they're processed later on.
+      if (!(h === 'channelBadges' || h === 'badges') && value instanceof Array) {
         value = this.flattenRuns(value);
       }
 
@@ -292,15 +296,21 @@
       } else if (jsFilterEnabled && h === 'viewCount') {
           const viewCount = parseViewCount(value);
           friendlyVideoObj[h] = viewCount;
-      } else if (jsFilterEnabled && h === 'channelBadges') {
+      } else if (jsFilterEnabled && (h === 'channelBadges' || h === 'badges')) {
           // Just in case YouTube decides to use multiple badges.
           let badges = [];
 
           value.forEach(br => {
+            /* Channels */
             if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_VERIFIED") {
                 badges.push("verified");
             } else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_VERIFIED_ARTIST") {
                 badges.push("artist");
+            }
+
+            /* Videos */
+            else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_LIVE_NOW") {
+                badges.push("live");
             }
           });
 
