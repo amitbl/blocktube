@@ -60,6 +60,7 @@
     ],
     title: ['title.runs', 'title.simpleText'],
     vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text.simpleText',
+    viewCount: 'viewCountText.simpleText',
   };
 
   const filterRules = {
@@ -285,7 +286,11 @@
                 if ((properties[0] !== null && vidLen < properties[0]) || (properties[1] !== null && vidLen > properties[1])) return true;
             }
         }
+      } else if (jsFilterEnabled && h === 'viewCount') {
+          const viewCount = parseViewCount(value);
+          friendlyVideoObj[h] = viewCount;
       }
+
       return false;
     });
 
@@ -569,6 +574,12 @@
         return -1;
       }
     }
+  }
+
+  function parseViewCount(viewCount) {
+    let views = viewCount.split(" ")[0]; // RTL languages might be an issue here
+    views = parseInt(views.replace(/[.,]/g, ""));
+    return views;
   }
 
   function transformToRegExp(data) {
