@@ -155,7 +155,7 @@
       // sidemenu subscribed channels
       guideEntryRenderer: {
         channelId: 'navigationEndpoint.browseEndpoint.browseId',
-        channelName: 'title',
+        channelName: ['title', 'formattedTitle.simpleText'],
       },
 
       universalWatchCardRenderer: {
@@ -208,7 +208,7 @@
       guideEntryRenderer: {
         properties: {
           channelId: 'navigationEndpoint.browseEndpoint.browseId',
-          channelName: 'title',
+          channelName: ['title', 'formattedTitle.simpleText'],
         },
       },
     },
