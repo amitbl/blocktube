@@ -94,7 +94,7 @@ form input[type=button]:hover{
   -webkit-box-shadow:none;
 }
 
-form div {
+form > fieldset > div {
   margin-bottom: 5px;
 }
 
@@ -111,7 +111,6 @@ form input[type="number"] {
 }
 
 h1 {
-  border-bottom: 1px solid #ccc;
   margin: 0;
   margin-bottom: 10px;
 }
@@ -127,3 +126,16 @@ h1 {
   padding: 3px;
 }
 
+.advanced {
+  margin-top: 10px;
+}
+
+.CodeMirror {
+  border: 1px solid black;
+  height: auto;
+}
+
+.CodeMirror .CodeMirror-scroll {
+  min-height: 70px;
+  max-height: 200px;
+}

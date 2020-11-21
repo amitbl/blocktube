@@ -7,6 +7,10 @@
   // extension storageData
   let storageData;
 
+  // JavaScript filtering
+  let jsFilter;
+  let jsFilterEnabled = false;
+
   // TODO: hack for blocking data in other objects
   let currentBlock = false;
 
@@ -49,6 +53,7 @@
   const baseRules = {
     videoId: 'videoId',
     channelId: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
+    channelBadges: 'ownerBadges',
     channelName: [
       'shortBylineText.runs',
       'shortBylineText.simpleText',
@@ -56,6 +61,12 @@
     ],
     title: ['title.runs', 'title.simpleText'],
     vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text.simpleText',
+    viewCount: [
+        'viewCountText.simpleText',
+        'viewCountText.runs'
+    ],
+    badges: 'badges',
+    publishTimeText: 'publishedTimeText.simpleText',
   };
 
   const filterRules = {
@@ -144,7 +155,7 @@
       // sidemenu subscribed channels
       guideEntryRenderer: {
         channelId: 'navigationEndpoint.browseEndpoint.browseId',
-        channelName: 'title',
+        channelName: ['title', 'formattedTitle.simpleText'],
       },
 
       universalWatchCardRenderer: {
@@ -197,7 +208,7 @@
       guideEntryRenderer: {
         properties: {
           channelId: 'navigationEndpoint.browseEndpoint.browseId',
-          channelName: 'title',
+          channelName: ['title', 'formattedTitle.simpleText'],
         },
       },
     },
@@ -237,16 +248,18 @@
       if (storageData.filterData[regexProps[idx]].length > 0) return false;
     }
 
-    return true;
+    return !jsFilterEnabled;
   };
 
-  ObjectFilter.prototype.matchFilterData = function (filters, obj) {
-    return Object.keys(filters).some((h) => {
+  ObjectFilter.prototype.matchFilterData = function (filters, obj, objectType) {
+    const friendlyVideoObj = {};
+
+    let doBlock = Object.keys(filters).some((h) => {
       const filterPath = filters[h];
       if (filterPath === undefined) return false;
 
       const properties = storageData.filterData[h];
-      if (properties === undefined || properties.length === 0) return false;
+      if (!jsFilterEnabled && (properties === undefined || properties.length === 0)) return false;
 
       const filterPathArr = filterPath instanceof Array ? filterPath : [filterPath];
       let value;
@@ -257,23 +270,60 @@
 
       if (value === undefined) return false;
 
-      if (value instanceof Array) {
+      // badges are also arrays, but they're processed later on.
+      if (!(h === 'channelBadges' || h === 'badges') && value instanceof Array) {
         value = this.flattenRuns(value);
       }
 
-      if (regexProps.includes(h) && properties.some(prop => prop && prop.test(value))) return true;
-      else if (h === 'vidLength' && properties.length === 2) {
+      if (regexProps.includes(h) && properties.some(prop => prop && prop.test(value))) {
+        return true;
+      } else if (h === 'vidLength') {
         const vidLen = parseTime(value);
-        if (vidLen > 0) {
-            if (storageData.options.vidLength_type === 'block') {
-                if ((properties[0] !== null && vidLen >= properties[0]) && (properties[1] !== null && vidLen <= properties[1])) return true;
-            } else {
-                if ((properties[0] !== null && vidLen < properties[0]) || (properties[1] !== null && vidLen > properties[1])) return true;
+        if (vidLen > 0 && properties.length === 2) {
+          if (storageData.options.vidLength_type === 'block') {
+            if ((properties[0] !== null && vidLen >= properties[0]) && (properties[1] !== null && vidLen <= properties[1])) return true;
+          } else {
+            if ((properties[0] !== null && vidLen < properties[0]) || (properties[1] !== null && vidLen > properties[1])) return true;
+          }
+
+          if (jsFilterEnabled) friendlyVideoObj[h] = vidLen;
+        }
+      } else if (jsFilterEnabled) {
+        if (h === 'viewCount') {
+          friendlyVideoObj[h] = parseViewCount(value);
+        } else if (h === 'channelBadges' || h === 'badges') {
+          const badges = [];
+          value.forEach(br => {
+            /* Channels */
+            if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_VERIFIED") {
+              badges.push("verified");
+            } else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_VERIFIED_ARTIST") {
+              badges.push("artist");
             }
+            /* Videos */
+            else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_LIVE_NOW") {
+              badges.push("live");
+            }
+          });
+          friendlyVideoObj[h] = badges;
+        } else {
+          friendlyVideoObj[h] = value;
         }
       }
+
       return false;
     });
+
+    if (!doBlock && jsFilterEnabled) {
+      // force return value into boolean just in case someone tries returning something else
+      try {
+        doBlock = !!jsFilter(friendlyVideoObj, objectType);
+      } catch (e) {
+        console.error("Custom function exception", e);
+      }
+    }
+
+    return doBlock;
   };
 
   ObjectFilter.prototype.flattenRuns = function (arr) {
@@ -306,7 +356,7 @@
           related = undefined;
         }
 
-        const isMatch = storageData.options.mixes && h === 'radioRenderer' || this.matchFilterData(properties, filteredObject);
+        const isMatch = storageData.options.mixes && h === 'radioRenderer' || this.matchFilterData(properties, filteredObject, h);
         if (isMatch) {
           res.push({
             name: h,
@@ -548,6 +598,12 @@
         return -1;
       }
     }
+  }
+
+  function parseViewCount(viewCount) {
+    let views = viewCount.split(" ")[0]; // RTL languages might be an issue here
+    views = parseInt(views.replace(/[.,]/g, ""));
+    return views;
   }
 
   function transformToRegExp(data) {
@@ -799,11 +855,28 @@
     transformToRegExp(data);
     if (data.options.trending) blockTrending(data);
     if (data.options.mixes) blockMixes(data);
-    if (storageData === undefined) {
-      storageData = data;
-      startHook();
+
+    const shouldStartHook = (storageData === undefined);
+    storageData = data;
+
+    // Enable JS filtering only if function has something in it
+    if (storageData.options.enable_javascript && storageData.filterData.javascript) {
+      try {
+        jsFilter = eval(storageData.filterData.javascript);
+        if (!(jsFilter instanceof Function)) {
+          throw Error("Function not found");
+        }
+        jsFilterEnabled = storageData.options.enable_javascript;
+      } catch (e) {
+        console.error("Custom function syntax error", e);
+        jsFilterEnabled = false;
+      }
     } else {
-      storageData = data;
+      jsFilterEnabled = false;
+    }
+
+    if (shouldStartHook) {
+      startHook();
     }
   }
 

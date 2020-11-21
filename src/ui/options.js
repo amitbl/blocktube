@@ -1,12 +1,24 @@
 (function () {
   const has = Object.prototype.hasOwnProperty;
 
+  const defaultJSFunction = `(video, objectType) => {
+  // Add custom conditions below
+
+  // Custom conditions did not match, do not block
+  return false;
+}`;
+
+  const jsEditors = {};
   let isLoggedIn = false;
   let storageData = {
-    filterData: {},
+    filterData: {
+      javascript: defaultJSFunction,
+    },
     options: {},
     uiPass: '',
   };
+
+  const textAreas = ['title', 'channelName', 'channelId', 'videoId', 'comment'];
 
   function loadData() {
     chrome.storage.local.get('storageData', (data) => {
@@ -25,19 +37,22 @@
   }
 
   function saveForm() {
-    ['title', 'channelName', 'channelId', 'videoId', 'comment'].forEach((v) => {
-      storageData.filterData[v] = multilineToArray($(v).value);
+    textAreas.forEach((v) => {
+      storageData.filterData[v] = multilineToArray(jsEditors[v].getValue());
     });
 
     const vidLenMin = parseInt($('vidLength_0').value, 10);
     const vidLenMax = parseInt($('vidLength_1').value, 10);
+
     storageData.filterData.vidLength   = [vidLenMin, vidLenMax];
+    storageData.filterData.javascript  = jsEditors['javascript'].getValue();
 
     storageData.uiPass = $('pass_save').value;
     storageData.options.trending = $('disable_trending').checked;
     storageData.options.mixes = $('disable_mixes').checked;
     storageData.options.autoplay = $('autoplay').checked;
     storageData.options.suggestions_only = $('suggestions_only').checked;
+    storageData.options.enable_javascript = $('enable_javascript').checked;
     storageData.options.block_message = $('block_message').value;
     storageData.options.vidLength_type = $('vidLength_type').value;
 
@@ -70,24 +85,32 @@
   }
 
   function populateForms(obj = undefined) {
-    ['title', 'channelName', 'channelId', 'videoId', 'comment'].forEach((v) => {
+    textAreas.forEach((v) => {
       const content = get(`filterData.${v}`, [], obj);
-      $(v).value = content.join('\n');
-      const len = content.length + 5;
-      $(v).rows = len < 40 ? len : 40;
+      jsEditors[v].setValue(content.join('\n'));
     });
 
     const vidLength = get('filterData.vidLength', [NaN, NaN], obj);
-    $('vidLength_0').value        = vidLength[0];
-    $('vidLength_1').value        = vidLength[1];
-    $('vidLength_type').value     = get('options.vidLength_type', 'allow', obj);
+    $('vidLength_0').value         = vidLength[0];
+    $('vidLength_1').value         = vidLength[1];
+    $('vidLength_type').value      = get('options.vidLength_type', 'allow', obj);
 
-    $('pass_save').value          = get('uiPass', '', obj);
-    $('disable_trending').checked = get('options.trending', false, obj);
-    $('disable_mixes').checked    = get('options.mixes', false, obj);
-    $('autoplay').checked         = get('options.autoplay', false, obj);
-    $('suggestions_only').checked = get('options.suggestions_only', false, obj);
-    $('block_message').value      = get('options.block_message', '', obj);
+    $('pass_save').value           = get('uiPass', '', obj);
+    $('disable_trending').checked  = get('options.trending', false, obj);
+    $('disable_mixes').checked     = get('options.mixes', false, obj);
+    $('autoplay').checked          = get('options.autoplay', false, obj);
+    $('suggestions_only').checked  = get('options.suggestions_only', false, obj);
+    $('enable_javascript').checked = get('options.enable_javascript', false, obj);
+    $('block_message').value       = get('options.block_message', '', obj);
+
+    const jsContent = get('filterData.javascript', defaultJSFunction, obj);
+    jsEditors['javascript'].setValue(jsContent);
+
+    if ($('enable_javascript').checked) {
+      $('advanced_tab').style.removeProperty("display");
+    }
+
+    setTimeout(_=>Object.values(jsEditors).forEach((v) => v.refresh()), 1); // https://stackoverflow.com/a/19970695
   }
 
   // !! Helpers
@@ -158,6 +181,17 @@
     reader.readAsText(f);
   }
 
+  textAreas.concat('javascript').forEach((v) => {
+    jsEditors[v] = CodeMirror.fromTextArea($(v), {
+      mode: "javascript",
+      matchBrackets: true,
+      autoCloseBrackets: true,
+      lineNumbers: true,
+      styleActiveLine: true,
+      lineWrapping: true
+    });
+  });
+
   // !! Start
   document.addEventListener('DOMContentLoaded', loadData);
 
@@ -185,4 +219,14 @@
   });
 
   $('myfile').addEventListener('change', importOptions, false);
+
+  $('enable_javascript').addEventListener('change', (v) => {
+    if (v.target.checked) {
+      $('advanced_tab').style.removeProperty("display");
+      setTimeout(_ => jsEditors['javascript'].refresh(), 1);
+    }
+    else {
+      $('advanced_tab').style.display = "none";
+    }
+  })
 }());
