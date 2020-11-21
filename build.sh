@@ -19,7 +19,7 @@ set_version() {
 
 uglify() {
     pushd $DEST/src/scripts
-    uglifyjs --ecma 8 -o seed_.js seed.js
+    terser --ecma 8 -o seed_.js seed.js
     sed -i -e "s/{SEED_CONTENTS}/$(sed 's:[/\\&]:\\&:g' seed_.js)/" content_script.js
     rm -f seed*.js;
 }
