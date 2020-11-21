@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="cm/codemirror.css" rel="stylesheet" type="text/css">
+    <link href="cm/codemirror.min.css" rel="stylesheet" type="text/css">
+    <link href="cm/dialog.min.css" rel="stylesheet" type="text/css">
     <link href="style.css" rel="stylesheet" type="text/css">
     <title>BlockTube - Options</title>
     <link rel="shortcut icon" type="image/png" href="../../assets/icons/16.png"/>
@@ -31,37 +32,37 @@
         <fieldset>
           <div>
             <label class="block-label" for="title">Video title</label>
-            <textarea class="form-textarea" rows="5" id="title"></textarea>
+            <textarea id="title"></textarea>
           </div>
           <div>
             <label class="block-label" for="channelName">Channel name</label>
-            <textarea class="form-textarea" rows="5" id="channelName"></textarea>
+            <textarea id="channelName"></textarea>
           </div>
           <div>
             <label class="block-label" for="videoId">Video ID</label>
-            <textarea class="form-textarea" rows="5" id="videoId"></textarea>
+            <textarea id="videoId"></textarea>
           </div>
           <div>
             <label class="block-label" for="channelId">Channel ID</label>
-            <textarea class="form-textarea" rows="5" id="channelId"></textarea>
+            <textarea id="channelId"></textarea>
           </div>
           <div>
             <label class="block-label" for="comment">Comment content</label>
-            <textarea class="form-textarea" rows="5" id="comment"></textarea>
+            <textarea id="comment"></textarea>
           </div>
         </fieldset>
         <legend>Advanced blocking</legend>
         <fieldset>
-          <span>
-              Please do not touch advanced blocking unless you
-              <a href="https://github.com/amitbl/blocktube/blob/master/ADVANCED.md">have read the documentation</a>
-          </span>
           <div>
             <input id="enable_javascript" type="checkbox" />
             <label for="enable_javascript">Enable advanced blocking</label>
           </div>
-          <div class="advanced">
-            <label class="block-label" for="javascript">Advanced blocking rules</label>
+          <div>
+            Don't enable this unless you know some Javascript and
+            <a href="https://github.com/amitbl/blocktube/blob/master/ADVANCED.md">have read the documentation</a>
+          </div>
+          <div id="advanced_tab" style="display: none" class="advanced">
+            <label class="block-label" for="javascript">Custom blocking function</label>
             <textarea id="javascript"></textarea>
           </div>
         </fieldset>
@@ -113,10 +114,15 @@
         </div>
       </form>
     </div>
-    <script type="text/javascript" src="cm/codemirror.js"></script>
-    <script type="text/javascript" src="cm/matchbrackets.js"></script>
-    <script type="text/javascript" src="cm/closebrackets.js"></script>
-    <script type="text/javascript" src="cm/javascript.js"></script>
+    <script type="text/javascript" src="cm/codemirror.min.js"></script>
+    <script type="text/javascript" src="cm/matchbrackets.min.js"></script>
+    <script type="text/javascript" src="cm/active-line.min.js"></script>
+    <script type="text/javascript" src="cm/closebrackets.min.js"></script>
+    <script type="text/javascript" src="cm/search.min.js"></script>
+    <script type="text/javascript" src="cm/searchcursor.min.js"></script>
+    <script type="text/javascript" src="cm/match-highlighter.min.js"></script>
+    <script type="text/javascript" src="cm/dialog.min.js"></script>
+    <script type="text/javascript" src="cm/javascript.min.js"></script>
     <script type="text/javascript" src="options.js"></script>
   </body>
 </html>

@@ -1,5 +1,5 @@
 body {
-  font: 14px sans-serif;
+  line-height: 1.5;
 }
 
 #options {
@@ -94,7 +94,7 @@ form input[type=button]:hover{
   -webkit-box-shadow:none;
 }
 
-form div {
+form > fieldset > div {
   margin-bottom: 5px;
 }
 
@@ -111,7 +111,6 @@ form input[type="number"] {
 }
 
 h1 {
-  border-bottom: 1px solid #ccc;
   margin: 0;
   margin-bottom: 10px;
 }
@@ -128,14 +127,15 @@ h1 {
 }
 
 .advanced {
-  margin-top: 15px;
+  margin-top: 10px;
 }
 
-.advanced .CodeMirror {
-  border: 1px solid;
-  height: auto;
+.CodeMirror {
+  border: 1px solid black;
+  font-size:13px;
 }
 
-.advanced .CodeMirror .CodeMirror-scroll {
+.CodeMirror .CodeMirror-scroll {
+  min-height: 70px;
   max-height: 200px;
 }
