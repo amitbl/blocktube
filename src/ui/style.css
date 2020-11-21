@@ -1,5 +1,5 @@
 body {
-  line-height: 1.5;
+  font: 14px sans-serif;
 }
 
 #options {
@@ -132,7 +132,7 @@ h1 {
 
 .CodeMirror {
   border: 1px solid black;
-  font-size:13px;
+  height: auto;
 }
 
 .CodeMirror .CodeMirror-scroll {
