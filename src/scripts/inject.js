@@ -279,7 +279,7 @@
         return true;
       } else if (h === 'vidLength') {
         const vidLen = parseTime(value);
-        if (vidLen > 0) {
+        if (vidLen > 0 && properties.length === 2) {
           if (storageData.options.vidLength_type === 'block') {
             if ((properties[0] !== null && vidLen >= properties[0]) && (properties[1] !== null && vidLen <= properties[1])) return true;
           } else {
