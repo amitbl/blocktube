@@ -7,6 +7,10 @@
   // extension storageData
   let storageData;
 
+  // JavaScript filtering
+  let jsFilter;
+  let jsFilterEnabled = false;
+
   // TODO: hack for blocking data in other objects
   let currentBlock = false;
 
@@ -49,6 +53,7 @@
   const baseRules = {
     videoId: 'videoId',
     channelId: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
+    channelBadges: 'ownerBadges',
     channelName: [
       'shortBylineText.runs',
       'shortBylineText.simpleText',
@@ -56,6 +61,12 @@
     ],
     title: ['title.runs', 'title.simpleText'],
     vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text.simpleText',
+    viewCount: [
+        'viewCountText.simpleText',
+        'viewCountText.runs'
+    ],
+    badges: 'badges',
+    publishTimeText: 'publishedTimeText.simpleText',
   };
 
   const filterRules = {
@@ -237,16 +248,17 @@
       if (storageData.filterData[regexProps[idx]].length > 0) return false;
     }
 
-    return true;
+    return !jsFilterEnabled;
   };
 
   ObjectFilter.prototype.matchFilterData = function (filters, obj) {
-    return Object.keys(filters).some((h) => {
+    let friendlyVideoObj = {};
+    let doBlock = Object.keys(filters).some((h) => {
       const filterPath = filters[h];
       if (filterPath === undefined) return false;
 
       const properties = storageData.filterData[h];
-      if (properties === undefined || properties.length === 0) return false;
+      if (!jsFilterEnabled && (properties === undefined || properties.length === 0)) return false;
 
       const filterPathArr = filterPath instanceof Array ? filterPath : [filterPath];
       let value;
@@ -257,13 +269,23 @@
 
       if (value === undefined) return false;
 
-      if (value instanceof Array) {
+      // badges are also arrays, but they're processed later on.
+      if (!(h === 'channelBadges' || h === 'badges') && value instanceof Array) {
         value = this.flattenRuns(value);
+      }
+
+      if (jsFilterEnabled) {
+        friendlyVideoObj[h] = value;
       }
 
       if (regexProps.includes(h) && properties.some(prop => prop && prop.test(value))) return true;
       else if (h === 'vidLength' && properties.length === 2) {
         const vidLen = parseTime(value);
+
+        if (jsFilterEnabled) {
+          friendlyVideoObj[h] = vidLen;
+        }
+
         if (vidLen > 0) {
             if (storageData.options.vidLength_type === 'block') {
                 if ((properties[0] !== null && vidLen >= properties[0]) && (properties[1] !== null && vidLen <= properties[1])) return true;
@@ -271,9 +293,39 @@
                 if ((properties[0] !== null && vidLen < properties[0]) || (properties[1] !== null && vidLen > properties[1])) return true;
             }
         }
+      } else if (jsFilterEnabled && h === 'viewCount') {
+          const viewCount = parseViewCount(value);
+          friendlyVideoObj[h] = viewCount;
+      } else if (jsFilterEnabled && (h === 'channelBadges' || h === 'badges')) {
+          // Just in case YouTube decides to use multiple badges.
+          let badges = [];
+
+          value.forEach(br => {
+            /* Channels */
+            if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_VERIFIED") {
+                badges.push("verified");
+            } else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_VERIFIED_ARTIST") {
+                badges.push("artist");
+            }
+
+            /* Videos */
+            else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_LIVE_NOW") {
+                badges.push("live");
+            }
+          });
+
+          friendlyVideoObj[h] = badges;
       }
+
       return false;
     });
+
+    if (!doBlock && jsFilterEnabled) {
+      // force return value into boolean just in case someone tries returning something else
+      doBlock = !!jsFilter(friendlyVideoObj);
+    }
+
+    return doBlock;
   };
 
   ObjectFilter.prototype.flattenRuns = function (arr) {
@@ -550,6 +602,12 @@
     }
   }
 
+  function parseViewCount(viewCount) {
+    let views = viewCount.split(" ")[0]; // RTL languages might be an issue here
+    views = parseInt(views.replace(/[.,]/g, ""));
+    return views;
+  }
+
   function transformToRegExp(data) {
     if (!has.call(data, 'filterData')) return;
 
@@ -799,11 +857,23 @@
     transformToRegExp(data);
     if (data.options.trending) blockTrending(data);
     if (data.options.mixes) blockMixes(data);
-    if (storageData === undefined) {
-      storageData = data;
+
+    let shouldStartHook = (storageData === undefined);
+    storageData = data;
+
+    // Enable JS filtering only if function has something in it
+    if (storageData.options.enable_javascript && storageData.filterData.javascript) {
+      try {
+        jsFilter = eval(storageData.filterData.javascript);
+        jsFilterEnabled = storageData.options.enable_javascript;
+      } catch (e) {
+        console.error("Couldn't load JS filter", e);
+        jsFilterEnabled = false;
+      }
+    }
+
+    if (shouldStartHook) {
       startHook();
-    } else {
-      storageData = data;
     }
   }
 

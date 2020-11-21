@@ -13,6 +13,7 @@ let storage = {
     comment: [],
     title: [],
     vidLength: [null, null],
+    javascript: "",
   },
   options: {
     trending: false,
@@ -65,6 +66,7 @@ const utils = {
     });
 
     sendData.filterData.vidLength = data.filterData.vidLength;
+    sendData.filterData.javascript = data.filterData.javascript;
 
     return sendData;
   },

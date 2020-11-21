@@ -127,3 +127,15 @@ h1 {
   padding: 3px;
 }
 
+.advanced {
+  margin-top: 15px;
+}
+
+.advanced .CodeMirror {
+  border: 1px solid;
+  height: auto;
+}
+
+.advanced .CodeMirror .CodeMirror-scroll {
+  max-height: 200px;
+}

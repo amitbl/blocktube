@@ -1,9 +1,19 @@
 (function () {
   const has = Object.prototype.hasOwnProperty;
 
+  const defaultJSFunction = `video => {
+  // Add custom conditions below
+
+  // Custom conditions did not match, do not block
+  return false;
+}`;
+
+  let jsEditor = null;
   let isLoggedIn = false;
   let storageData = {
-    filterData: {},
+    filterData: {
+      javascript: defaultJSFunction,
+    },
     options: {},
     uiPass: '',
   };
@@ -31,13 +41,16 @@
 
     const vidLenMin = parseInt($('vidLength_0').value, 10);
     const vidLenMax = parseInt($('vidLength_1').value, 10);
+
     storageData.filterData.vidLength   = [vidLenMin, vidLenMax];
+    storageData.filterData.javascript  = jsEditor.getValue();
 
     storageData.uiPass = $('pass_save').value;
     storageData.options.trending = $('disable_trending').checked;
     storageData.options.mixes = $('disable_mixes').checked;
     storageData.options.autoplay = $('autoplay').checked;
     storageData.options.suggestions_only = $('suggestions_only').checked;
+    storageData.options.enable_javascript = $('enable_javascript').checked;
     storageData.options.block_message = $('block_message').value;
     storageData.options.vidLength_type = $('vidLength_type').value;
 
@@ -78,16 +91,21 @@
     });
 
     const vidLength = get('filterData.vidLength', [NaN, NaN], obj);
-    $('vidLength_0').value        = vidLength[0];
-    $('vidLength_1').value        = vidLength[1];
-    $('vidLength_type').value     = get('options.vidLength_type', 'allow', obj);
+    $('vidLength_0').value         = vidLength[0];
+    $('vidLength_1').value         = vidLength[1];
+    $('vidLength_type').value      = get('options.vidLength_type', 'allow', obj);
 
-    $('pass_save').value          = get('uiPass', '', obj);
-    $('disable_trending').checked = get('options.trending', false, obj);
-    $('disable_mixes').checked    = get('options.mixes', false, obj);
-    $('autoplay').checked         = get('options.autoplay', false, obj);
-    $('suggestions_only').checked = get('options.suggestions_only', false, obj);
-    $('block_message').value      = get('options.block_message', '', obj);
+    $('pass_save').value           = get('uiPass', '', obj);
+    $('disable_trending').checked  = get('options.trending', false, obj);
+    $('disable_mixes').checked     = get('options.mixes', false, obj);
+    $('autoplay').checked          = get('options.autoplay', false, obj);
+    $('suggestions_only').checked  = get('options.suggestions_only', false, obj);
+    $('enable_javascript').checked = get('options.enable_javascript', false, obj);
+    $('block_message').value       = get('options.block_message', '', obj);
+
+    const jsContent = get('filterData.javascript', defaultJSFunction, obj);
+    jsEditor.setValue(jsContent);
+    setTimeout(_=>jsEditor.refresh(), 1); // https://stackoverflow.com/a/19970695
   }
 
   // !! Helpers
@@ -158,6 +176,13 @@
     reader.readAsText(f);
   }
 
+  jsEditor = CodeMirror.fromTextArea($("javascript"), {
+    mode: "javascript",
+    viewportMargin: Infinity,
+    matchBrackets: true,
+    autoCloseBrackets: true,
+  });
+
   // !! Start
   document.addEventListener('DOMContentLoaded', loadData);
 
@@ -185,4 +210,5 @@
   });
 
   $('myfile').addEventListener('change', importOptions, false);
+
 }());
