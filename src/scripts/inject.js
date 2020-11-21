@@ -251,8 +251,9 @@
     return !jsFilterEnabled;
   };
 
-  ObjectFilter.prototype.matchFilterData = function (filters, obj) {
-    let friendlyVideoObj = {};
+  ObjectFilter.prototype.matchFilterData = function (filters, obj, objectType) {
+    const friendlyVideoObj = {};
+
     let doBlock = Object.keys(filters).some((h) => {
       const filterPath = filters[h];
       if (filterPath === undefined) return false;
@@ -274,47 +275,40 @@
         value = this.flattenRuns(value);
       }
 
-      if (jsFilterEnabled) {
-        friendlyVideoObj[h] = value;
-      }
-
-      if (regexProps.includes(h) && properties.some(prop => prop && prop.test(value))) return true;
-      else if (h === 'vidLength' && properties.length === 2) {
+      if (regexProps.includes(h) && properties.some(prop => prop && prop.test(value))) {
+        return true;
+      } else if (h === 'vidLength') {
         const vidLen = parseTime(value);
-
-        if (jsFilterEnabled) {
-          friendlyVideoObj[h] = vidLen;
-        }
-
         if (vidLen > 0) {
-            if (storageData.options.vidLength_type === 'block') {
-                if ((properties[0] !== null && vidLen >= properties[0]) && (properties[1] !== null && vidLen <= properties[1])) return true;
-            } else {
-                if ((properties[0] !== null && vidLen < properties[0]) || (properties[1] !== null && vidLen > properties[1])) return true;
-            }
-        }
-      } else if (jsFilterEnabled && h === 'viewCount') {
-          const viewCount = parseViewCount(value);
-          friendlyVideoObj[h] = viewCount;
-      } else if (jsFilterEnabled && (h === 'channelBadges' || h === 'badges')) {
-          // Just in case YouTube decides to use multiple badges.
-          let badges = [];
+          if (storageData.options.vidLength_type === 'block') {
+            if ((properties[0] !== null && vidLen >= properties[0]) && (properties[1] !== null && vidLen <= properties[1])) return true;
+          } else {
+            if ((properties[0] !== null && vidLen < properties[0]) || (properties[1] !== null && vidLen > properties[1])) return true;
+          }
 
+          if (jsFilterEnabled) friendlyVideoObj[h] = vidLen;
+        }
+      } else if (jsFilterEnabled) {
+        if (h === 'viewCount') {
+          friendlyVideoObj[h] = parseViewCount(value);
+        } else if (h === 'channelBadges' || h === 'badges') {
+          const badges = [];
           value.forEach(br => {
             /* Channels */
             if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_VERIFIED") {
-                badges.push("verified");
+              badges.push("verified");
             } else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_VERIFIED_ARTIST") {
-                badges.push("artist");
+              badges.push("artist");
             }
-
             /* Videos */
             else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_LIVE_NOW") {
-                badges.push("live");
+              badges.push("live");
             }
           });
-
           friendlyVideoObj[h] = badges;
+        } else {
+          friendlyVideoObj[h] = value;
+        }
       }
 
       return false;
@@ -322,7 +316,11 @@
 
     if (!doBlock && jsFilterEnabled) {
       // force return value into boolean just in case someone tries returning something else
-      doBlock = !!jsFilter(friendlyVideoObj);
+      try {
+        doBlock = !!jsFilter(friendlyVideoObj, objectType);
+      } catch (e) {
+        console.error("Custom function exception", e);
+      }
     }
 
     return doBlock;
@@ -358,7 +356,7 @@
           related = undefined;
         }
 
-        const isMatch = storageData.options.mixes && h === 'radioRenderer' || this.matchFilterData(properties, filteredObject);
+        const isMatch = storageData.options.mixes && h === 'radioRenderer' || this.matchFilterData(properties, filteredObject, h);
         if (isMatch) {
           res.push({
             name: h,
@@ -858,18 +856,23 @@
     if (data.options.trending) blockTrending(data);
     if (data.options.mixes) blockMixes(data);
 
-    let shouldStartHook = (storageData === undefined);
+    const shouldStartHook = (storageData === undefined);
     storageData = data;
 
     // Enable JS filtering only if function has something in it
     if (storageData.options.enable_javascript && storageData.filterData.javascript) {
       try {
         jsFilter = eval(storageData.filterData.javascript);
+        if (!(jsFilter instanceof Function)) {
+          throw Error("Function not found");
+        }
         jsFilterEnabled = storageData.options.enable_javascript;
       } catch (e) {
-        console.error("Couldn't load JS filter", e);
+        console.error("Custom function syntax error", e);
         jsFilterEnabled = false;
       }
+    } else {
+      jsFilterEnabled = false;
     }
 
     if (shouldStartHook) {
