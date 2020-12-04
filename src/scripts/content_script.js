@@ -59,6 +59,13 @@
       s.async = false;
       (document.head || document.documentElement).appendChild(s);
     },
+    sendReload(msg, duration) {
+      window.postMessage({
+        from: 'BLOCKTUBE_CONTENT',
+        type: 'reloadRequired',
+        data: {msg, duration}
+      }, document.location.origin);
+    }
   };
 
   function connectToPort() {
@@ -82,12 +89,8 @@
 
     // Reload page on extension update/uninstall
     port.onDisconnect.addListener(() => {
-      if (chrome.runtime.lastError) {
-        console.log('Port error', chrome.runtime.lastError);
-        connectToPort();
-      } else {
-        document.location.reload();
-      }
+      port = null;
+      utils.sendReload();
     });
   }
 

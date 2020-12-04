@@ -75,6 +75,11 @@
         return;
       }
 
+      if (window.btReloadRequired) {
+        window.btExports.openToast("BlockTube was updated, this tab needs to be reloaded to use this function", 5000);
+        return;
+      }
+
       let type;
       let data;
       let videoData;

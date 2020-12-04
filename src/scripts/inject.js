@@ -101,6 +101,8 @@
 
   // !! Globals
 
+  window.btReloadRequired = false;
+
   // extension storageData
   let storageData;
 
@@ -938,6 +940,40 @@
     }
   }
 
+  function openToast(msg, duration) {
+    const ytdApp = document.getElementsByTagName('ytd-app')[0];
+    const ytEvent = new CustomEvent('yt-action', {
+      bubbles: true,
+      cancelable: false,
+      composed: true,
+      detail: {
+        actionName: 'yt-open-popup-action',
+        args: [
+          {
+            openPopupAction: {
+              durationHintMs: duration,
+              popup: {
+                notificationActionRenderer: {
+                  responseText: {
+                    runs: [{
+                      text: msg
+                    }]
+                  }
+                }
+              },
+              popupType: 'TOAST'
+            }
+          },
+          ytdApp,
+          undefined],
+        returnValue: [],
+        disableBroadcast: false,
+        optionalAction: true
+      }
+    });
+    ytdApp.dispatchEvent(ytEvent);
+  }
+
   // !! Start
   console.info('BlockTube Init');
 
@@ -951,6 +987,10 @@
         storageReceived(event.data.data);
         break;
       }
+      case 'reloadRequired':
+        window.btReloadRequired = true;
+        openToast("BlockTube was updated, Please reload this tab to reactivate it", 15000);
+        break;
       default:
         break;
     }
@@ -958,6 +998,7 @@
 
   window.btExports = {
     spfFilter,
-    fetchFilter
+    fetchFilter,
+    openToast
   }
 }());
