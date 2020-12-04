@@ -624,7 +624,7 @@
   }
 
   function fetchFilter(url, resp) {
-    if (['/youtubei/v1/search', '/youtubei/v1/browse'].includes(url.pathname)) {
+    if (['/youtubei/v1/search', '/youtubei/v1/browse', '/youtubei/v1/next'].includes(url.pathname)) {
       ObjectFilter(resp, filterRules.main, [], true);
     }
     else if (url.pathname === '/youtubei/v1/guide') {
