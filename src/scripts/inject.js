@@ -2,6 +2,103 @@
   'use strict';
   const has = Object.prototype.hasOwnProperty;
 
+  // Thanks to uBlock origin
+  const defineProperty = function(chain, cValue, middleware = undefined) {
+    const thisScript = document.currentScript;
+    let aborted = false;
+    const mustAbort = function(v) {
+      if ( aborted ) { return true; }
+      aborted =
+            (v !== undefined && v !== null) &&
+            (cValue !== undefined && cValue !== null) &&
+            (typeof v !== typeof cValue);
+      return aborted;
+    };
+    // https://github.com/uBlockOrigin/uBlock-issues/issues/156
+    //   Support multiple trappers for the same property.
+    const trapProp = function(owner, prop, configurable, handler) {
+      if ( handler.init(owner[prop]) === false ) { return; }
+      const odesc = Object.getOwnPropertyDescriptor(owner, prop);
+      let prevGetter, prevSetter;
+      if ( odesc instanceof Object ) {
+        if ( odesc.configurable === false ) { return; }
+        if ( odesc.get instanceof Function ) {
+          prevGetter = odesc.get;
+        }
+        if ( odesc.set instanceof Function ) {
+          prevSetter = odesc.set;
+        }
+      }
+      Object.defineProperty(owner, prop, {
+        configurable,
+        get() {
+          if ( prevGetter !== undefined ) {
+            prevGetter();
+          }
+          return handler.getter(); // cValue
+        },
+        set(a) {
+          if ( prevSetter !== undefined ) {
+            prevSetter(a);
+          }
+          handler.setter(a);
+        }
+      });
+    };
+    const trapChain = function(owner, chain) {
+      const pos = chain.indexOf('.');
+      if ( pos === -1 ) {
+        trapProp(owner, chain, false, {
+          v: undefined,
+          init: function(v) {
+            if ( mustAbort(v) ) { return false; }
+            this.v = v;
+            return true;
+          },
+          getter: function() {
+            return document.currentScript === thisScript
+              ? this.v
+              : cValue;
+          },
+          setter: function(a) {
+            if (middleware instanceof Function) {
+              middleware(a);
+              cValue = a;
+            } else {
+              if ( mustAbort(a) === false ) { return; }
+              cValue = a;
+            }
+          }
+        });
+        return;
+      }
+      const prop = chain.slice(0, pos);
+      const v = owner[prop];
+      chain = chain.slice(pos + 1);
+      if ( v instanceof Object || typeof v === 'object' && v !== null ) {
+        trapChain(v, chain);
+        return;
+      }
+      trapProp(owner, prop, true, {
+        v: undefined,
+        init: function(v) {
+          this.v = v;
+          return true;
+        },
+        getter: function() {
+          return this.v;
+        },
+        setter: function(a) {
+          this.v = a;
+          if ( a instanceof Object ) {
+            trapChain(a, chain);
+          }
+        }
+      });
+    };
+    trapChain(window, chain);
+  }
+
   // !! Globals
 
   // extension storageData
@@ -450,7 +547,7 @@
     }
 
     const message = (storageData.options.block_message) || '';
-
+    ytData.streamingData = undefined;
     ytData.playabilityStatus.status = 'ERROR';
     ytData.playabilityStatus.reason = message;
     ytData.playabilityStatus.errorScreen = {
@@ -762,88 +859,49 @@
   function startHook() {
     const currentUrl = new URL(document.location);
     if (currentUrl.pathname.startsWith('/embed/')) {
-      window.yt = window.yt || {};
-      window.yt.config_ = window.yt.config_ || {};
-      if (!window.yt.config_.PLAYER_CONFIG) {
-        Object.defineProperty(window.yt.config_, 'PLAYER_CONFIG', {
-          get() {
-            return this.PLAYER_CONFIG_;
-          },
-          set(val) {
-            ObjectFilter(val, filterRules.ytPlayer);
-            this.PLAYER_CONFIG_ = val;
-          },
-        });
-      } else {
+      const ytConfigPlayerConfig = getObjectByPath(window, 'yt.config_.PLAYER_CONFIG');
+      if (typeof ytConfigPlayerConfig === 'object' && ytConfigPlayerConfig !== null) {
         ObjectFilter(window.yt.config_.PLAYER_CONFIG, filterRules.ytPlayer);
+      } else {
+        defineProperty('yt.config_.PLAYER_CONFIG', undefined, (v) => ObjectFilter(v, filterRules.ytPlayer));
       }
     }
 
-    window.ytplayer = window.ytplayer || {};
-    if (!has.call(window.ytplayer, 'config')) {
-      Object.defineProperty(window.ytplayer, 'config', {
-        get() {
-          return this.config_;
-        },
-        set(val) {
-          const player_resp = getObjectByPath(val, 'args.player_response');
-          if (player_resp) {
-              try {
-                  val.args.player_response_parsed = JSON.parse(player_resp);
-              } catch (e) {
-              }
-          }
-          ObjectFilter(val, filterRules.ytPlayer);
-          this.config_ = val;
-        },
-      });
-    } else {
+    const ytPlayerconfig = getObjectByPath(window, 'ytplayer.config');
+    if (typeof ytPlayerconfig === 'object' && ytPlayerconfig !== null) {
       ObjectFilter(window.ytplayer.config, filterRules.ytPlayer);
+    } else {
+      defineProperty('ytplayer.config', undefined, (v) => {
+        const playerResp = getObjectByPath(v, 'args.player_response');
+        if (playerResp) {
+          try {
+            v.args.player_response_parsed = JSON.parse(playerResp);
+          } catch (e) {
+          }
+        }
+        ObjectFilter(v, filterRules.ytPlayer)
+      });
     }
 
-    if (!has.call(window, 'ytInitialGuideData') || window.ytInitialGuideData === undefined) {
-      Object.defineProperty(window, 'ytInitialGuideData', {
-        get() {
-          return this.ytInitialGuideData_;
-        },
-        set(val) {
-          ObjectFilter(val, filterRules.guide);
-          this.ytInitialGuideData_ = val;
-        },
-      });
-    } else {
+    if (typeof window.ytInitialGuideData === 'object' && window.ytInitialGuideData !== null) {
       ObjectFilter(window.ytInitialGuideData, filterRules.guide);
+    } else {
+      defineProperty('ytInitialGuideData', undefined, (v) => ObjectFilter(v, filterRules.guide));
     }
 
-    if (!has.call(window, 'ytInitialPlayerResponse') || window.ytInitialPlayerResponse === undefined) {
-      Object.defineProperty(window, 'ytInitialPlayerResponse', {
-        get() {
-          return this.ytInitialPlayerResponse_;
-        },
-        set(val) {
-          ObjectFilter(val, filterRules.ytPlayer);
-          this.ytInitialPlayerResponse_ = val;
-        },
-      });
-    } else {
+    if (typeof window.ytInitialPlayerResponse === 'object' && window.ytInitialPlayerResponse !== null) {
       ObjectFilter(window.ytInitialPlayerResponse, filterRules.ytPlayer);
+    } else {
+      defineProperty('ytInitialPlayerResponse', undefined, (v) => ObjectFilter(v, filterRules.ytPlayer));
     }
 
     const postActions = [removeRvs, fixAutoplay];
-    if (!has.call(window, 'ytInitialData') || window.ytInitialData === undefined) {
-      Object.defineProperty(window, 'ytInitialData', {
-        get() {
-          return this.ytInitialData_;
-        },
-        set(val) {
-          if (val.contents && currentBlock) postActions.push(redirectToNext);
-          ObjectFilter(val, Object.assign(filterRules.main, filterRules.comments), postActions, true);
-          this.ytInitialData_ = val;
-        },
-      });
+    if (typeof window.ytInitialData === 'object' && window.ytInitialData !== null) {
+      ObjectFilter(window.ytInitialData, Object.assign(filterRules.main, filterRules.comments), (window.ytInitialData.contents && currentBlock) ? postActions.concat(redirectToNext) : postActions, true);
     } else {
-      if (window.ytInitialData.contents && currentBlock) postActions.push(redirectToNext);
-      ObjectFilter(window.ytInitialData, Object.assign(filterRules.main, filterRules.comments), postActions, true);
+      defineProperty('ytInitialData', undefined, (v) => {
+        ObjectFilter(v, Object.assign(filterRules.main, filterRules.comments), (v.contents && currentBlock) ? postActions.concat(redirectToNext) : postActions, true)
+      });
     }
 
     window.btDispatched = true;
