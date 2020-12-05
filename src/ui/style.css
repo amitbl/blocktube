@@ -139,3 +139,27 @@ h1 {
   min-height: 70px;
   max-height: 200px;
 }
+
+.cm-resizer {
+  background: #f7f7f7;
+  height: 20px;
+  user-select: none;
+  cursor: row-resize;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+.cm-resizer:before {
+  content: '\2261'; /* https://en.wikipedia.org/wiki/Triple_bar */
+  color: #999;
+  position: absolute;
+  left: 50%;
+}
+
+.cm-resizer:hover {
+  background: #f0f0f0;
+}
+
+.cm-resizer:hover:before {
+  color: #000;
+}

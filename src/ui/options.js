@@ -181,6 +181,32 @@
     reader.readAsText(f);
   }
 
+  function cmResizer(cm, resizer) {
+    const MIN_HEIGHT = 70;
+
+    function heightOf(element) {
+      return parseInt(window.getComputedStyle(element).height.replace(/px$/, ""));
+    }
+
+    function onDrag(e) {
+      cm.display.scroller.style.maxHeight = "100%";
+      cm.setSize(null, Math.max(MIN_HEIGHT, (cm.start_h + e.y - cm.start_y)) + "px");
+    }
+
+    function onRelease(e) {
+      document.body.removeEventListener("mousemove", onDrag);
+      window.removeEventListener("mouseup", onRelease);
+    }
+
+    resizer.addEventListener("mousedown", function (e) {
+      cm.start_y = e.y;
+      cm.start_h = heightOf(cm.display.wrapper);
+
+      document.body.addEventListener("mousemove", onDrag);
+      window.addEventListener("mouseup", onRelease);
+    });
+  }
+
   textAreas.concat('javascript').forEach((v) => {
     jsEditors[v] = CodeMirror.fromTextArea($(v), {
       mode: "javascript",
@@ -188,8 +214,25 @@
       autoCloseBrackets: true,
       lineNumbers: true,
       styleActiveLine: true,
-      lineWrapping: true
+      lineWrapping: true,
+      extraKeys: {
+        F11: function(cm) {
+          if (cm.getOption("fullScreen")) {
+            cm.display.scroller.style.maxHeight = cm.start_h || "200px";
+          } else {
+            cm.display.scroller.style.maxHeight = "100%";
+          }
+          cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+        },
+        Esc: function(cm) {
+          if (cm.getOption("fullScreen")) {
+            cm.display.scroller.style.maxHeight = cm.start_h || "200px";
+            cm.setOption("fullScreen", false);
+          }
+        }
+      }
     });
+    cmResizer(jsEditors[v], $(v + '_resizer'));
   });
 
   // !! Start

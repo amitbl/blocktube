@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="cm/codemirror.min.css" rel="stylesheet" type="text/css">
     <link href="cm/dialog.min.css" rel="stylesheet" type="text/css">
+    <link href="cm/fullscreen.min.css" rel="stylesheet" type="text/css">
     <link href="style.css" rel="stylesheet" type="text/css">
     <title>BlockTube - Options</title>
     <link rel="shortcut icon" type="image/png" href="../../assets/icons/16.png"/>
@@ -33,22 +34,27 @@
           <div>
             <label class="block-label" for="title">Video title</label>
             <textarea id="title"></textarea>
+            <div id="title_resizer" class="cm-resizer"></div>
           </div>
           <div>
             <label class="block-label" for="channelName">Channel name</label>
             <textarea id="channelName"></textarea>
+            <div id="channelName_resizer" class="cm-resizer"></div>
           </div>
           <div>
             <label class="block-label" for="videoId">Video ID</label>
             <textarea id="videoId"></textarea>
+            <div id="videoId_resizer" class="cm-resizer"></div>
           </div>
           <div>
             <label class="block-label" for="channelId">Channel ID</label>
             <textarea id="channelId"></textarea>
+            <div id="channelId_resizer" class="cm-resizer"></div>
           </div>
           <div>
             <label class="block-label" for="comment">Comment content</label>
             <textarea id="comment"></textarea>
+            <div id="comment_resizer" class="cm-resizer"></div>
           </div>
         </fieldset>
         <legend>Advanced blocking</legend>
@@ -64,6 +70,7 @@
           <div id="advanced_tab" style="display: none" class="advanced">
             <label class="block-label" for="javascript">Custom blocking function</label>
             <textarea id="javascript"></textarea>
+            <div id="javascript_resizer" class="cm-resizer"></div>
           </div>
         </fieldset>
         <legend>Other options</legend>
@@ -122,6 +129,7 @@
     <script type="text/javascript" src="cm/searchcursor.min.js"></script>
     <script type="text/javascript" src="cm/match-highlighter.min.js"></script>
     <script type="text/javascript" src="cm/dialog.min.js"></script>
+    <script type="text/javascript" src="cm/fullscreen.min.js"></script>
     <script type="text/javascript" src="cm/javascript.min.js"></script>
     <script type="text/javascript" src="options.js"></script>
   </body>
