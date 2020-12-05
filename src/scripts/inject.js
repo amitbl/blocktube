@@ -4,7 +4,6 @@
 
   // Thanks to uBlock origin
   const defineProperty = function(chain, cValue, middleware = undefined) {
-    const thisScript = document.currentScript;
     let aborted = false;
     const mustAbort = function(v) {
       if ( aborted ) { return true; }
@@ -56,14 +55,12 @@
             return true;
           },
           getter: function() {
-            return document.currentScript === thisScript
-              ? this.v
-              : cValue;
+            return cValue;
           },
           setter: function(a) {
             if (middleware instanceof Function) {
-              middleware(a);
               cValue = a;
+              middleware(a);
             } else {
               if ( mustAbort(a) === false ) { return; }
               cValue = a;
@@ -283,13 +280,12 @@
     ytPlayer: {
       args: {
         properties: {
-          videoId: ['video_id', 'player_response_parsed.videoDetails.videoId'],
-          channelId: ['ucid', 'player_response_parsed.videoDetails.channelId'],
-          channelName: ['author', 'player_response_parsed.videoDetails.author'],
-          title: ['title', 'player_response_parsed.videoDetails.title'],
-          vidLength: ['length_seconds', 'player_response_parsed.videoDetails.lengthSeconds']
-        },
-        customFunc: setPageBlock
+          videoId: ['video_id', 'raw_player_response.videoDetails.videoId'],
+          channelId: ['ucid', 'raw_player_response.videoDetails.channelId'],
+          channelName: ['author', 'raw_player_response.videoDetails.author'],
+          title: ['title', 'raw_player_response.videoDetails.title'],
+          vidLength: ['length_seconds', 'raw_player_response.videoDetails.lengthSeconds']
+        }
       },
       videoDetails: {
         properties: {
@@ -301,6 +297,16 @@
         },
         customFunc: disablePlayer,
       },
+      PLAYER_VARS: {
+        properties: {
+          videoId: ['video_id'],
+          channelId: ['embedded_player_response_parsed.embedPreview.thumbnailPreviewRenderer.videoDetails.embeddedPlayerOverlayVideoDetailsRenderer.expandedRenderer.embeddedPlayerOverlayVideoDetailsExpandedRenderer.subscribeButton.subscribeButtonRenderer.channelId'],
+          channelName: ['embedded_player_response_parsed.embedPreview.thumbnailPreviewRenderer.videoDetails.embeddedPlayerOverlayVideoDetailsRenderer.expandedRenderer.embeddedPlayerOverlayVideoDetailsExpandedRenderer.title.runs'],
+          title: ['embedded_player_response_parsed.embedPreview.thumbnailPreviewRenderer.title.runs'],
+          vidLength: ['embedded_player_response_parsed.embedPreview.thumbnailPreviewRenderer.videoDurationSeconds']
+        },
+        customFunc: disableEmbedPlayer
+      }
     },
     guide: {
       // sidemenu subscribed channels
@@ -534,12 +540,12 @@
 
   // !! Custom filtering functions
 
-  function setPageBlock() {
+  function disableEmbedPlayer(ytData) {
     if (storageData.options.suggestions_only) {
       return false;
     }
 
-    currentBlock = true;
+    censorTitle();
     return true;
   }
 
@@ -549,26 +555,34 @@
     }
 
     const message = (storageData.options.block_message) || '';
-    ytData.streamingData = undefined;
-    ytData.playabilityStatus.status = 'ERROR';
-    ytData.playabilityStatus.reason = message;
-    ytData.playabilityStatus.errorScreen = {
-      playerErrorMessageRenderer: {
-        reason: {
-          simpleText: message,
-        },
-        thumbnail: {
-          thumbnails: [{
-            url: '//s.ytimg.com/yts/img/meh7-vflGevej7.png',
-            width: 140,
-            height: 100,
-          }],
-        },
-        icon: {
-          iconType: 'ERROR_OUTLINE',
-        },
-      },
+    for (const prop of Object.getOwnPropertyNames(ytData)) {
+      try {
+        delete ytData[prop];
+      } catch (e) { }
+    }
+    ytData.playabilityStatus = {
+      status: 'ERROR',
+      reason: message,
+      errorScreen: {
+        playerErrorMessageRenderer: {
+          reason: {
+            simpleText: message,
+          },
+          thumbnail: {
+            thumbnails: [{
+              url: '//s.ytimg.com/yts/img/meh7-vflGevej7.png',
+              width: 140,
+              height: 100,
+            }]
+          },
+          icon: {
+            iconType: 'ERROR_OUTLINE',
+          }
+        }
+      }
     };
+
+    currentBlock = true;
   }
 
   function blockPlaylistVid(pl) {
@@ -739,8 +753,8 @@
       if (has.call(obj, 'player')) {
         try {
           const player_resp = getObjectByPath(obj.player, 'args.player_response');
-          obj.player.args.player_response_parsed = JSON.parse(player_resp);
-        } catch (e) {}
+          obj.player.args.raw_player_response = JSON.parse(player_resp);
+        } catch (e) { }
         ObjectFilter(obj.player, filterRules.ytPlayer);
       }
 
@@ -861,11 +875,19 @@
   function startHook() {
     const currentUrl = new URL(document.location);
     if (currentUrl.pathname.startsWith('/embed/')) {
-      const ytConfigPlayerConfig = getObjectByPath(window, 'yt.config_.PLAYER_CONFIG');
+      const ytConfigPlayerConfig = getObjectByPath(window, 'yt.config_.PLAYER_VARS');
       if (typeof ytConfigPlayerConfig === 'object' && ytConfigPlayerConfig !== null) {
-        ObjectFilter(window.yt.config_.PLAYER_CONFIG, filterRules.ytPlayer);
+        try {
+          ytConfigPlayerConfig.embedded_player_response_parsed = JSON.parse(ytConfigPlayerConfig.embedded_player_response);
+        } catch (e) { }
+        ObjectFilter(window.yt.config_, filterRules.ytPlayer);
       } else {
-        defineProperty('yt.config_.PLAYER_CONFIG', undefined, (v) => ObjectFilter(v, filterRules.ytPlayer));
+        defineProperty('yt.config_.PLAYER_VARS', undefined, (v) => {
+          try {
+            v.embedded_player_response_parsed = JSON.parse(v.embedded_player_response);
+          } catch (e) { }
+          ObjectFilter(window.yt.config_, filterRules.ytPlayer)
+        });
       }
     }
 
@@ -877,11 +899,10 @@
         const playerResp = getObjectByPath(v, 'args.player_response');
         if (playerResp) {
           try {
-            v.args.player_response_parsed = JSON.parse(playerResp);
-          } catch (e) {
-          }
+            v.args.raw_player_response = JSON.parse(playerResp);
+          } catch (e) { }
         }
-        ObjectFilter(v, filterRules.ytPlayer)
+        ObjectFilter(window.ytplayer.config, filterRules.ytPlayer)
       });
     }
 
@@ -942,6 +963,7 @@
 
   function openToast(msg, duration) {
     const ytdApp = document.getElementsByTagName('ytd-app')[0];
+    if (ytdApp === undefined) return;
     const ytEvent = new CustomEvent('yt-action', {
       bubbles: true,
       cancelable: false,
