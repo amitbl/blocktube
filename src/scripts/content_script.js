@@ -1,9 +1,32 @@
 (function () {
   'use strict';
 
-  // Do not run on already opened YouTube tabs
+  const utils = {
+    sendStorage() {
+      window.postMessage({
+        from: 'BLOCKTUBE_CONTENT',
+        type: 'storageData',
+        data: compiledStorage || globalStorage,
+      }, document.location.origin);
+    },
+    inject() {
+      const s = document.createElement('script');
+      s.src = chrome.extension.getURL('src/scripts/inject.js');
+      s.onload = events.ready;
+      s.async = false;
+      (document.head || document.documentElement).appendChild(s);
+    },
+    sendReload(msg, duration) {
+      window.postMessage({
+        from: 'BLOCKTUBE_CONTENT',
+        type: 'reloadRequired',
+        data: {msg, duration}
+      }, document.location.origin);
+    }
+  };
+
   if (document.body) {
-    console.info('Please refresh this tab to activate BlockTube');
+    utils.sendReload();
     return;
   }
 
@@ -42,30 +65,6 @@
       utils.sendStorage();
       ready = true;
     },
-  };
-
-  const utils = {
-    sendStorage() {
-      window.postMessage({
-        from: 'BLOCKTUBE_CONTENT',
-        type: 'storageData',
-        data: compiledStorage || globalStorage,
-      }, document.location.origin);
-    },
-    inject() {
-      const s = document.createElement('script');
-      s.src = chrome.extension.getURL('src/scripts/inject.js');
-      s.onload = events.ready;
-      s.async = false;
-      (document.head || document.documentElement).appendChild(s);
-    },
-    sendReload(msg, duration) {
-      window.postMessage({
-        from: 'BLOCKTUBE_CONTENT',
-        type: 'reloadRequired',
-        data: {msg, duration}
-      }, document.location.origin);
-    }
   };
 
   function connectToPort() {
