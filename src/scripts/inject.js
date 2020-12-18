@@ -829,10 +829,10 @@
       if (chipSection !== -1) {
         secondaryResults = getObjectByPath(secondaryResults[chipSection], 'itemSectionRenderer.contents');
       }
-      if (!secondaryResults) return;
+      if (secondaryResults === undefined) return;
 
       const regularVid = secondaryResults.findIndex(x => has.call(x, 'compactVideoRenderer'));
-      if (!regularVid) return;
+      if (regularVid === undefined) return;
 
       autoPlay.contents.push(secondaryResults[regularVid]);
       secondaryResults.splice(regularVid, 1);
