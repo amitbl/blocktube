@@ -285,7 +285,8 @@
           channelName: ['author', 'raw_player_response.videoDetails.author'],
           title: ['title', 'raw_player_response.videoDetails.title'],
           vidLength: ['length_seconds', 'raw_player_response.videoDetails.lengthSeconds']
-        }
+        },
+        customFunc: disableEmbedPlayer,
       },
       videoDetails: {
         properties: {
