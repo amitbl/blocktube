@@ -209,7 +209,7 @@
 
   textAreas.concat('javascript').forEach((v) => {
     jsEditors[v] = CodeMirror.fromTextArea($(v), {
-      mode: "javascript",
+      mode: v === 'javascript' ? 'javascript' : 'blocktube',
       matchBrackets: true,
       autoCloseBrackets: true,
       lineNumbers: true,
