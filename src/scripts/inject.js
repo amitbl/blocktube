@@ -662,8 +662,10 @@
 
     const prop = 'compactVideoRenderer';
     nextVids.some((vid) => {
-      if (!has.call(vid, 'compactVideoRenderer')) return false;
-      if (vid[prop] && vid[prop].videoId) document.location = `watch?v=${vid[prop].videoId}`;
+      const checkedObj = has.call(vid, 'compactAutoplayRenderer') ? getObjectByPath(vid, 'compactAutoplayRenderer.contents', [])[0] : vid
+      if (!checkedObj) return;
+      if (!has.call(checkedObj, prop)) return false;
+      if (checkedObj[prop] && checkedObj[prop].videoId) document.location = `watch?v=${checkedObj[prop].videoId}`;
       return true;
     });
 
