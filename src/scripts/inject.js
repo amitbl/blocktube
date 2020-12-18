@@ -808,13 +808,11 @@
       'playerOverlays.playerOverlayRenderer.endScreen.watchNextEndScreenRenderer.results',
     );
     if (overlays === undefined) return;
-
-    overlays.unshift(overlays[index - 1]);
-    overlays.splice(index, 1);
+    overlays.splice(0, 0, overlays.splice(index, 1)[0]);
   }
 
   function fixAutoplay() {
-    const secondaryResults = getObjectByPath(
+    let secondaryResults = getObjectByPath(
       this.object,
       'contents.twoColumnWatchNextResults.secondaryResults.secondaryResults.results',
     );
@@ -824,7 +822,15 @@
     if (autoPlay === undefined) return;
 
     if (autoPlay.contents.length === 0) {
+      const chipSection = secondaryResults.findIndex(x => has.call(x, 'itemSectionRenderer'));
+      if (chipSection !== -1) {
+        secondaryResults = getObjectByPath(secondaryResults[chipSection], 'itemSectionRenderer.contents');
+      }
+      if (!secondaryResults) return;
+
       const regularVid = secondaryResults.findIndex(x => has.call(x, 'compactVideoRenderer'));
+      if (!regularVid) return;
+
       autoPlay.contents.push(secondaryResults[regularVid]);
       secondaryResults.splice(regularVid, 1);
       fixOverlay.call(this, regularVid);
