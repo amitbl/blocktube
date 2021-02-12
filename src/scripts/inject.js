@@ -891,9 +891,11 @@
         } catch (e) { }
         ObjectFilter(window.yt.config_, filterRules.ytPlayer);
       } else {
-        defineProperty('yt.config_.PLAYER_VARS', undefined, (v) => {
+        defineProperty('yt.config_', undefined, (v) => {
           try {
-            v.embedded_player_response_parsed = JSON.parse(v.embedded_player_response);
+            if (has.call(v, 'PLAYER_VARS')) {
+              v.PLAYER_VARS.embedded_player_response_parsed = JSON.parse(v.PLAYER_VARS.embedded_player_response);
+            }
           } catch (e) { }
           ObjectFilter(window.yt.config_, filterRules.ytPlayer)
         });
