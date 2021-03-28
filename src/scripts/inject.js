@@ -792,11 +792,12 @@
   }
 
   function blockTrending(data) {
-    if (document.location.pathname === '/feed/trending') {
+    if (document.location.pathname === '/feed/trending' || document.location.pathname === '/feed/explore') {
       redirectToIndex();
     }
 
     data.filterData.channelId.push(/^FEtrending$/);
+    data.filterData.channelId.push(/^FEexplore$/);
   }
 
   function removeRvs() {
