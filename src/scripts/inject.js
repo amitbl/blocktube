@@ -276,6 +276,18 @@
           channelName: ['channelTitle.simpleText', 'channelTitle.runs'],
         },
       },
+
+      playerOverlayAutoplayRenderer: {
+        properties: {
+          videoId: 'videoId',
+          channelId: 'byline.runs.navigationEndpoint.browseEndpoint.browseId',
+          channelName: 'byline.runs.text',
+          title: ['videoTitle.simpleText', 'videoTitle.runs'],
+          publishTimeText: 'publishedTimeText.simpleText',
+          vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text.simpleText',
+        }
+      },
+
     },
     ytPlayer: {
       args: {
@@ -658,18 +670,10 @@
       return;
     }
 
-    const nextVids = getObjectByPath(secondary, 'secondaryResults.results');
-    if (nextVids === undefined) return;
-
-    const prop = 'compactVideoRenderer';
-    nextVids.some((vid) => {
-      const checkedObj = has.call(vid, 'compactAutoplayRenderer') ? getObjectByPath(vid, 'compactAutoplayRenderer.contents', [])[0] : vid
-      if (!checkedObj) return;
-      if (!has.call(checkedObj, prop)) return false;
-      if (checkedObj[prop] && checkedObj[prop].videoId) document.location = `watch?v=${checkedObj[prop].videoId}`;
-      return true;
-    });
-
+    const vidId = findNextVideo(this.object);
+    if (vidId !== false) {
+      document.location = `watch?v=${vidId}`;
+    }
     secondary.secondaryResults = undefined;
   }
 
@@ -777,7 +781,7 @@
             rules = filterRules.comments;
             break;
           case '/watch':
-            postActions = [removeRvs, fixAutoplay];
+            postActions = [fixAutoplay];
             if (currentBlock) postActions.push(redirectToNext);
           default:
             rules = filterRules.main;
@@ -800,45 +804,47 @@
     data.filterData.channelId.push(/^FEexplore$/);
   }
 
-  function removeRvs() {
-    if (has.call(this.object, 'webWatchNextResponseExtensionData')) {
-      delete this.object.webWatchNextResponseExtensionData;
+  function fixAutoplay() {
+    let autoplayOverlay = getObjectByPath(
+      this.object,
+      'playerOverlays.playerOverlayRenderer.autoplay.playerOverlayAutoplayRenderer',
+    );
+    if (autoplayOverlay !== undefined) return;
+
+    let autoPlay = getObjectByPath(this.object, 'contents.twoColumnWatchNextResults.autoplay.autoplay.sets');
+    if (autoPlay === undefined) return;
+    autoPlay = autoPlay[0].autoplayVideo;
+    if (autoPlay === undefined) return;
+    try {
+      const videoId = findNextVideo(this.object);
+      if (videoId !== false) {
+        autoPlay.videoId = videoId
+        autoPlay.watchEndpoint.videoId = videoId
+      } else {
+        delete this.object.contents.twoColumnWatchNextResults.autoplay;
+      }
+    } catch (e) {
+      delete this.object.contents.twoColumnWatchNextResults.autoplay;
     }
   }
 
-  function fixOverlay(index) {
-    const overlays = getObjectByPath(
-      this.object,
-      'playerOverlays.playerOverlayRenderer.endScreen.watchNextEndScreenRenderer.results',
-    );
-    if (overlays === undefined) return;
-    overlays.splice(0, 0, overlays.splice(index, 1)[0]);
-  }
-
-  function fixAutoplay() {
+  function findNextVideo(object) {
     let secondaryResults = getObjectByPath(
-      this.object,
+      object,
       'contents.twoColumnWatchNextResults.secondaryResults.secondaryResults.results',
     );
+    if (secondaryResults === undefined) return false;
+
+    const chipSection = secondaryResults.findIndex(x => has.call(x, 'itemSectionRenderer'));
+    if (chipSection === -1) return false;
+
+    secondaryResults = getObjectByPath(secondaryResults[chipSection], 'itemSectionRenderer.contents');
     if (secondaryResults === undefined) return;
 
-    const autoPlay = getObjectByPath(secondaryResults, 'compactAutoplayRenderer');
-    if (autoPlay === undefined) return;
+    const regularVid = secondaryResults.findIndex(x => has.call(x, 'compactVideoRenderer'));
+    const vidObj = secondaryResults[regularVid].compactVideoRenderer;
 
-    if (autoPlay.contents.length === 0) {
-      const chipSection = secondaryResults.findIndex(x => has.call(x, 'itemSectionRenderer'));
-      if (chipSection !== -1) {
-        secondaryResults = getObjectByPath(secondaryResults[chipSection], 'itemSectionRenderer.contents');
-      }
-      if (secondaryResults === undefined) return;
-
-      const regularVid = secondaryResults.findIndex(x => has.call(x, 'compactVideoRenderer'));
-      if (regularVid === undefined) return;
-
-      autoPlay.contents.push(secondaryResults[regularVid]);
-      secondaryResults.splice(regularVid, 1);
-      fixOverlay.call(this, regularVid);
-    }
+    return vidObj.videoId;
   }
 
   function addContextMenus(obj) {
@@ -930,7 +936,7 @@
       defineProperty('ytInitialPlayerResponse', undefined, (v) => ObjectFilter(v, filterRules.ytPlayer));
     }
 
-    const postActions = [removeRvs, fixAutoplay];
+    const postActions = [fixAutoplay];
     if (typeof window.ytInitialData === 'object' && window.ytInitialData !== null) {
       ObjectFilter(window.ytInitialData, Object.assign(filterRules.main, filterRules.comments), (window.ytInitialData.contents && currentBlock) ? postActions.concat(redirectToNext) : postActions, true);
     } else {
