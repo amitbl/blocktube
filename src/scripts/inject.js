@@ -805,6 +805,10 @@
   }
 
   function fixAutoplay() {
+    if (getObjectByPath(this.object, 'playerOverlays.playerOverlayRenderer.autoplay') === undefined) {
+      return;
+    }
+
     let autoplayOverlay = getObjectByPath(
       this.object,
       'playerOverlays.playerOverlayRenderer.autoplay.playerOverlayAutoplayRenderer',
@@ -836,10 +840,10 @@
     if (secondaryResults === undefined) return false;
 
     const chipSection = secondaryResults.findIndex(x => has.call(x, 'itemSectionRenderer'));
-    if (chipSection === -1) return false;
-
-    secondaryResults = getObjectByPath(secondaryResults[chipSection], 'itemSectionRenderer.contents');
-    if (secondaryResults === undefined) return;
+    if (chipSection !== -1) {
+      secondaryResults = getObjectByPath(secondaryResults[chipSection], 'itemSectionRenderer.contents');
+      if (secondaryResults === undefined) return false;
+    }
 
     const regularVid = secondaryResults.findIndex(x => has.call(x, 'compactVideoRenderer'));
     const vidObj = secondaryResults[regularVid].compactVideoRenderer;
