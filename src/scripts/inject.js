@@ -744,11 +744,19 @@
   }
 
   function fetchFilter(url, resp) {
-    if (['/youtubei/v1/search', '/youtubei/v1/browse', '/youtubei/v1/next'].includes(url.pathname)) {
+    if (['/youtubei/v1/search', '/youtubei/v1/browse'].includes(url.pathname)) {
       ObjectFilter(resp, filterRules.main, [], true);
+    }
+    else if (url.pathname === '/youtubei/v1/next') {
+      const postActions = [fixAutoplay];
+      if (currentBlock) postActions.push(redirectToNext);
+      ObjectFilter(resp, filterRules.main, postActions, true);
     }
     else if (url.pathname === '/youtubei/v1/guide') {
       ObjectFilter(resp, filterRules.guide, [], true);
+    }
+    else if (url.pathname === '/youtubei/v1/player') {
+      ObjectFilter(resp, filterRules.ytPlayer, [], true);
     }
   }
 
@@ -827,6 +835,7 @@
       } else {
         delete this.object.contents.twoColumnWatchNextResults.autoplay;
       }
+      this.object.responseContext.webResponseContextExtensionData.webPrefetchData.navigationEndpoints = [];
     } catch (e) {
       delete this.object.contents.twoColumnWatchNextResults.autoplay;
     }
