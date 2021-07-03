@@ -47,7 +47,7 @@
     const trapChain = function(owner, chain) {
       const pos = chain.indexOf('.');
       if ( pos === -1 ) {
-        trapProp(owner, chain, false, {
+        trapProp(owner, chain, true, {
           v: undefined,
           init: function(v) {
             if ( mustAbort(v) ) { return false; }
