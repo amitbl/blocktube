@@ -882,13 +882,14 @@
       if (!has.call(obj[attr], 'shortBylineText')) return;
       items = getObjectByPath(obj[attr], 'menu.menuRenderer.items');
       const topLevel = getObjectByPath(obj[attr], 'menu.menuRenderer.topLevelButtons');
-      if (!items && !topLevel) {
-        obj[attr].menu = { menuRenderer: { items: [] } };
-        items = obj[attr].menu.menuRenderer.items;
-      }
-      if (topLevel) {
-        obj[attr].menu.menuRenderer.items = [];
-        items = obj[attr].menu.menuRenderer.items;
+      if (!items) {
+        if (!topLevel) {
+          obj[attr].menu = { menuRenderer: { items: [] } };
+          items = obj[attr].menu.menuRenderer.items;
+        } else {
+          obj[attr].menu.menuRenderer.items = [];
+          items = obj[attr].menu.menuRenderer.items;
+        }
       }
       hasChannel = true;
       hasVideo = true;
