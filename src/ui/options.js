@@ -52,6 +52,7 @@
     storageData.options.mixes = $('disable_mixes').checked;
     storageData.options.autoplay = $('autoplay').checked;
     storageData.options.suggestions_only = $('suggestions_only').checked;
+    storageData.options.block_feedback = $('block_feedback').checked;
     storageData.options.enable_javascript = $('enable_javascript').checked;
     storageData.options.block_message = $('block_message').value;
     storageData.options.vidLength_type = $('vidLength_type').value;
@@ -100,6 +101,7 @@
     $('disable_mixes').checked     = get('options.mixes', false, obj);
     $('autoplay').checked          = get('options.autoplay', false, obj);
     $('suggestions_only').checked  = get('options.suggestions_only', false, obj);
+    $('block_feedback').checked    = get('options.block_feedback', false, obj);
     $('enable_javascript').checked = get('options.enable_javascript', false, obj);
     $('block_message').value       = get('options.block_message', '', obj);
 

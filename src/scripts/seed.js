@@ -162,6 +162,10 @@
         } else {
           document.getElementById('movie_player').stopVideo();
         }
+        if (this.data.serviceEndpoint) {
+          if (this.onTap) this.onTap(event);
+          else if (this.onTap_) this.onTap_(event);
+        }
       }
     },
     genericHook(cb) {

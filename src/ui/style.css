@@ -130,6 +130,28 @@ h1 {
   margin-top: 10px;
 }
 
+.tooltip {
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  background-color: #888;
+  text-align: center;
+  color: white;
+}
+
+.tooltip-link {
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  background-color: #888;
+  text-align: center;
+  text-decoration:none;
+  color: white;
+  font-weight: bold;
+}
+
 .CodeMirror {
   border: 1px solid black;
   height: auto;

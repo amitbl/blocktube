@@ -18,7 +18,8 @@ let storage = {
   options: {
     trending: false,
     mixes: false,
-    suggestions_only: false
+    suggestions_only: false,
+    block_feedback: false
   },
 };
 

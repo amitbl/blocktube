@@ -894,9 +894,18 @@
       hasChannel = true;
       hasVideo = true;
     }
-    const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] } } };
-    const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] } } };
+
     if (items instanceof Array){
+      const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] } } };
+      const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] } } };
+      if (storageData.options.block_feedback)
+        items.forEach((e) => {
+          if (getObjectByPath(e, 'menuServiceItemRenderer.icon.iconType') === 'NOT_INTERESTED' && hasVideo) {
+            blockVid.menuServiceItemRenderer.serviceEndpoint = JSON.parse(JSON.stringify(e.menuServiceItemRenderer.serviceEndpoint))
+          } else if (getObjectByPath(e, 'menuServiceItemRenderer.icon.iconType') === 'REMOVE' && hasChannel) {
+            blockCh.menuServiceItemRenderer.serviceEndpoint = JSON.parse(JSON.stringify(e.menuServiceItemRenderer.serviceEndpoint))
+          }
+        });
       if (hasChannel) items.push(blockCh);
       if (hasVideo) items.push(blockVid);
     }
