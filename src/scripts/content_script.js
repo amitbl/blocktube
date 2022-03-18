@@ -32,7 +32,9 @@
 
   // Inject seed
   const seed = document.createElement('script');
-  seed.textContent = '{SEED_CONTENTS}';
+  seed.textContent = `
+  {SEED_CONTENTS}
+  `;
   seed.async = false;
   (document.head || document.documentElement).prepend(seed);
 

@@ -7,17 +7,6 @@
 
   window.btDispatched = false;
 
-  const deepGet = (p, o) => p.reduce((xs, x) => (xs && xs[x]) ? xs[x] : null, o);
-
-  function deepGetFirst(paths, o) {
-    for (let i = 0; i < paths.length; i++) {
-      let res = deepGet(paths[i], o);
-      if (res) {
-        return res;
-      }
-    }
-  }
-
   function createProxyHook(path, hookKeys) {
     path = path.split('.');
 
@@ -69,104 +58,8 @@
   ];
 
   const hooks = {
-    menuOnTap(event) {
-      const menuAction = this.getElementsByTagName('yt-formatted-string')[0].textContent;
-      if (!['Block Channel', 'Block Video'].includes(menuAction)) {
-        if (this.onTap) this.onTap(event);
-        else if (this.onTap_) this.onTap_(event);
-        return;
-      }
-
-      if (window.btReloadRequired) {
-        window.btExports.openToast("BlockTube was updated, this tab needs to be reloaded to use this function", 5000);
-        return;
-      }
-
-      let type;
-      let data;
-      let videoData;
-      let channelData;
-      const parentDom = this.parentComponent.eventSink_.parentComponent;
-      const parentData = parentDom.data;
-      let removeParent = true;
-
-      // Video player context menu
-      if (parentDom.tagName === 'YTD-VIDEO-PRIMARY-INFO-RENDERER') {
-        const player = document.getElementsByTagName('ytd-page-manager')[0].data.playerResponse;
-        const owner = document.getElementsByTagName('ytd-video-owner-renderer')[0].data;
-        const ownerUCID = owner.title.runs[0].navigationEndpoint.browseEndpoint.browseId;
-        let playerUCID = player.videoDetails.channelId;
-        if (playerUCID !== ownerUCID) {
-          playerUCID = [playerUCID, ownerUCID];
-        }
-        channelData = {
-          text: player.videoDetails.author,
-          id: playerUCID,
-        };
-        videoData = {
-          text: player.videoDetails.title,
-          id: player.videoDetails.videoId,
-        };
-
-        removeParent = false;
-      } else {
-        channelData = {
-          text: deepGetFirst([
-            ['shortBylineText', 'runs', 0, 'text'],
-            ['authorText', 'simpleText'],
-            ['authorText', 'runs', 0, 'text']], parentData),
-          id: deepGetFirst([
-            ['shortBylineText', 'runs', 0 ,'navigationEndpoint', 'browseEndpoint', 'browseId'],
-            ['authorEndpoint', 'browseEndpoint', 'browseId']], parentData),
-        };
-        videoData = {
-          text: deepGetFirst([
-            ['title', 'simpleText'],
-            ['title', 'runs', 0, 'text']], parentData),
-          id: parentData.videoId,
-        };
-      }
-
-      switch (menuAction) {
-        case 'Block Channel': {
-          type = 'channelId';
-          data = channelData;
-          break;
-        }
-        case 'Block Video': {
-          type = 'videoId';
-          data = videoData;
-          break;
-        }
-        default:
-          break;
-      }
-
-      if (data && type) {
-        postMessage('contextBlockData', { type, info: data });
-        if (removeParent) {
-          if (['YTD-COMMENT-RENDERER', 'YTD-BACKSTAGE-POST-RENDERER', 'YTD-POST-RENDERER'].includes(parentDom.tagName)) {
-            parentDom.parentNode.remove();
-          }
-          else if (parentDom.tagName === 'YTD-MOVIE-RENDERER') {
-            parentDom.remove();
-          }
-          else {
-            parentDom.dismissedRenderer = {
-              notificationMultiActionRenderer: {
-                responseText: {simpleText: 'Blocked'},
-              }
-            };
-            parentDom.setAttribute('is-dismissed', '');
-          }
-        } else {
-          document.getElementById('movie_player').stopVideo();
-        }
-        if (this.data.serviceEndpoint) {
-          if (this.onTap) this.onTap(event);
-          else if (this.onTap_) this.onTap_(event);
-        }
-      }
+    menuOnTap(...args) {
+      window.btExports.menuOnTap.call(this, ...args);
     },
     genericHook(cb) {
       return function (...args) {
