@@ -163,6 +163,7 @@
     ],
     badges: 'badges',
     publishTimeText: 'publishedTimeText.simpleText',
+    percentWatched: 'thumbnailOverlays.thumbnailOverlayResumePlaybackRenderer.percentDurationWatched'
   };
 
   const filterRules = {
@@ -359,6 +360,8 @@
   }
 
   ObjectFilter.prototype.isDataEmpty = function () {
+    if (!isNaN(storageData.options.percent_watched_hide)) return false;
+
     if (!isNaN(storageData.filterData.vidLength[0]) ||
         !isNaN(storageData.filterData.vidLength[1])) return false;
 
@@ -387,6 +390,9 @@
       }
 
       if (value === undefined) return false;
+
+      if (h === 'percentWatched' && objectType != 'playlistPanelVideoRenderer'
+          && storageData.options.percent_watched_hide && parseInt(value) >= storageData.options.percent_watched_hide) return true;
 
       // badges are also arrays, but they're processed later on.
       if (!(h === 'channelBadges' || h === 'badges') && value instanceof Array) {

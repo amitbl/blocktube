@@ -56,6 +56,7 @@
     storageData.options.enable_javascript = $('enable_javascript').checked;
     storageData.options.block_message = $('block_message').value;
     storageData.options.vidLength_type = $('vidLength_type').value;
+    storageData.options.percent_watched_hide = parseInt($('percent_watched_hide').value, 10);
 
     saveData('status_save');
   }
@@ -104,6 +105,7 @@
     $('block_feedback').checked    = get('options.block_feedback', false, obj);
     $('enable_javascript').checked = get('options.enable_javascript', false, obj);
     $('block_message').value       = get('options.block_message', '', obj);
+    $('percent_watched_hide').value = get('options.percent_watched_hide', NaN, obj);
 
     const jsContent = get('filterData.javascript', defaultJSFunction, obj);
     jsEditors['javascript'].setValue(jsContent);

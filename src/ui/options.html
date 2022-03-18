@@ -80,6 +80,10 @@
             <input id="block_message" type="text" autocomplete="off" />
           </div>
           <div>
+            <label class="block-label" for="percent_watched_hide">Hide videos watched more than</label>
+            <input id="percent_watched_hide" size="3" type="number" min="0" max="100" autocomplete="off" /> % <span class="tooltip" title="* This feature uses Youtube's watch time tracking and will only work when logged in&#10; * Matched videos are only hidden and will work on direct access and playlists">?</span>
+          </div>
+          <div>
             <label class="block-label" for="vidLength_0">Runtime blocking</label>
             <select id="vidLength_type" class="select">
               <option value="block">Block</option>

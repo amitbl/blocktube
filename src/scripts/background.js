@@ -14,6 +14,7 @@ let storage = {
     title: [],
     vidLength: [null, null],
     javascript: "",
+    percentWatchedHide: null
   },
   options: {
     trending: false,
