@@ -752,6 +752,35 @@
     });
   }
 
+  function playerMiscFilters() {
+    let start_obj = getObjectByPath(this.object, 'args.raw_player_response');
+    start_obj = (start_obj) ? start_obj : this.object;
+
+    if (storageData.options.disable_you_there === true) {
+      const playerMessages = getObjectByPath(start_obj, 'messages', []);
+      for (let i = playerMessages.length - 1; i >= 0; i -= 1) {
+        if (has.call(playerMessages[i], 'youThereRenderer')) {
+          playerMessages.splice(i, 1);
+        }
+      }
+    }
+
+    if (storageData.options.disable_db_normalize === true) {
+      const audioConfig = getObjectByPath(start_obj, 'playerConfig.audioConfig');
+      if (audioConfig !== undefined) {
+        audioConfig.loudnessDb = null;
+        audioConfig.perceptualLoudnessDb = null;
+        audioConfig.enablePerFormatLoudness = false;
+      }
+      const streamConfig = getObjectByPath(start_obj, 'streamingData.adaptiveFormats', []);
+      streamConfig.forEach((conf) => {
+          if (conf.loudnessDb !== undefined) {
+            conf.loudnessDb = 0.0;
+          }
+      })
+    }
+  }
+
   function fetchFilter(url, resp) {
     if (['/youtubei/v1/search', '/youtubei/v1/browse'].includes(url.pathname)) {
       ObjectFilter(resp, filterRules.main, [], true);
@@ -765,7 +794,7 @@
       ObjectFilter(resp, filterRules.guide, [], true);
     }
     else if (url.pathname === '/youtubei/v1/player') {
-      ObjectFilter(resp, filterRules.ytPlayer, [], true);
+      ObjectFilter(resp, filterRules.ytPlayer, [playerMiscFilters]);
     }
   }
 
@@ -779,7 +808,7 @@
           const player_resp = getObjectByPath(obj.player, 'args.player_response');
           obj.player.args.raw_player_response = JSON.parse(player_resp);
         } catch (e) { }
-        ObjectFilter(obj.player, filterRules.ytPlayer);
+        ObjectFilter(obj.player, filterRules.ytPlayer, [playerMiscFilters]);
       }
 
       if (has.call(obj, 'playerResponse')) {
@@ -936,7 +965,7 @@
         try {
           ytConfigPlayerConfig.embedded_player_response_parsed = JSON.parse(ytConfigPlayerConfig.embedded_player_response);
         } catch (e) { }
-        ObjectFilter(window.yt.config_, filterRules.ytPlayer);
+        ObjectFilter(window.yt.config_, filterRules.ytPlayer, [playerMiscFilters]);
       } else {
         defineProperty('yt.config_', undefined, (v) => {
           try {
@@ -944,14 +973,14 @@
               v.PLAYER_VARS.embedded_player_response_parsed = JSON.parse(v.PLAYER_VARS.embedded_player_response);
             }
           } catch (e) { }
-          ObjectFilter(window.yt.config_, filterRules.ytPlayer)
+          ObjectFilter(window.yt.config_, filterRules.ytPlayer, [playerMiscFilters])
         });
       }
     }
 
     const ytPlayerconfig = getObjectByPath(window, 'ytplayer.config');
     if (typeof ytPlayerconfig === 'object' && ytPlayerconfig !== null) {
-      ObjectFilter(window.ytplayer.config, filterRules.ytPlayer);
+      ObjectFilter(window.ytplayer.config, filterRules.ytPlayer, [playerMiscFilters]);
     } else {
       defineProperty('ytplayer.config', undefined, (v) => {
         const playerResp = getObjectByPath(v, 'args.player_response');
@@ -960,7 +989,7 @@
             v.args.raw_player_response = JSON.parse(playerResp);
           } catch (e) { }
         }
-        ObjectFilter(window.ytplayer.config, filterRules.ytPlayer)
+        ObjectFilter(window.ytplayer.config, filterRules.ytPlayer, [playerMiscFilters])
       });
     }
 

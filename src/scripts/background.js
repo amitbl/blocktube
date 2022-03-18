@@ -21,7 +21,12 @@ let storage = {
     mixes: false,
     shorts: false,
     suggestions_only: false,
-    block_feedback: false
+    autoplay: false,
+    enable_javascript: false,
+    block_message: "",
+    block_feedback: false,
+    disable_db_normalize: false,
+    disable_you_there: false
   },
 };
 
