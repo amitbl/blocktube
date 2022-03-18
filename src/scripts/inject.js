@@ -381,7 +381,7 @@
       if (filterPath === undefined) return false;
 
       const properties = storageData.filterData[h];
-      if (!jsFilterEnabled && (properties === undefined || properties.length === 0)) return false;
+      if (regexProps.includes(h) && (properties === undefined || properties.length === 0 && !jsFilterEnabled)) return false;
 
       const filterPathArr = filterPath instanceof Array ? filterPath : [filterPath];
       let value;
@@ -400,22 +400,26 @@
         value = this.flattenRuns(value);
       }
 
-      if (regexProps.includes(h) && properties.some(prop => prop && prop.test(value))) {
-        return true;
-      } else if (h === 'vidLength') {
+      if (regexProps.includes(h) && properties.some(prop => prop && prop.test(value))) return true;
+
+      if (h === 'vidLength') {
         const vidLen = parseTime(value);
+        if (vidLen === -2 && storageData.options.shorts) {
+          return true;
+        }
         if (vidLen > 0 && properties.length === 2) {
           if (storageData.options.vidLength_type === 'block') {
             if ((properties[0] !== null && vidLen >= properties[0]) && (properties[1] !== null && vidLen <= properties[1])) return true;
           } else {
             if ((properties[0] !== null && vidLen < properties[0]) || (properties[1] !== null && vidLen > properties[1])) return true;
           }
-
-          if (jsFilterEnabled) friendlyVideoObj[h] = vidLen;
         }
-      } else if (jsFilterEnabled) {
+        value = vidLen;
+      }
+
+      if (jsFilterEnabled) {
         if (h === 'viewCount') {
-          friendlyVideoObj[h] = parseViewCount(value);
+          value = parseViewCount(value);
         } else if (h === 'channelBadges' || h === 'badges') {
           const badges = [];
           value.forEach(br => {
@@ -430,10 +434,9 @@
               badges.push("live");
             }
           });
-          friendlyVideoObj[h] = badges;
-        } else {
-          friendlyVideoObj[h] = value;
+          value = badges;
         }
+        friendlyVideoObj[h] = value;
       }
 
       return false;
