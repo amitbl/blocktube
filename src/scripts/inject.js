@@ -120,6 +120,7 @@
     'compactVideoRenderer',
     'videoPrimaryInfoRenderer',
     'commentRenderer',
+    'playlistPanelVideoRenderer'
   ];
 
   // those properties can be safely deleted when one of thier child got filtered
@@ -936,7 +937,9 @@
       items = obj[attr].actionMenu.menuRenderer.items;
       hasChannel = true;
     } else {
-      if (!has.call(obj[attr], 'shortBylineText')) return;
+      hasChannel = has.call(obj[attr], 'shortBylineText');
+      hasVideo = true;
+
       items = getObjectByPath(obj[attr], 'menu.menuRenderer.items');
       const topLevel = getObjectByPath(obj[attr], 'menu.menuRenderer.topLevelButtons');
       if (!items) {
@@ -948,8 +951,6 @@
           items = obj[attr].menu.menuRenderer.items;
         }
       }
-      hasChannel = true;
-      hasVideo = true;
     }
 
     if (items instanceof Array){
