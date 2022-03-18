@@ -160,6 +160,21 @@
     });
   }
 
+  if (window.location.pathname.startsWith('/embed/')) {
+    const XMLHttpRequestResponse = Object.getOwnPropertyDescriptor(XMLHttpRequest.prototype, 'response');
+    Object.defineProperty(XMLHttpRequest.prototype, 'response', {
+      get: function() {
+        if(!fetch_uris.some(u => this.responseURL.includes(u))) {
+          return XMLHttpRequestResponse.get.call(this);
+        }
+        let res = JSON.parse(XMLHttpRequestResponse.get.call(this).replace(')]}\'', ''));
+        window.btExports.fetchFilter(new URL(this.responseURL), res);
+        return JSON.stringify(res);
+      },
+      configurable: true
+    });
+  }
+
   // Polymer elements modifications
   Object.defineProperty(window, 'Polymer', {
     get() {

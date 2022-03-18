@@ -315,10 +315,10 @@
       PLAYER_VARS: {
         properties: {
           videoId: ['video_id'],
-          channelId: ['embedded_player_response_parsed.embedPreview.thumbnailPreviewRenderer.videoDetails.embeddedPlayerOverlayVideoDetailsRenderer.expandedRenderer.embeddedPlayerOverlayVideoDetailsExpandedRenderer.subscribeButton.subscribeButtonRenderer.channelId'],
-          channelName: ['embedded_player_response_parsed.embedPreview.thumbnailPreviewRenderer.videoDetails.embeddedPlayerOverlayVideoDetailsRenderer.expandedRenderer.embeddedPlayerOverlayVideoDetailsExpandedRenderer.title.runs'],
-          title: ['embedded_player_response_parsed.embedPreview.thumbnailPreviewRenderer.title.runs'],
-          vidLength: ['embedded_player_response_parsed.embedPreview.thumbnailPreviewRenderer.videoDurationSeconds']
+          channelId: ['raw_player_response.embedPreview.thumbnailPreviewRenderer.videoDetails.embeddedPlayerOverlayVideoDetailsRenderer.expandedRenderer.embeddedPlayerOverlayVideoDetailsExpandedRenderer.subscribeButton.subscribeButtonRenderer.channelId'],
+          channelName: ['raw_player_response.embedPreview.thumbnailPreviewRenderer.videoDetails.embeddedPlayerOverlayVideoDetailsRenderer.expandedRenderer.embeddedPlayerOverlayVideoDetailsExpandedRenderer.title.runs'],
+          title: ['raw_player_response.embedPreview.thumbnailPreviewRenderer.title.runs'],
+          vidLength: ['raw_player_response.embedPreview.thumbnailPreviewRenderer.videoDurationSeconds']
         },
         customFunc: disableEmbedPlayer
       }
@@ -970,19 +970,18 @@
   }
 
   function startHook() {
-    const currentUrl = new URL(document.location);
-    if (currentUrl.pathname.startsWith('/embed/')) {
+    if (window.location.pathname.startsWith('/embed/')) {
       const ytConfigPlayerConfig = getObjectByPath(window, 'yt.config_.PLAYER_VARS');
       if (typeof ytConfigPlayerConfig === 'object' && ytConfigPlayerConfig !== null) {
         try {
-          ytConfigPlayerConfig.embedded_player_response_parsed = JSON.parse(ytConfigPlayerConfig.embedded_player_response);
+          ytConfigPlayerConfig.raw_player_response = JSON.parse(ytConfigPlayerConfig.embedded_player_response);
         } catch (e) { }
         ObjectFilter(window.yt.config_, filterRules.ytPlayer, [playerMiscFilters]);
       } else {
         defineProperty('yt.config_', undefined, (v) => {
           try {
             if (has.call(v, 'PLAYER_VARS')) {
-              v.PLAYER_VARS.embedded_player_response_parsed = JSON.parse(v.PLAYER_VARS.embedded_player_response);
+              v.PLAYER_VARS.raw_player_response = JSON.parse(v.PLAYER_VARS.embedded_player_response);
             }
           } catch (e) { }
           ObjectFilter(window.yt.config_, filterRules.ytPlayer, [playerMiscFilters])
