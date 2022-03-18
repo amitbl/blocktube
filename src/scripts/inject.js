@@ -326,7 +326,7 @@
       // sidemenu subscribed channels
       guideEntryRenderer: {
         properties: {
-          channelId: 'navigationEndpoint.browseEndpoint.browseId',
+          channelId: ['navigationEndpoint.browseEndpoint.browseId', 'icon.iconType'],
           channelName: ['title', 'formattedTitle.simpleText'],
         },
       },
@@ -709,6 +709,9 @@
   }
 
   function parseTime(timeStr) {
+    if (timeStr === 'SHORTS') {
+      return -2;
+    }
     const parts = String(timeStr).split(':').map(x => parseInt(x, 10));
     switch (parts.length) {
       case 3: {
@@ -816,6 +819,14 @@
 
     data.filterData.channelId.push(/^FEtrending$/);
     data.filterData.channelId.push(/^FEexplore$/);
+  }
+
+  function blockShorts(data) {
+    if (document.location.pathname.startsWith('/shorts/')) {
+      redirectToIndex();
+    }
+
+    data.filterData.channelId.push(/^TAB_SHORTS$/);
   }
 
   function fixAutoplay() {
@@ -983,6 +994,7 @@
     transformToRegExp(data);
     if (data.options.trending) blockTrending(data);
     if (data.options.mixes) blockMixes(data);
+    if (data.options.shorts) blockShorts(data);
 
     const shouldStartHook = (storageData === undefined);
     storageData = data;

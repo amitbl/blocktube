@@ -19,6 +19,7 @@ let storage = {
   options: {
     trending: false,
     mixes: false,
+    shorts: false,
     suggestions_only: false,
     block_feedback: false
   },

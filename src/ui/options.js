@@ -49,6 +49,7 @@
 
     storageData.uiPass = $('pass_save').value;
     storageData.options.trending = $('disable_trending').checked;
+    storageData.options.shorts = $('disable_shorts').checked;
     storageData.options.mixes = $('disable_mixes').checked;
     storageData.options.autoplay = $('autoplay').checked;
     storageData.options.suggestions_only = $('suggestions_only').checked;
@@ -99,6 +100,7 @@
 
     $('pass_save').value           = get('uiPass', '', obj);
     $('disable_trending').checked  = get('options.trending', false, obj);
+    $('disable_shorts').checked    = get('options.shorts', false, obj);
     $('disable_mixes').checked     = get('options.mixes', false, obj);
     $('autoplay').checked          = get('options.autoplay', false, obj);
     $('suggestions_only').checked  = get('options.suggestions_only', false, obj);
