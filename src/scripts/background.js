@@ -39,7 +39,7 @@ const utils = {
     if (entriesArr.length === 1 && entriesArr[0] === '') return [];
 
     // skip empty and comments lines
-    const filtered = [...new Set(entriesArr.filter(x => !(x === '' || x.startsWith('//'))))];
+    const filtered = [...new Set(entriesArr.filter(x => !(!x || x === '' || x.startsWith('//'))))];
 
     return filtered.map((v) => {
       v = v.trim();
