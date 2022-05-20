@@ -392,8 +392,9 @@
 
       if (value === undefined) return false;
 
-      if (h === 'percentWatched' && objectType != 'playlistPanelVideoRenderer'
-          && storageData.options.percent_watched_hide && parseInt(value) >= storageData.options.percent_watched_hide) return true;
+      if (h === 'percentWatched' && storageData.options.percent_watched_hide && objectType != 'playlistPanelVideoRenderer'
+           && !['/feed/history', '/feed/library', '/playlist'].includes(document.location.pathname)
+           && parseInt(value) >= storageData.options.percent_watched_hide) return true;
 
       // badges are also arrays, but they're processed later on.
       if (!(h === 'channelBadges' || h === 'badges') && value instanceof Array) {
