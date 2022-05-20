@@ -1121,7 +1121,7 @@
     let removeParent = true;
 
     // Video player context menu
-    if (parentDom.tagName === 'YTD-VIDEO-PRIMARY-INFO-RENDERER') {
+    if (parentDom.tagName === 'YTD-VIDEO-PRIMARY-INFO-RENDERER' || parentDom.tagName === 'YTD-WATCH-METADATA') {
       const player = document.getElementsByTagName('ytd-page-manager')[0].data.playerResponse;
       const owner = document.getElementsByTagName('ytd-video-owner-renderer')[0].data;
       const ownerUCID = owner.title.runs[0].navigationEndpoint.browseEndpoint.browseId;
