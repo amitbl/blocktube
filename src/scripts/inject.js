@@ -485,7 +485,7 @@
           related = undefined;
         }
 
-        const isMatch = storageData.options.mixes && h === 'radioRenderer' || this.matchFilterData(properties, filteredObject, h);
+        const isMatch = (storageData.options.mixes && (h === 'radioRenderer' || h === 'compactRadioRenderer')) || this.matchFilterData(properties, filteredObject, h);
         if (isMatch) {
           res.push({
             name: h,
