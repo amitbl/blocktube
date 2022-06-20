@@ -1175,11 +1175,18 @@
     if (data && type) {
       postMessage('contextBlockData', { type, info: data });
       if (removeParent) {
-        if (['YTD-COMMENT-RENDERER', 'YTD-BACKSTAGE-POST-RENDERER', 'YTD-POST-RENDERER'].includes(parentDom.tagName)) {
+        if (['YTD-BACKSTAGE-POST-RENDERER', 'YTD-POST-RENDERER'].includes(parentDom.tagName)) {
           parentDom.parentNode.remove();
         }
         else if (['YTD-PLAYLIST-PANEL-VIDEO-RENDERER', 'YTD-MOVIE-RENDERER'].includes(parentDom.tagName)) {
           parentDom.remove();
+        }
+        else if ('YTD-COMMENT-RENDERER' === parentDom.tagName) {
+          if (parentDom.parentNode.tagName === 'YTD-COMMENT-THREAD-RENDERER') {
+            parentDom.parentNode.remove();
+          } else {
+            parentDom.remove();
+          }
         }
         else {
           parentDom.dismissedRenderer = {
