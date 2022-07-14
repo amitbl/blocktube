@@ -1100,7 +1100,7 @@
   }
 
   function menuOnTap(event) {
-    const menuAction = this.getElementsByTagName('yt-formatted-string')[0].textContent;
+    const menuAction = this.getElementsByTagName('yt-formatted-string')[0].getRawText();
     if (!['Block Channel', 'Block Video'].includes(menuAction)) {
       if (this.onTap) this.onTap(event);
       else if (this.onTap_) this.onTap_(event);
