@@ -20,7 +20,7 @@
 
   const textAreas = ['title', 'channelName', 'channelId', 'videoId', 'comment'];
 
-  function loadData() {
+  function loadLocalData() {
     chrome.storage.local.get('storageData', (data) => {
       if (Object.keys(data).length > 0) {
         storageData = data.storageData;
@@ -29,11 +29,50 @@
     });
   }
 
-  function saveData(label = undefined) {
+  function loadCloudData() {
+    chrome.storage.sync.get('storageData', (data) => {
+      if (Object.keys(data).length > 0) {
+        storageData = data.storageData;
+      }
+      checkForLogin();
+    });
+  }
+
+  function saveLocalData(label = undefined) {
     if (!isLoggedIn) return;
     chrome.storage.local.set({ storageData }, () => {
       if (label !== undefined) setLabel(label, 'Options Saved');
     });
+  }
+
+  function saveCloudData(label = undefined) {
+    if (!isLoggedIn) return;
+    chrome.storage.sync.set({ storageData }, () => {
+      if (!(chrome.runtime.lastError) && (label !== undefined)) {
+        setLabel(label, 'Options Saved');
+      } else {
+        setLabel(label, "Storage quota exceeded!");
+        $('enable_cloud_syncing').checked = false;
+      }
+    });
+  }
+
+  function saveData(label = undefined){
+    if ($('enable_cloud_syncing').checked) {
+		saveCloudData(label);
+    }else {
+      saveLocalData(label);
+    }
+  }
+
+  function loadData(){
+	chrome.storage.local.get(['storageData'], (localData) => {
+		if (localData.storageData.options.enable_cloud_syncing) {
+			loadCloudData();
+		}else {
+			loadLocalData();
+		}
+	})
   }
 
   function saveForm() {
@@ -54,6 +93,7 @@
     storageData.options.autoplay = $('autoplay').checked;
     storageData.options.suggestions_only = $('suggestions_only').checked;
     storageData.options.disable_db_normalize = $('disable_db_normalize').checked;
+    storageData.options.enable_cloud_syncing = $('enable_cloud_syncing').checked;
     storageData.options.disable_you_there = $('disable_you_there').checked;
     storageData.options.block_feedback = $('block_feedback').checked;
     storageData.options.enable_javascript = $('enable_javascript').checked;
@@ -112,6 +152,7 @@
     $('enable_javascript').checked = get('options.enable_javascript', false, obj);
     $('block_message').value       = get('options.block_message', '', obj);
     $('percent_watched_hide').value = get('options.percent_watched_hide', NaN, obj);
+    $('enable_cloud_syncing').checked = get('options.enable_cloud_syncing', false, obj);
 
     const jsContent = get('filterData.javascript', defaultJSFunction, obj);
     jsEditors['javascript'].setValue(jsContent);
@@ -247,6 +288,19 @@
 
   // !! Start
   document.addEventListener('DOMContentLoaded', loadData);
+
+	$('enable_cloud_syncing').addEventListener('change', (e)=> {
+		chrome.storage.local.get('storageData', (data) => {
+			if (Object.keys(data).length > 0) {
+				let storageData = data.storageData;
+				storageData.options.enable_cloud_syncing = e.target.checked;
+				chrome.storage.local.set({storageData}, () => {
+					loadData();
+				})
+			}
+		});
+
+	})
 
   $('options').addEventListener('submit', (evt) => {
     evt.preventDefault();
