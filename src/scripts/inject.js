@@ -121,7 +121,8 @@
     'compactVideoRenderer',
     'videoPrimaryInfoRenderer',
     'commentRenderer',
-    'playlistPanelVideoRenderer'
+    'playlistPanelVideoRenderer',
+    'reelItemRenderer'
   ];
 
   // those properties can be safely deleted when one of thier child got filtered
@@ -305,6 +306,20 @@
         }
       },
 
+      reelItemRenderer: {
+        properties: {
+          videoId: 'videoId',
+          channelId: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.channelNavigationEndpoint.browseEndpoint.browseId',
+          channelName: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.channelTitleText.runs.text',
+          title: ['headline.simpleText', 'headline.runs'],
+          publishTimeText: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.timestampText.simpleText'
+        }
+      },
+
+      richShelfRenderer: {
+        channelId: 'endpoint.browseEndpoint.browseId'
+      },
+
     },
     ytPlayer: {
       args: {
@@ -361,6 +376,8 @@
     }
   }
 
+  const mergedFilterRules = Object.assign(filterRules.main, filterRules.comments);
+
   // !! ObjectFilter
   function ObjectFilter(object, filterRules, postActions = [], contextMenus = false) {
     if (!(this instanceof ObjectFilter))
@@ -414,7 +431,7 @@
 
       // badges are also arrays, but they're processed later on.
       if (!(h === 'channelBadges' || h === 'badges') && value instanceof Array) {
-        value = this.flattenRuns(value);
+        value = flattenRuns(value);
       }
 
       if (regexProps.includes(h) && properties.some(prop => prop && prop.test(value))) return true;
@@ -471,14 +488,16 @@
     return doBlock;
   };
 
-  ObjectFilter.prototype.flattenRuns = function (arr) {
-    return arr.reduce((res, v) => {
-      if (has.call(v, 'text')) {
-        res.push(v.text);
-      }
-      return res;
-    }, []).join(' ');
-  };
+  ObjectFilter.prototype.isExtendedMatched = function(filteredObject, h) {
+    if (storageData.options.movies) {
+      if (h === 'movieRenderer' || h === 'compactMovieRenderer') return true;
+      if (h === 'videoRenderer' && !getObjectByPath(filteredObject, "shortBylineText.runs.navigationEndpoint.browseEndpoint")) return true;
+    }
+    if (storageData.options.shorts && h === 'reelItemRenderer') return true;
+    if (storageData.options.mixes && (h === 'radioRenderer' || h === 'compactRadioRenderer')) return true;
+
+    return false;
+  }
 
   ObjectFilter.prototype.matchFilterRule = function (obj) {
     if (this.isDataEmpty()) return [];
@@ -501,7 +520,7 @@
           related = undefined;
         }
 
-        const isMatch = (storageData.options.mixes && (h === 'radioRenderer' || h === 'compactRadioRenderer')) || this.matchFilterData(properties, filteredObject, h);
+        const isMatch = this.isExtendedMatched(filteredObject, h) || this.matchFilterData(properties, filteredObject, h);
         if (isMatch) {
           res.push({
             name: h,
@@ -705,6 +724,26 @@
   }
 
   // !! Utils
+
+  function flattenRuns(arr) {
+    if (!(arr instanceof Array)) return arr;
+    return arr.reduce((res, v) => {
+      if (has.call(v, 'text')) {
+        res.push(v.text);
+      }
+      return res;
+    }, []).join(' ');
+  };
+
+  function getFlattenByPath(obj, filterPath) {
+    if (filterPath === undefined) return;
+    const filterPathArr = filterPath instanceof Array ? filterPath : [filterPath];
+    let value;
+    for (let idx = 0; idx < filterPathArr.length; idx += 1) {
+      value = getObjectByPath(obj, filterPathArr[idx]);
+      if (value !== undefined) return flattenRuns(value);
+    }
+  }
 
   function postMessage(type, data) {
     window.postMessage({ from: 'BLOCKTUBE_PAGE', type, data }, document.location.origin);
@@ -994,6 +1033,11 @@
         });
       if (hasChannel) items.push(blockCh);
       if (hasVideo) items.push(blockVid);
+
+      if (hasChannel || hasVideo) {
+        obj[attr]._btOriginalAttr = attr;
+      }
+
     }
   }
 
@@ -1046,10 +1090,10 @@
 
     const postActions = [fixAutoplay];
     if (typeof window.ytInitialData === 'object' && window.ytInitialData !== null) {
-      ObjectFilter(window.ytInitialData, Object.assign(filterRules.main, filterRules.comments), (window.ytInitialData.contents && currentBlock) ? postActions.concat(redirectToNext) : postActions, true);
+      ObjectFilter(window.ytInitialData, mergedFilterRules, (window.ytInitialData.contents && currentBlock) ? postActions.concat(redirectToNext) : postActions, true);
     } else {
       defineProperty('ytInitialData', undefined, (v) => {
-        ObjectFilter(v, Object.assign(filterRules.main, filterRules.comments), (v.contents && currentBlock) ? postActions.concat(redirectToNext) : postActions, true)
+        ObjectFilter(v, mergedFilterRules, (v.contents && currentBlock) ? postActions.concat(redirectToNext) : postActions, true)
       });
     }
 
@@ -1164,21 +1208,18 @@
 
       removeParent = false;
     } else {
+      let attrKey = parentData._btOriginalAttr;
+      let searchIn = mergedFilterRules[attrKey].properties ? mergedFilterRules[attrKey].properties : mergedFilterRules[attrKey];
+
       channelData = {
-        text: deepGetFirst([
-          ['shortBylineText', 'runs', 0, 'text'],
-          ['authorText', 'simpleText'],
-          ['authorText', 'runs', 0, 'text']], parentData),
-        id: deepGetFirst([
-          ['shortBylineText', 'runs', 0 ,'navigationEndpoint', 'browseEndpoint', 'browseId'],
-          ['authorEndpoint', 'browseEndpoint', 'browseId']], parentData),
-      };
+        id: getFlattenByPath(parentData, searchIn.channelId),
+        text: getFlattenByPath(parentData, searchIn.channelName),
+      }
+
       videoData = {
-        text: deepGetFirst([
-          ['title', 'simpleText'],
-          ['title', 'runs', 0, 'text']], parentData),
-        id: parentData.videoId,
-      };
+        id: getFlattenByPath(parentData, searchIn.videoId),
+        text: getFlattenByPath(parentData, searchIn.title),
+      }
     }
 
     switch (menuAction) {
