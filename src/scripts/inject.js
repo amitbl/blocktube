@@ -115,6 +115,7 @@
     'backstagePostRenderer',
     'postRenderer',
     'movieRenderer',
+    'compactMovieRenderer',
     'videoRenderer',
     'gridVideoRenderer',
     'compactVideoRenderer',
@@ -130,6 +131,7 @@
     'horizontalListRenderer',
     'verticalListRenderer',
     'shelfRenderer',
+    'richShelfRenderer',
     'gridRenderer',
     'expandedShelfContentsRenderer',
     'comment',
@@ -169,7 +171,20 @@
 
   const filterRules = {
     main: {
-      movieRenderer: baseRules,
+      compactMovieRenderer: {
+        videoId: 'videoId',
+        title: ['title.runs', 'title.simpleText'],
+        vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text.simpleText',
+        badges: 'badges',
+        percentWatched: 'thumbnailOverlays.thumbnailOverlayResumePlaybackRenderer.percentDurationWatched'
+      },
+      movieRenderer: {
+        videoId: 'videoId',
+        title: ['title.runs', 'title.simpleText'],
+        vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text.simpleText',
+        badges: 'badges',
+        percentWatched: 'thumbnailOverlays.thumbnailOverlayResumePlaybackRenderer.percentDurationWatched'
+      },
       gridVideoRenderer: baseRules,
       videoRenderer: baseRules,
       radioRenderer: baseRules,
@@ -361,6 +376,7 @@
   }
 
   ObjectFilter.prototype.isDataEmpty = function () {
+    if (storageData.options.shorts || storageData.options.movies || storageData.options.mixes) return false;
     if (!isNaN(storageData.options.percent_watched_hide)) return false;
 
     if (!isNaN(storageData.filterData.vidLength[0]) ||
@@ -941,7 +957,15 @@
       items = obj[attr].actionMenu.menuRenderer.items;
       hasChannel = true;
     } else {
-      hasChannel = has.call(obj[attr], 'shortBylineText');
+
+      if (attr === 'movieRenderer' || attr === 'compactMovieRenderer') {
+        hasChannel = false;
+      } else if (has.call(obj[attr], 'shortBylineText') && getObjectByPath(obj[attr], 'shortBylineText.runs.navigationEndpoint.browseEndpoint')) {
+        hasChannel = true;
+      } else if (attr === 'reelItemRenderer') {
+        hasChannel = true;
+      }
+
       hasVideo = true;
 
       items = getObjectByPath(obj[attr], 'menu.menuRenderer.items');

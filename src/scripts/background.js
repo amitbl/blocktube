@@ -20,6 +20,7 @@ let storage = {
     trending: false,
     mixes: false,
     shorts: false,
+    movies: false,
     suggestions_only: false,
     autoplay: false,
     enable_javascript: false,
