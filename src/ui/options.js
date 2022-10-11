@@ -46,10 +46,11 @@
 
     storageData.filterData.vidLength   = [vidLenMin, vidLenMax];
     storageData.filterData.javascript  = jsEditors['javascript'].getValue();
-
+debugger;
     storageData.uiPass = $('pass_save').value;
     storageData.options.trending = $('disable_trending').checked;
     storageData.options.shorts = $('disable_shorts').checked;
+    storageData.options.allow_shorts_on_subs_page = $('allow_shorts_on_subs_page').checked;
     storageData.options.movies = $('disable_movies').checked;
     storageData.options.mixes = $('disable_mixes').checked;
     storageData.options.autoplay = $('autoplay').checked;
@@ -97,6 +98,7 @@
     });
 
     const vidLength = get('filterData.vidLength', [NaN, NaN], obj);
+    debugger;
     $('vidLength_0').value         = vidLength[0];
     $('vidLength_1').value         = vidLength[1];
     $('vidLength_type').value      = get('options.vidLength_type', 'allow', obj);
@@ -104,6 +106,7 @@
     $('pass_save').value           = get('uiPass', '', obj);
     $('disable_trending').checked  = get('options.trending', false, obj);
     $('disable_shorts').checked    = get('options.shorts', false, obj);
+    $('allow_shorts_on_subs_page').checked = get('options.allow_shorts_on_subs_page', false, obj);
     $('disable_movies').checked    = get('options.movies', false, obj);
     $('disable_mixes').checked     = get('options.mixes', false, obj);
     $('autoplay').checked          = get('options.autoplay', false, obj);
