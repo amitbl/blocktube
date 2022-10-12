@@ -46,7 +46,6 @@
 
     storageData.filterData.vidLength   = [vidLenMin, vidLenMax];
     storageData.filterData.javascript  = jsEditors['javascript'].getValue();
-debugger;
     storageData.uiPass = $('pass_save').value;
     storageData.options.trending = $('disable_trending').checked;
     storageData.options.shorts = $('disable_shorts').checked;
@@ -98,7 +97,6 @@ debugger;
     });
 
     const vidLength = get('filterData.vidLength', [NaN, NaN], obj);
-    debugger;
     $('vidLength_0').value         = vidLength[0];
     $('vidLength_1').value         = vidLength[1];
     $('vidLength_type').value      = get('options.vidLength_type', 'allow', obj);
