@@ -922,7 +922,7 @@
   }
 
   function blockShorts(data) {
-    if (document.location.pathname.startsWith('/shorts/')) {
+    if (document.location.pathname.startsWith('/shorts/') && !data.options.allow_shorts_on_subs_page) {
       redirectToIndex();
     }
 
