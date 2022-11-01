@@ -491,7 +491,7 @@
   ObjectFilter.prototype.isExtendedMatched = function(filteredObject, h) {
     if (storageData.options.movies) {
       if (h === 'movieRenderer' || h === 'compactMovieRenderer') return true;
-      if (h === 'videoRenderer' && !getObjectByPath(filteredObject, "shortBylineText.runs.navigationEndpoint.browseEndpoint")) return true;
+      if (h === 'videoRenderer' && !getObjectByPath(filteredObject, "shortBylineText.runs.navigationEndpoint.browseEndpoint") && filteredObject.longBylineText && filteredObject.badges) return true;
     }
     if (storageData.options.shorts && h === 'reelItemRenderer') return true;
     if (storageData.options.mixes && (h === 'radioRenderer' || h === 'compactRadioRenderer')) return true;
