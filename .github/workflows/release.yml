@@ -25,11 +25,13 @@ jobs:
           echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
       - name: Create GitHub release
         id: create_release
-        uses: actions/create-release@v1
+        uses: ncipollo/release-action@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          release_name: ${{ steps.release_info.outputs.VERSION }}
+          tag: ${{ steps.release_info.outputs.VERSION }}
+          name: ${{ steps.release_info.outputs.VERSION }}
+          allowUpdates: true
       - name: Build packages
         run: |
           ./tools/build.sh firefox_selfhosted
