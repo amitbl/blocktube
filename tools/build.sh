@@ -30,7 +30,7 @@ uglify() {
 
 zipfile() {
     cd $DEST
-    zip "$DEST/blocktube_${BROWSER}_${VERSION}.zip" -qr ./*
+    zip "$DEST/blocktube_${BROWSER}_v${VERSION}.zip" -qr ./*
 }
 
 clean() {
