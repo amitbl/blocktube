@@ -22,7 +22,7 @@ jobs:
       - name: Get release information
         id: release_info
         run: |
-          echo ::set-output name=VERSION::${GITHUB_REF_NAME}
+          echo "VERSION=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
       - name: Create GitHub release
         id: create_release
         uses: actions/create-release@v1
