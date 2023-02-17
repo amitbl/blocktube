@@ -2,13 +2,14 @@
 
 SCRIPT=`realpath $0`
 BASEDIR=$(dirname $(dirname $SCRIPT))
-VERSION="${2:-dev}"
+VERSION="${2:-`cat $BASEDIR/VERSION`}"
 
 copy_files() {
     mkdir -p $DEST
     cp -R $BASEDIR/src      $DEST
     cp -R $BASEDIR/assets   $DEST
     cp -R $BASEDIR/LICENSE  $DEST
+    cp -R $BASEDIR/VERSION  $DEST
     cp platform/$BROWSER/manifest.json $DEST
 }
 
