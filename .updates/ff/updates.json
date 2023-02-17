@@ -2,16 +2,6 @@
   "addons": {
     "{58204f8b-01c2-4bbc-98f8-9a90458fd9ef}": {
       "updates": [
-        {
-          "version": "v0.3.34",
-          "update_link": "https://github.com/amitbl/blocktube/releases/download/v0.3.34/blocktube_firefox_selfhosted_v0.3.34.xpi",
-          "update_hash": "sha512:d81ce4df7a4aa8c50e4c69d578584b94ed2c334f6e4ccfee200345b5652ee2503291311d7a6059ee59d0cec9ce2a81961280e2532764ac7aaa7e6581c0835ad7"
-        },
-        {
-          "version": "v0.3.35",
-          "update_link": "https://github.com/amitbl/blocktube/releases/download/v0.3.35/blocktube_firefox_selfhosted_v0.3.35.xpi",
-          "update_hash": "sha512:141aac7602408c623e1f24a7613190e2b87c5fc94abdefd000e873ab175b003b3aab16c66ce6d59116a5f389e96f745eaaacfdad04c0d75274fd1870a0047058"
-        }
       ]
     }
   }
