@@ -2,6 +2,11 @@
   "addons": {
     "{58204f8b-01c2-4bbc-98f8-9a90458fd9ef}": {
       "updates": [
+        {
+          "version": "v0.3.35",
+          "update_link": "https://github.com/amitbl/blocktube/releases/download/v0.3.35/blocktube_firefox_selfhosted_v0.3.35.xpi",
+          "update_hash": "sha512:d59e8badda3ffed2577be111855ab3f65b6b0abd6d5c2b7496941dc8265ad4cca5a2b66d7a68aa19d9976ae7d450cbc78e95505ac804aec91832c4e435c0c38e"
+        }
       ]
     }
   }
