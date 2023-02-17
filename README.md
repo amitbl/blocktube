@@ -25,9 +25,9 @@ Filter and block unwanted content from YouTube™.
 
   In the meantime it's possible to install the extension directly from GitHub from the link below
 
-* [**Firefox GitHub Self Hosted**](https://github.com/amitbl/blocktube/releases/latest/download/blocktube_firefox_selfhosted.xpi)
+* [**Firefox GitHub Self Hosted** (ESR/Developer/Nightly versions only)](https://github.com/amitbl/blocktube/releases/latest/download/blocktube_firefox_selfhosted.xpi)
 
-  This works only if you set `xpinstall.signatures.required` to `false` in `about:config`.<sup>[see "Add-on signing in Firefox"](https://support.mozilla.org/en-US/kb/add-on-signing-in-firefox)</sup>
+  This works only if you set `xpinstall.signatures.required` to `false` in `about:config`. <sup>[see "Add-on signing in Firefox"](https://support.mozilla.org/en-US/kb/add-on-signing-in-firefox)</sup>
 
 ## FAQ
 * I'm still using YouTube's old layout desgin, can I use this extension?  
@@ -65,7 +65,7 @@ Filter and block unwanted content from YouTube™.
 ```
 # Install build requirements
 sudo apt install nodejs npm
-npm install -g terser
+sudo npm install -g terser
 
 # Clone Repo
 git clone https://github.com/amitbl/blocktube
