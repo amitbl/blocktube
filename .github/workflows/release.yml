@@ -59,7 +59,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: dist/firefox_selfhosted/blocktube_firefox_selfhosted_${{ env.VERSION }}.zip
-          asset_name: blocktube_firefox_selfhosted_${{ env.VERSION }}.xpi
+          asset_name: blocktube_firefox_selfhosted.xpi
           asset_content_type: application/octet-stream
       - name: Update Firefox self hosted manifest
         run: |
