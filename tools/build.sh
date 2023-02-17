@@ -26,7 +26,7 @@ uglify() {
 
 zipfile() {
     cd $DEST
-    zip "$DEST/blocktube_$BROWSER_$VERSION.zip" -qr ./*
+    zip "$DEST/blocktube_${BROWSER}_${VERSION}.zip" -qr ./*
 }
 
 clean() {
@@ -41,7 +41,12 @@ build() {
     zipfile
 }
 
-if [ "$1" == "firefox" ]; then
+if [ "$1" == "firefox_selfhosted" ]; then
+    DEST=$BASEDIR/dist/firefox_selfhosted
+    BROWSER=firefox_selfhosted
+    echo "Building Firefox Self-Hosted to $DEST"
+    build
+elif [ "$1" == "firefox" ]; then
     DEST=$BASEDIR/dist/firefox
     BROWSER=firefox
     echo "Building Firefox to $DEST"

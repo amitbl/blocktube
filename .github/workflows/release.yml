@@ -1,0 +1,68 @@
+name: BlockTube release
+
+on:
+  create:
+    branches: master
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    permissions:
+      contents: write
+    name: Build packages
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Get release information
+        id: release_info
+        run: |
+          echo ::set-output name=VERSION::${GITHUB_REF_NAME}
+      - name: Create GitHub release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          tag_name: ${{ steps.release_info.outputs.VERSION }}
+          release_name: ${{ steps.release_info.outputs.VERSION }}
+          prerelease: true
+      - name: Build packages
+        run: |
+          ./build.sh firefox_selfhosted
+          ./build.sh chrome
+      - name: Upload Chromium package
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/build/blocktube_chrome_${{ steps.release_info.outputs.VERSION }}.zip
+          asset_name: blocktube_chrome_${{ steps.release_info.outputs.VERSION }}.zip
+          asset_content_type: application/octet-stream
+      - name: Upload Firefox package
+        id: ff_selfhosted_release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/build/blocktube_firefox_selfhosted_${{ steps.release_info.outputs.VERSION }}.zip
+          asset_name: blocktube_firefox_selfhosted_${{ steps.release_info.outputs.VERSION }}.xpi
+          asset_content_type: application/octet-stream
+      - name: Update Firefox self hosted manifest
+        run: |
+          git checkout master
+          ./build_ff_update_manifest.py ${{ steps.release_info.outputs.VERSION }} \
+          ${{ steps.ff_selfhosted_release.outputs.browser_download_url }} \
+          $(sha512sum ./dist/build/blocktube_firefox_selfhosted_${{ steps.release_info.outputs.VERSION }}.zip | awk '{print "sha512:"$1}')
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .updates/ff/updates.json
+          git commit -m "Update Firefox self hosted manifest to version ${{ steps.release_info.outputs.VERSION }}"
+          git push -u origin master
