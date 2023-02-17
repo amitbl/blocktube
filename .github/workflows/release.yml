@@ -29,7 +29,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         with:
-          tag_name: ${{ steps.release_info.outputs.VERSION }}
           release_name: ${{ steps.release_info.outputs.VERSION }}
       - name: Build packages
         run: |
