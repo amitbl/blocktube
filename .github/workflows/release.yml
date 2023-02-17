@@ -40,8 +40,8 @@ jobs:
           allowUpdates: true
       - name: Build packages
         run: |
-          ./tools/build.sh firefox_selfhosted ${{ env.VERSION }}
-          ./tools/build.sh chrome ${{ env.VERSION }}
+          ./tools/build.sh firefox_selfhosted
+          ./tools/build.sh chrome
       - name: Upload Chromium package
         uses: shogo82148/actions-upload-release-asset@v1
         env:
