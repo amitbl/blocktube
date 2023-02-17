@@ -19,7 +19,15 @@ Filter and block unwanted content from YouTube™.
 ## Install
 
 * [**Chrome Webstore**](https://chrome.google.com/webstore/detail/blocktube/bbeaicapbccfllodepmimpkgecanonai?hl=en-US)
-* [**Firefox AMO**](https://addons.mozilla.org/en-US/firefox/addon/blocktube/)
+* ~~[**Firefox AMO**](https://addons.mozilla.org/en-US/firefox/addon/blocktube/)~~
+
+  The extension is temporary disabled in AMO (https://github.com/amitbl/blocktube/issues/281)
+
+  In the meantime it's possible to install the extension directly from GitHub from the link below
+
+* [**Firefox GitHub Self Hosted**](https://github.com/amitbl/blocktube/releases/latest/download/blocktube_firefox_selfhosted.xpi)
+
+  This works only if you set `xpinstall.signatures.required` to `false` in `about:config`.<sup>[see "Add-on signing in Firefox"](https://support.mozilla.org/en-US/kb/add-on-signing-in-firefox)</sup>
 
 ## FAQ
 * I'm still using YouTube's old layout desgin, can I use this extension?  
@@ -50,14 +58,38 @@ Filter and block unwanted content from YouTube™.
 
 * How can I ensure this extension cannot be bypassed?   
   TODO
-  
+
+## Development & Build
+
+*Ubuntu*
+```
+# Install build requirements
+sudo apt install nodejs npm
+npm install -g terser
+
+# Clone Repo
+git clone https://github.com/amitbl/blocktube
+
+### Make your changes ###
+
+# Build package
+./tools/build.sh firefox
+./tools/build.sh chrome
+
+# Output packages locations
+./dist/firefox/blocktube_firefox_VERSION.zip
+./dist/chrome/blocktube_chrome_VERSION.zip
+
+# Temporary installation / debugging
+Firefox: https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/
+Chrome: https://developer.chrome.com/docs/extensions/mv3/getstarted/development-basics/#load-unpacked
+```
+
 ## Future work
 
 * User-friendly options UI
 * Sync options to cloud provider / enterprise policies
-* ~~Context menu helper~~ Done
 * Whitelist mode
-* YouTube Gaming support
 * Dynamic rules (match multiple rules to block a video)
 
 ## License
