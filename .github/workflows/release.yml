@@ -31,7 +31,6 @@ jobs:
         with:
           tag_name: ${{ steps.release_info.outputs.VERSION }}
           release_name: ${{ steps.release_info.outputs.VERSION }}
-          prerelease: true
       - name: Build packages
         run: |
           ./tools/build.sh firefox_selfhosted
