@@ -16,7 +16,7 @@ with open('./.updates/ff/updates.json', 'r') as f:
 
 
 update_obj = {
-    "version": NEW_VERSION,
+    "version": NEW_VERSION.replace('v', ''),
     "update_link": NEW_VERSION_URL,
     "update_hash": NEW_VERSION_HASH
 }
