@@ -41,7 +41,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/build/blocktube_chrome_${{ steps.release_info.outputs.VERSION }}.zip
+          asset_path: dist/chrome/blocktube_chrome_${{ steps.release_info.outputs.VERSION }}.zip
           asset_name: blocktube_chrome_${{ steps.release_info.outputs.VERSION }}.zip
           asset_content_type: application/octet-stream
       - name: Upload Firefox package
@@ -51,7 +51,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/build/blocktube_firefox_selfhosted_${{ steps.release_info.outputs.VERSION }}.zip
+          asset_path: dist/firefox_selfhosted/blocktube_firefox_selfhosted_${{ steps.release_info.outputs.VERSION }}.zip
           asset_name: blocktube_firefox_selfhosted_${{ steps.release_info.outputs.VERSION }}.xpi
           asset_content_type: application/octet-stream
       - name: Update Firefox self hosted manifest
