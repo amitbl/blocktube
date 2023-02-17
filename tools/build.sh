@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 SCRIPT=`realpath $0`
-BASEDIR=`dirname $SCRIPT`
-VERSION=0.3.34
+BASEDIR=$(dirname $(dirname $SCRIPT))
+VERSION="${2:-dev}"
 
 copy_files() {
     mkdir -p $DEST
