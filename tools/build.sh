@@ -19,7 +19,7 @@ set_version() {
 
 uglify() {
     pushd $DEST/src/scripts
-    terser --ecma 8 -o seed_.js seed.js
+    terser --ecma 8 -o seed_.js seed.js || echo "Build failed, terser is missing. install with \`npm install -g terser\`"; exit 1
     sed -i -e "s/{SEED_CONTENTS}/$(sed 's:[/\\&]:\\&:g' seed_.js)/" content_script.js
     rm -f seed*.js;
 }
