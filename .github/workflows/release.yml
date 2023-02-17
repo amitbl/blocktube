@@ -60,7 +60,7 @@ jobs:
           git checkout master
           ./tools/build_ff_update_manifest.py ${{ steps.release_info.outputs.VERSION }} \
           ${{ steps.ff_selfhosted_release.outputs.browser_download_url }} \
-          $(sha512sum ./dist/build/blocktube_firefox_selfhosted_${{ steps.release_info.outputs.VERSION }}.zip | awk '{print "sha512:"$1}')
+          $(sha512sum ./dist/firefox_selfhosted/blocktube_firefox_selfhosted_${{ steps.release_info.outputs.VERSION }}.zip | awk '{print "sha512:"$1}')
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add .updates/ff/updates.json
