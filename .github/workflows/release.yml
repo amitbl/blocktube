@@ -34,8 +34,8 @@ jobs:
           prerelease: true
       - name: Build packages
         run: |
-          ./build.sh firefox_selfhosted
-          ./build.sh chrome
+          ./tools/build.sh firefox_selfhosted
+          ./tools/build.sh chrome
       - name: Upload Chromium package
         uses: actions/upload-release-asset@v1
         env:
@@ -58,7 +58,7 @@ jobs:
       - name: Update Firefox self hosted manifest
         run: |
           git checkout master
-          ./build_ff_update_manifest.py ${{ steps.release_info.outputs.VERSION }} \
+          ./tools/build_ff_update_manifest.py ${{ steps.release_info.outputs.VERSION }} \
           ${{ steps.ff_selfhosted_release.outputs.browser_download_url }} \
           $(sha512sum ./dist/build/blocktube_firefox_selfhosted_${{ steps.release_info.outputs.VERSION }}.zip | awk '{print "sha512:"$1}')
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
