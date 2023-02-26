@@ -25,9 +25,7 @@ Filter and block unwanted content from YouTube™.
 
   In the meantime it's possible to install the extension directly from GitHub from the link below
 
-* [**Firefox GitHub Self Hosted** (ESR/Developer/Nightly versions only)](https://github.com/amitbl/blocktube/releases/latest/download/blocktube_firefox_selfhosted.xpi)
-
-  This works only if you set `xpinstall.signatures.required` to `false` in `about:config`. <sup>[see "Add-on signing in Firefox"](https://support.mozilla.org/en-US/kb/add-on-signing-in-firefox)</sup>
+* [**Firefox GitHub**](https://github.com/amitbl/blocktube/releases/download/0.3.32/blocktube-0.3.32.xpi)
 
 ## FAQ
 * I'm still using YouTube's old layout desgin, can I use this extension?  
