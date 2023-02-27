@@ -3,6 +3,11 @@
     "blocktube@git": {
       "updates": [
         {
+          "version": "0.3.36",
+          "update_link": "https://github.com/amitbl/blocktube/releases/download/v0.3.36/blocktube_firefox_selfhosted.xpi",
+          "update_hash": "sha512:ecfbec5ba9725d377612ee15dbcddf1f381bcd651826ed08a03875b626202b2070c9f40fdbc8e9753e378f5c9e52267d06e7a16792f684a5e0f8d93780e0f7ee"
+        },
+        {
           "version": "0.3.35",
           "update_link": "https://github.com/amitbl/blocktube/releases/download/v0.3.35/blocktube_firefox_selfhosted.xpi",
           "update_hash": "sha512:91e0ce1cd6698e0a6a5e2fdf142c6c1b9455d4e3eb1670d296d9a3880f1df3fd99b00914c4ed73ee29d822668e2a74eec43c10c977941715613efbd80934fa81"
