@@ -1114,7 +1114,7 @@
     // Enable JS filtering only if function has something in it
     if (storageData.options.enable_javascript && storageData.filterData.javascript) {
       try {
-        jsFilter = eval(storageData.filterData.javascript);
+        jsFilter = window.eval(storageData.filterData.javascript);
         if (!(jsFilter instanceof Function)) {
           throw Error("Function not found");
         }
