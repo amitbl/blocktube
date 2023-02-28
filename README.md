@@ -19,13 +19,7 @@ Filter and block unwanted content from YouTube™.
 ## Install
 
 * [**Chrome Webstore**](https://chrome.google.com/webstore/detail/blocktube/bbeaicapbccfllodepmimpkgecanonai?hl=en-US)
-* ~~[**Firefox AMO**](https://addons.mozilla.org/en-US/firefox/addon/blocktube/)~~
-
-  The extension is temporary disabled in AMO (https://github.com/amitbl/blocktube/issues/281)
-
-  In the meantime it's possible to install the extension directly from GitHub from the link below
-
-* [**Firefox GitHub**](https://github.com/amitbl/blocktube/releases/download/0.3.32/blocktube-0.3.32.xpi)
+* [**Firefox AMO**](https://addons.mozilla.org/en-US/firefox/addon/blocktube/)
 
 ## FAQ
 * I'm still using YouTube's old layout desgin, can I use this extension?  
