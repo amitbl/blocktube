@@ -438,7 +438,7 @@
 
       if (h === 'vidLength') {
         const vidLen = parseTime(value);
-        if (vidLen === -2 && storageData.options.shorts) {
+        if (vidLen === -2 && storageData.options.shorts && !(storageData.options.allow_shorts_on_subs_page && '/feed/subscriptions' === document.location.pathname)) {
           return true;
         }
         if (vidLen > 0 && properties.length === 2) {
@@ -922,7 +922,7 @@
   }
 
   function blockShorts(data) {
-    if (document.location.pathname.startsWith('/shorts/')) {
+    if (document.location.pathname.startsWith('/shorts/') && !data.options.allow_shorts_on_subs_page) {
       redirectToIndex();
     }
 
