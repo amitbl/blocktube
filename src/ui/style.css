@@ -1,187 +1,303 @@
+:root {
+  --red: #EF4F43;
+  --dark: #0d1117;
+  --light: #161b22;
+  --white: #e6edf3;
+  --btn-bg: #21262d;
+  --cm-bg: #161b22;
+  --borders: #30363d;
+}
+
 body {
-  font: 14px sans-serif;
+  margin-inline: 15%;
+  font-family: Segoe UI, sans-serif;
+  background-color: var(--dark);
+  color: var(--white);
 }
 
-#options {
-  margin-top: 10px;
+/* NAVBAR/HEADER */
+body div:has(h1) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  margin-block: 2em;
+  border: none !important;
+  text-transform: uppercase;
+}
+/* BLOCKTUBE TITLE */
+body div:has(h1) h1 {
+  font-size: xx-large
+}
+body div:has(h1) h1:before {
+  content: "XX";
+  color: transparent;
+  margin-right: .3em;
+  width: 200px !important;
+  height: 200px !important;
+  display: inline;
+  background-image: url('https://i.postimg.cc/4yQC2NMd/Group-1.png');
+  background-size: contain;
+  background-repeat: no-repeat;
 }
 
-.form-textarea {
-  border-width: 1px;
-  border-color: #ccc;
-  width: 100%;
-  resize: vertical;
-  overflow-wrap: normal;
+/* NAV BUTTONS */
+body div:has(h1) span small {
+  display: none;
+}
+body div:has(h1) span a {
+  text-decoration: none;
+  color: var(--white);
+  background-color: var(--btn-bg);
+  font-weight: 600;
+  font-size: small;
+  
+  padding-inline: 1em;
+  padding-block: .5em;
+  margin-left: 1em;
+  border-radius: .3em;
+
+  transition: 150ms all;
+  border: 1.5px solid transparent;
+}
+body div:has(h1) span a:hover {
+  transition: 150ms all;
+  border: 1.5px solid var(--borders);
+  background-color: var(--cm-bg);
 }
 
-.status-text {
-  margin: 1em;
-  padding-top:5px;
-  font-size: larger;
-  font-weight:bold;
-}
+/* SECTION */
 
-form fieldset {
-  border: none;
-  padding-bottom: 0;
-}
-
+/* Headers */
 form legend {
-  margin-bottom: 10px;
-  font-size: larger;
-  font-weight: bold;
-  margin-top:5px;
+  font-size: medium;
+  background: var(--light);
+  margin-top: 1.5em;
+  padding-block: .6em;
+  padding-inline: .8em;
+  border-radius: 8px 8px 0px 0px;
+  border: 1px solid var(--borders);
+  /*  Fix default CSS spacing  */
+  margin-bottom: -1px;
 }
 
-.block-label {
-  display:block;
-  margin-bottom: 2px;
-  font-style: italic;
-}
-
-form label {
-  font-size:small;
-}
-
-form input[type=checkbox] {
-  margin: 0 0 0 0;
-}
-
-form input[type=submit],
-form input[type=button]{
-  background: #4B99AD;
-  padding: 5px 15px 5px 15px;
-  border: none;
-  color: #fff;
-  margin-top:5px;
-}
-
-form input[type=submit]:hover,
-form input[type=button]:hover{
-  background: #4691A4;
-  box-shadow:none;
-  -moz-box-shadow:none;
-  -webkit-box-shadow:none;
-}
-
-#export {
-  background: #FF4444;
-  padding: 5px 15px 5px 15px;
-  border: none;
-  color: #fff;
-  margin-top:5px;
-}
-
-#export:hover{
-  background: #FF5555;
-  box-shadow:none;
-  -moz-box-shadow:none;
-  -webkit-box-shadow:none;
-}
-
-#import {
-  background: #224444;
-  padding: 5px 15px 5px 15px;
-  border: none;
-  color: #fff;
-  margin-top:5px;
-}
-
-#import:hover{
-  background: #225555;
-  box-shadow:none;
-  -moz-box-shadow:none;
-  -webkit-box-shadow:none;
-}
-
-form > fieldset > div {
-  margin-bottom: 5px;
-}
-
-form input[type="text"],
-form input[type="password"],
-form input[type="number"] {
-  border-width: 1px;
-  border-color: #ccc;
-  padding: 3px;
-}
-
-#main {
-  margin-left: 5px;
-}
-
-h1 {
+/* Fieldsets */
+fieldset {
   margin: 0;
-  margin-bottom: 10px;
+  border-radius: 0px 0px 8px 8px;
+  border: 1px solid var(--borders);
+}
+fieldset > div {
+  margin-block: 3em;
+  padding-inline: 3em;
 }
 
-.buttons {
-  border-top: 1px solid #ccc;
-  padding-top:5px;
+/* Labels */
+label.block-label {
+  font-size: large;
+  line-height: 1.8;
+  font-weight: 600;
 }
 
+/* Text imput */
+fieldset input {
+  background: var(--btn-bg);
+  outline: 1px solid  var(--border) !important;
+  border: none;
+  border-radius: 3px;
+  color: var(--white);
+  padding-inline: .5em;
+  padding-block: .35em;
+  border: 2px solid transparent;
+}
+fieldset input:focus {
+  background-color: var(--borders);
+  border-bottom: 2px solid var(--white);
+}
+
+/* select button */
 .select {
-  border-width: 1px;
-  border-color: #ccc;
-  padding: 3px;
+  background-color: var(--btn-bg);
+  color: var(--white);
+  border-color: transparent;
+  padding-inline: .5em;
+  padding-block: .35em;
+  border-radius: 3px;
+}
+.select:active, .select:hover, .select:focus {
+  border-color: var(--borders);
 }
 
-.advanced {
-  margin-top: 10px;
+/* Fieldset Advanced Blocking */
+fieldset div:has(input#enable_javascript), div#advanced_tab {
+  margin-block: 2em;
 }
 
-.tooltip {
-  border-radius: 50%;
-  width: 15px;
-  height: 15px;
-  display: inline-block;
-  background-color: #888;
-  text-align: center;
-  color: white;
+/* Last fieldset, different spacing than others */
+fieldset:last-of-type {
+  padding-block: 2em;
+}
+fieldset:last-of-type div {
+  margin-block: 1em;
 }
 
-.tooltip-link {
-  border-radius: 50%;
-  width: 15px;
-  height: 15px;
-  display: inline-block;
-  background-color: #888;
-  text-align: center;
-  text-decoration:none;
-  color: white;
-  font-weight: bold;
+/* Tooltip */
+.tooltip-link, .tooltip {
+  background: var(--btn-bg);
+  padding-inline:5px;
+  padding-block: px;
+  border-radius: 50px;
+  text-decoration: none;
+  color: var(--white);
 }
-
+/* CODEMIRROR - CODE BLOCK FORMAT */
 .CodeMirror {
-  border: 1px solid black;
+  border-radius: 6px;
+  overflow: hidden;
   height: auto;
 }
-
 .CodeMirror .CodeMirror-scroll {
   min-height: 70px;
   max-height: 200px;
 }
 
+/* Codeblock resizers */
 .cm-resizer {
-  background: #f7f7f7;
-  height: 20px;
+  background: var(--light);
+  height: 0px;
   user-select: none;
   cursor: row-resize;
-  border-top: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
+  text-align: center;
 }
-
 .cm-resizer:before {
   content: '\2261'; /* https://en.wikipedia.org/wiki/Triple_bar */
   color: #999;
-  position: absolute;
-  left: 50%;
+  font-size: 15px;
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  padding: .7em;
+  transition: 200ms all;
 }
 
-.cm-resizer:hover {
-  background: #f0f0f0;
+.cm-resizer:hover:before, .cm-resizer:active:before {
+  color: var(--white);
+  background: var(--btn-bg);
+  border-radius: 0 0 50px 50px;
+  transition: 200ms all;
 }
 
-.cm-resizer:hover:before {
-  color: #000;
+/* FINAL BUTTONS */
+div.buttons {
+  display: flex;
+  gap: .8em;
+  flex-wrap: wrap;
+  margin-bottom: 15em;
 }
+div.buttons input {
+  flex: 1 1 30%;
+  color: var(--white);
+  text-transform: uppercase;
+  background-color: var(--btn-bg);
+  font-weight: 600;
+  font-size: medium;
+  border: none;
+  margin-top: 1.5em;
+  
+  padding-inline: 1em;
+  padding-block: .5em;
+  border-radius: .3em;
+}
+
+div.buttons span {
+  font-size: medium;
+  width: 100% !important;
+  order: 1;
+  background: var(--light) !important;
+  border-radius: 8px;
+  padding: 1em;
+}
+
+/* Save - Export - Import */
+input#save_btn {
+  background: #398ea3;
+  transition: 150ms all;
+  border: 1.5px solid transparent;
+}
+input#export {
+  background: #bd1d20;
+  transition: 150ms all;
+  border: 1.5px solid transparent;
+}
+input#import {
+  background: #234444;
+  transition: 150ms all;
+  border: 1.5px solid transparent;
+}
+div.buttons input:hover {
+  border: 1.5px solid var(--borders);
+  transition: 150ms all;
+}
+input#save_btn:hover {
+  background: #55b4cd;
+  transition: 150ms all;
+  border: 1.5px solid transparent;
+}
+input#export:hover {
+  background: #e22d30;
+  transition: 150ms all;
+  border: 1.5px solid transparent;
+}
+input#import:hover {
+  background: #317c7c;
+  transition: 150ms all;
+  border: 1.5px solid transparent;
+}
+div.buttons input:active {
+  transform: translateY(0px);
+   box-shadow: 0px 0px 0px 0px;
+  transition: 150ms all;
+}
+
+
+/* CM-AYU-MIRAGE (THEME) */
+/* Based on https://github.com/dempfi/ayu */
+.cm-s-default.CodeMirror { background: var(--cm-bg); color: #cbccc6; }
+.cm-s-default div.CodeMirror-selected { background: var(--borders); }
+.cm-s-default .CodeMirror-line::selection, .cm-s-default .CodeMirror-line > span::selection, .cm-s-default .CodeMirror-line > span > span::selection { background: #34455a; }
+.cm-s-default .CodeMirror-line::-moz-selection, .cm-s-default .CodeMirror-line > span::-moz-selection, .cm-s-default .CodeMirror-line > span > span::-moz-selection { background: rgba(25, 30, 42, 99); }
+.cm-s-default .CodeMirror-gutters { background: var(--btn-bg); border-right: 0px; }
+.cm-s-default .CodeMirror-guttermarker { color: white; }
+.cm-s-default .CodeMirror-guttermarker-subtle { color:  rgba(112, 122, 140, 66); }
+.cm-s-default .CodeMirror-linenumber { color: rgba(61, 66, 77, 99); }
+.cm-s-default .CodeMirror-cursor { border-left: 1px solid #ffcc66;  }
+.cm-s-default.cm-fat-cursor .CodeMirror-cursor {background-color: #a2a8a175 !important;}
+.cm-s-default .cm-animate-fat-cursor { background-color: #a2a8a175 !important; }
+
+.cm-s-default span.cm-comment { color: #5c6773; font-style:italic; }
+.cm-s-default span.cm-atom { color: #ae81ff; }
+.cm-s-default span.cm-number { color: #ffcc66; }
+
+.cm-s-default span.cm-comment.cm-attribute { color: #ffd580; }
+.cm-s-default span.cm-comment.cm-def { color: #d4bfff; }
+.cm-s-default span.cm-comment.cm-tag { color: #5ccfe6; }
+.cm-s-default span.cm-comment.cm-type { color: #5998a6; }
+
+.cm-s-default span.cm-property { color: #f29e74; }
+.cm-s-default span.cm-attribute { color: #ffd580; }  
+.cm-s-default span.cm-keyword { color: #ffa759; } 
+.cm-s-default span.cm-builtin { color: #ffcc66; }
+.cm-s-default span.cm-string { color: #bae67e; }
+
+.cm-s-default span.cm-variable { color: #cbccc6; }
+.cm-s-default span.cm-variable-2 { color: #f28779; }
+.cm-s-default span.cm-variable-3 { color: #5ccfe6; }
+.cm-s-default span.cm-type { color: #ffa759; }
+.cm-s-default span.cm-def { color: #ffd580; }
+.cm-s-default span.cm-bracket { color: rgba(92, 207, 230, 80); }
+.cm-s-default span.cm-tag { color: #5ccfe6; }
+.cm-s-default span.cm-header { color: #bae67e; }
+.cm-s-default span.cm-link { color: #5ccfe6; }
+.cm-s-default span.cm-error { color: #ff3333; } 
+.cm-s-default .CodeMirror-activeline-background { background: #191e2a; }
+.cm-s-default .CodeMirror-matchingbracket { text-decoration: underline; color: white !important; }
