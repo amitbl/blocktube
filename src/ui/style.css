@@ -30,13 +30,13 @@ body div:has(h1) h1 {
   font-size: xx-large
 }
 body div:has(h1) h1:before {
-  content: "XX";
+  content: "____";
   color: transparent;
   margin-right: .3em;
   width: 200px !important;
   height: 200px !important;
   display: inline;
-  background-image: url('https://i.postimg.cc/4yQC2NMd/Group-1.png');
+  background-image: url('https://raw.githubusercontent.com/sugiiiiii/blocktube/patch-1/assets/block-tube-logo-alpha.png');
   background-size: contain;
   background-repeat: no-repeat;
 }
