@@ -11,72 +11,117 @@
     <link rel="shortcut icon" type="image/png" href="../../assets/icons/16.png"/>
   </head>
   <body>
-    <div style="border-bottom: 1px solid #ccc">
-      <h1 style="display:inline">BlockTube</h1>
-      <span style="float:right"><a target="_blank" href="https://github.com/amitbl/blocktube/wiki">How to use</a>
-        <a target="_blank" href="https://github.com/amitbl/blocktube/releases">Changelog</a><br /><small style="float:right">v{EXT_VERSION}</small></span>
+    <div id="header">
+      <h1 id="header-text"><img id="logo-img" src="../../assets/icons/128.png" /><span id="logo-text">BlockTube</span></h1>
+      <div id="header-menu">
+        <a class="nav-item" target="_blank" href="https://github.com/amitbl/blocktube/wiki">How to use</a>
+        <a class="nav-item" target="_blank" href="https://github.com/amitbl/blocktube/releases">Changelog (v{EXT_VERSION})</a>
+      </div>
     </div>
     <div id="main">
       <form id="login" style="display:none">
-        <p>Extension options are restricted, please login to continue.</p>
-        <div>
-          <label class="block-label" style="margin-right:5px" for="pass_login">Password</label>
-          <input id="pass_login" type="password" size="32" autocomplete="off" class="form-text" />
-        </div>
-        <div>
-          <input type="submit" id="send_login" value="Login" />
-          <div class="status-text" id="status_login"></div>
-        </div>
-      </form>
-      <form id="options" style="display:none">
-        <legend>Filters options</legend>
+        <legend>Login</legend>
         <fieldset>
           <div>
-            <label class="block-label" for="title">Video title</label>
-            <textarea id="title"></textarea>
-            <div id="title_resizer" class="cm-resizer"></div>
+            <label class="block-label" style="margin-right:5px" for="pass_login">Password</label>
+            <input id="pass_login" type="password" size="32" autocomplete="off" class="form-text" />
           </div>
           <div>
-            <label class="block-label" for="channelName">Channel name</label>
-            <textarea id="channelName"></textarea>
-            <div id="channelName_resizer" class="cm-resizer"></div>
-          </div>
-          <div>
-            <label class="block-label" for="videoId">Video ID</label>
-            <textarea id="videoId"></textarea>
-            <div id="videoId_resizer" class="cm-resizer"></div>
-          </div>
-          <div>
-            <label class="block-label" for="channelId">Channel ID</label>
-            <textarea id="channelId"></textarea>
-            <div id="channelId_resizer" class="cm-resizer"></div>
-          </div>
-          <div>
-            <label class="block-label" for="comment">Comment content</label>
-            <textarea id="comment"></textarea>
-            <div id="comment_resizer" class="cm-resizer"></div>
+            <input type="submit" id="send_login" value="Login" />
+            <div class="status-text" id="status_login"></div>
           </div>
         </fieldset>
-        <legend>Advanced blocking</legend>
+      </form>
+      <form id="options" style="display:none">
+        <legend>Filter options</legend>
         <fieldset>
-          <div>
-            <input id="enable_javascript" type="checkbox" />
-            <label for="enable_javascript">Enable advanced blocking <a target="_blank" href="https://github.com/amitbl/blocktube/wiki/Advanced-Blocking" class="tooltip-link" title="Don't enable this unless you know some Javascript and have read the documentation">?</a></label>
-          </div>
-          <div id="advanced_tab" style="display: none" class="advanced">
-            <label class="block-label" for="javascript">Custom blocking function</label>
-            <textarea id="javascript"></textarea>
-            <div id="javascript_resizer" class="cm-resizer"></div>
-          </div>
+          <div class="tabset" id="tabbed-filters-parent">
+            <div class="tab-menu" id="tabbed-filters-menu">
+              <input type="radio" name="filter-tab" id="tab-title" aria-controls="title-tab-content" checked>
+              <label style="border-top: 1px solid var(--borders)" for="tab-title">Video title</label>
+
+              <input type="radio" name="filter-tab" id="tab-channel-name" aria-controls="channel-name-tab-content">
+              <label for="tab-channel-name">Channel name</label>
+
+              <input type="radio" name="filter-tab" id="tab-video-id" aria-controls="videoid-tab-content">
+              <label for="tab-video-id">Video ID</label>
+
+              <input type="radio" name="filter-tab" id="tab-channel-id" aria-controls="channelid-tab-content">
+              <label for="tab-channel-id">Channel ID</label>
+
+              <input type="radio" name="filter-tab" id="tab-comment" aria-controls="comment-tab-content">
+              <label for="tab-comment">Comment content</label>
+
+              <input type="radio" name="filter-tab" id="tab-advanced" aria-controls="advanced-tab-content">
+              <label for="tab-advanced">
+                Advanced Blocking
+              </label>
+
+            </div>
+            <div class="tab-panels" id="tabbed-filters-content">
+              <section id="title-tab-content" class="tab-panel">
+                <div>
+                  <textarea id="title"></textarea>
+                  <div id="title_resizer" class="cm-resizer"></div>
+                </div>
+              </section>
+
+              <section id="channel-name-tab-content" class="tab-panel">
+                <div>
+                  <textarea id="channelName"></textarea>
+                  <div id="channelName_resizer" class="cm-resizer"></div>
+                </div>
+              </section>
+
+              <section id="videoid-tab-content" class="tab-panel">
+                <div>
+                  <textarea id="videoId"></textarea>
+                  <div id="videoId_resizer" class="cm-resizer"></div>
+                </div>
+              </section>
+
+              <section id="channelid-tab-content" class="tab-panel">
+                <div>
+                  <textarea id="channelId"></textarea>
+                  <div id="channelId_resizer" class="cm-resizer"></div>
+                </div>
+              </section>
+
+              <section id="comment-tab-content" class="tab-panel">
+                <div>
+                  <textarea id="comment"></textarea>
+                  <div id="comment_resizer" class="cm-resizer"></div>
+                </div>
+              </section>
+
+              <section id="advanced-tab-content" class="tab-panel">
+                <div id="advanced_tab" style="display: none" class="advanced">
+                        <textarea id="javascript"></textarea>
+                        <div id="javascript_resizer" class="cm-resizer"></div>
+                </div>
+                <div>
+                  <input id="enable_javascript" type="checkbox" />
+                  <label style="margin-top:5px" for="enable_javascript">Enable advanced blocking <a style="cursor: pointer" target="_blank" href="https://github.com/amitbl/blocktube/wiki/Advanced-Blocking" class="tooltip-link" title="Don't enable this unless you know some Javascript and have read the documentation">?</a></label>
+                </div>
+              </section>
+
+            </div>
         </fieldset>
         <legend>Other options</legend>
         <fieldset>
           <div>
-            <label class="block-label" for="pass_save">UI Password:</label>
+            <label class="block-label" for="ui_theme">UI Theme</label>
+            <select id="ui_theme" class="select">
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+          <div>
+            <label class="block-label" for="pass_save">UI Password</label>
             <input id="pass_save" type="password" autocomplete="off" />
           </div>
           <div>
-            <label class="block-label" for="block_message">Video blocked message:</label>
+            <label class="block-label" for="block_message">Video blocked message</label>
             <input id="block_message" type="text" autocomplete="off" />
           </div>
           <div>
@@ -101,7 +146,7 @@
           </div>
           <div>
             <input id="disable_trending" type="checkbox" />
-            <label for="disable_trending">Disable Explore page</label>
+            <label for="disable_trending">Block Explore page</label>
           </div>
           <div>
             <input id="disable_shorts" type="checkbox" />
@@ -113,34 +158,36 @@
           </div>
           <div>
             <input id="autoplay" type="checkbox" />
-            <label for="autoplay">Autoplay next video on block</label>
+            <label for="autoplay">Enable Auto-playing next suggested video when blocking occurs</label>
           </div>
           <div>
               <input id="suggestions_only" type="checkbox" />
-              <label for="suggestions_only">Enable suggestions hide-only mode <span class="tooltip" title="This option will make videos hidden, and won't block them when directly visiting them via URL, or when embedded on other sites.">?</span></label>
+              <label for="suggestions_only">Disable direct access blocking <span class="tooltip" title="This option will make videos hidden in suggestions, and won't block them when directly visiting them via URL, or when embedded on other sites.">?</span></label>
           </div>
           <div>
             <input id="block_feedback" type="checkbox" />
-            <label for="block_feedback">Click on "Not interested / Don't recommend channel" when blocking using context menus. <span class="tooltip" title="* This option will trigger the normal YouTube operations in addition to BlockTube's. &#10;* This will work only on videos that normally have these options available in menu.&#10;* Clicking on the 'Undo' button will not remove the video from your blocklist.">?</span></label>
+            <label for="block_feedback">Click on "Not interested / Don't recommend channel" when blocking using context menus <span class="tooltip" title="* This option will trigger the normal YouTube operations in addition to BlockTube's. &#10;* This will work only on videos that normally have these options available in menu.&#10;* Clicking on the 'Undo' button will not remove the video from your blocklist.">?</span></label>
           </div>
           <div>
             <input id="disable_you_there" type="checkbox" />
             <label for="disable_you_there">Disable automatic pause of videos <span class="tooltip" title="This will remove &quot;Video paused. Continue watching?&quot; pop-up messages">?</span></label>
           </div>
-          <div>
+          <div style="margin: 0">
             <input id="disable_db_normalize" type="checkbox" />
             <label for="disable_db_normalize">Disable YouTube's audio loudness normalization</label>
           </div>
         </fieldset>
-        <div class="buttons">
-          <input type="submit" id="save_btn" value="Save" />
-          <input type="button" id="export" value="Export" />
-          <input type="button" id="import" value="Import" />
+        <div class="buttons sticky">
+          <input type="button" class="disabled-btn" id="save_btn" value="✔ Save" />
+          <input type="button" id="export" value="🡅 Export" />
+          <input type="button" id="import" value="🡇 Import" />
           <input type="file" id="myfile" accept="application/json" style="display:none" />
-          <span class="status-text" id="status_save"></span>
+          <div class="flex-break"></div>
+          <div id="status_save" class="alert"></div>
         </div>
       </form>
     </div>
+
     <script type="text/javascript" src="cm/codemirror.js"></script>
     <script type="text/javascript" src="cm/matchbrackets.js"></script>
     <script type="text/javascript" src="cm/active-line.js"></script>

@@ -1,51 +1,140 @@
-:root {
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Remove default margin */
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+
+/* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
+ul[role='list'],
+ol[role='list'] {
+  list-style: none;
+}
+
+/* Set core root defaults */
+html:focus-within {
+  scroll-behavior: smooth;
+}
+
+/* Set core body defaults */
+body {
+  text-rendering: optimizeSpeed;
+  line-height: 1.5;
+}
+
+/* A elements that don't have a class get default styles */
+a:not([class]) {
+  text-decoration-skip-ink: auto;
+}
+
+/* Make images easier to work with */
+img,
+picture {
+  max-width: 100%;
+  display: block;
+}
+
+/* Inherit fonts for inputs and buttons */
+input,
+button,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Remove all animations, transitions and smooth scroll for people that prefer not to see them */
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+   scroll-behavior: auto;
+  }
+  
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+[data-theme="light"] {
   --red: #EF4F43;
-  --dark: #0d1117;
+  --dark: #ffffff;
+  --light: #e9e9e9;
+  --white: #000000;
+  --white-force: #ffffff;
+  --btn-bg: rgba(0, 0, 0, 0.05);
+  --btn-bg-focus: #d1dae6;
+  --cm-bg: #d1dae6;
+  --borders: #30363d;
+}
+
+[data-theme="dark"] {
+  --red: #EF4F43;
+  --dark: rgb(15, 15, 15);
   --light: #161b22;
-  --white: #e6edf3;
+  --white: #ffffff;
+  --white-force: #ffffff;
   --btn-bg: #21262d;
+  --btn-bg-focus: #30363d;
   --cm-bg: #161b22;
   --borders: #30363d;
 }
 
 body {
   margin-inline: 15%;
-  font-family: Segoe UI, sans-serif;
+  font-family: "Overpass", "Open Sans", Helvetica, sans-serif;
   background-color: var(--dark);
   color: var(--white);
+  font-size: 1rem;
 }
 
 /* NAVBAR/HEADER */
-body div:has(h1) {
+#header {
+  margin-top: 1.5em;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  
-  margin-block: 2em;
-  border: none !important;
   text-transform: uppercase;
+  border-bottom: 1px solid var(--borders);
 }
+
+#header-menu {
+  display: flex;
+  align-items: center;
+}
+
 /* BLOCKTUBE TITLE */
-body div:has(h1) h1 {
-  font-size: xx-large
+
+#header-text {
+  display: flex;
+  align-items: center;
+
 }
-body div:has(h1) h1:before {
-  content: "____";
-  color: transparent;
-  margin-right: .3em;
-  width: 200px !important;
-  height: 200px !important;
-  display: inline;
-  background-image: url('https://raw.githubusercontent.com/sugiiiiii/blocktube/patch-1/assets/block-tube-logo-alpha.png');
-  background-size: contain;
-  background-repeat: no-repeat;
+
+#logo-img {
+  margin-right: 5px;
+  height: 32px;
+  width: 32px;
 }
 
 /* NAV BUTTONS */
-body div:has(h1) span small {
-  display: none;
-}
-body div:has(h1) span a {
+.nav-item {
   text-decoration: none;
   color: var(--white);
   background-color: var(--btn-bg);
@@ -60,7 +149,7 @@ body div:has(h1) span a {
   transition: 150ms all;
   border: 1.5px solid transparent;
 }
-body div:has(h1) span a:hover {
+.nav-item:hover {
   transition: 150ms all;
   border: 1.5px solid var(--borders);
   background-color: var(--cm-bg);
@@ -88,18 +177,16 @@ fieldset {
   border: 1px solid var(--borders);
 }
 fieldset > div {
-  margin-block: 3em;
-  padding-inline: 3em;
+  margin-block: 2em;
+  padding-inline: .25em;
 }
 
 /* Labels */
 label.block-label {
-  font-size: large;
-  line-height: 1.8;
-  font-weight: 600;
+  display: block;
 }
 
-/* Text imput */
+/* Text input */
 fieldset input {
   background: var(--btn-bg);
   outline: 1px solid  var(--border) !important;
@@ -107,11 +194,11 @@ fieldset input {
   border-radius: 3px;
   color: var(--white);
   padding-inline: .5em;
-  padding-block: .35em;
+  padding-block: .15em;
   border: 2px solid transparent;
 }
 fieldset input:focus {
-  background-color: var(--borders);
+  background-color: var(--btn-bg-focus);
   border-bottom: 2px solid var(--white);
 }
 
@@ -124,41 +211,44 @@ fieldset input:focus {
   padding-block: .35em;
   border-radius: 3px;
 }
-.select:active, .select:hover, .select:focus {
-  border-color: var(--borders);
+.select:active, .select:focus {
+  border-bottom: 2px solid var(--white);
 }
 
 /* Fieldset Advanced Blocking */
-fieldset div:has(input#enable_javascript), div#advanced_tab {
+/* fieldset div:has(input#enable_javascript), div#advanced_tab {
   margin-block: 2em;
-}
+} */
 
 /* Last fieldset, different spacing than others */
-fieldset:last-of-type {
-  padding-block: 2em;
-}
 fieldset:last-of-type div {
   margin-block: 1em;
 }
 
 /* Tooltip */
 .tooltip-link, .tooltip {
-  background: var(--btn-bg);
+  background: #a43c46;
   padding-inline:5px;
-  padding-block: px;
   border-radius: 50px;
   text-decoration: none;
-  color: var(--white);
+  color: var(--white-force);
+  font-weight: 800;
+  font-size: smaller;
+  cursor: help;
 }
+
 /* CODEMIRROR - CODE BLOCK FORMAT */
 .CodeMirror {
-  border-radius: 6px;
   overflow: hidden;
   height: auto;
 }
 .CodeMirror .CodeMirror-scroll {
-  min-height: 70px;
-  max-height: 200px;
+  min-height: 220px;
+  max-height: 220px;
+}
+
+.CodeMirror-fullscreen {
+  z-index: 999999999999;
 }
 
 /* Codeblock resizers */
@@ -169,40 +259,31 @@ fieldset:last-of-type div {
   cursor: row-resize;
   text-align: center;
 }
+
 .cm-resizer:before {
   content: '\2261'; /* https://en.wikipedia.org/wiki/Triple_bar */
   color: #999;
-  font-size: 15px;
-  width: 50px;
-  height: 50px;
   text-align: center;
   padding: .7em;
-  transition: 200ms all;
-}
-
-.cm-resizer:hover:before, .cm-resizer:active:before {
-  color: var(--white);
-  background: var(--btn-bg);
-  border-radius: 0 0 50px 50px;
   transition: 200ms all;
 }
 
 /* FINAL BUTTONS */
 div.buttons {
   display: flex;
-  gap: .8em;
   flex-wrap: wrap;
-  margin-bottom: 15em;
+  gap: .4em;
+  margin-top: 10px;
 }
+
 div.buttons input {
   flex: 1 1 30%;
-  color: var(--white);
+  color: var(--white-force);
   text-transform: uppercase;
   background-color: var(--btn-bg);
   font-weight: 600;
   font-size: medium;
   border: none;
-  margin-top: 1.5em;
   
   padding-inline: 1em;
   padding-block: .5em;
@@ -220,84 +301,193 @@ div.buttons span {
 
 /* Save - Export - Import */
 input#save_btn {
-  background: #398ea3;
-  transition: 150ms all;
+  background: #06c;
   border: 1.5px solid transparent;
+  cursor: pointer;
 }
 input#export {
   background: #bd1d20;
-  transition: 150ms all;
   border: 1.5px solid transparent;
+  cursor: pointer;
 }
 input#import {
   background: #234444;
-  transition: 150ms all;
   border: 1.5px solid transparent;
-}
-div.buttons input:hover {
-  border: 1.5px solid var(--borders);
-  transition: 150ms all;
-}
-input#save_btn:hover {
-  background: #55b4cd;
-  transition: 150ms all;
-  border: 1.5px solid transparent;
-}
-input#export:hover {
-  background: #e22d30;
-  transition: 150ms all;
-  border: 1.5px solid transparent;
-}
-input#import:hover {
-  background: #317c7c;
-  transition: 150ms all;
-  border: 1.5px solid transparent;
-}
-div.buttons input:active {
-  transform: translateY(0px);
-   box-shadow: 0px 0px 0px 0px;
-  transition: 150ms all;
+  cursor: pointer;
 }
 
+.disabled-btn {
+  cursor: not-allowed !important;
+  background-color: var(--borders) !important;
+  color: var(--light) !important;
+  font-weight: 100 !important;
+}
 
 /* CM-AYU-MIRAGE (THEME) */
 /* Based on https://github.com/dempfi/ayu */
-.cm-s-default.CodeMirror { background: var(--cm-bg); color: #cbccc6; }
-.cm-s-default div.CodeMirror-selected { background: var(--borders); }
-.cm-s-default .CodeMirror-line::selection, .cm-s-default .CodeMirror-line > span::selection, .cm-s-default .CodeMirror-line > span > span::selection { background: #34455a; }
-.cm-s-default .CodeMirror-line::-moz-selection, .cm-s-default .CodeMirror-line > span::-moz-selection, .cm-s-default .CodeMirror-line > span > span::-moz-selection { background: rgba(25, 30, 42, 99); }
-.cm-s-default .CodeMirror-gutters { background: var(--btn-bg); border-right: 0px; }
-.cm-s-default .CodeMirror-guttermarker { color: white; }
-.cm-s-default .CodeMirror-guttermarker-subtle { color:  rgba(112, 122, 140, 66); }
-.cm-s-default .CodeMirror-linenumber { color: rgba(61, 66, 77, 99); }
-.cm-s-default .CodeMirror-cursor { border-left: 1px solid #ffcc66;  }
-.cm-s-default.cm-fat-cursor .CodeMirror-cursor {background-color: #a2a8a175 !important;}
-.cm-s-default .cm-animate-fat-cursor { background-color: #a2a8a175 !important; }
+.CodeMirror { background: #f7f7f7; }
 
-.cm-s-default span.cm-comment { color: #5c6773; font-style:italic; }
-.cm-s-default span.cm-atom { color: #ae81ff; }
-.cm-s-default span.cm-number { color: #ffcc66; }
+.cm-darktheme.CodeMirror { background: var(--cm-bg); color: #cbccc6; }
+.cm-darktheme div.CodeMirror-selected { background: var(--borders); }
+.cm-darktheme .CodeMirror-line::selection, .cm-darktheme .CodeMirror-line > span::selection, .cm-darktheme .CodeMirror-line > span > span::selection { background: #34455a; }
+.cm-darktheme .CodeMirror-line::-moz-selection, .cm-darktheme .CodeMirror-line > span::-moz-selection, .cm-darktheme .CodeMirror-line > span > span::-moz-selection { background: rgba(25, 30, 42, 99); }
+.cm-darktheme .CodeMirror-gutters { background: var(--btn-bg); border-right: 0px; }
+.cm-darktheme .CodeMirror-guttermarker { color: white; }
+.cm-darktheme .CodeMirror-guttermarker-subtle { color:  rgba(112, 122, 140, 66); }
+.cm-darktheme .CodeMirror-linenumber { color: rgba(61, 66, 77, 99); }
+.cm-darktheme .CodeMirror-cursor { border-left: 1px solid #ffcc66;  }
+.cm-darktheme.cm-fat-cursor .CodeMirror-cursor {background-color: #a2a8a175 !important;}
+.cm-darktheme .cm-animate-fat-cursor { background-color: #a2a8a175 !important; }
 
-.cm-s-default span.cm-comment.cm-attribute { color: #ffd580; }
-.cm-s-default span.cm-comment.cm-def { color: #d4bfff; }
-.cm-s-default span.cm-comment.cm-tag { color: #5ccfe6; }
-.cm-s-default span.cm-comment.cm-type { color: #5998a6; }
+.cm-darktheme span.cm-comment { color: #5c6773; font-style:italic; }
+.cm-darktheme span.cm-atom { color: #ae81ff; }
+.cm-darktheme span.cm-number { color: #ffcc66; }
 
-.cm-s-default span.cm-property { color: #f29e74; }
-.cm-s-default span.cm-attribute { color: #ffd580; }  
-.cm-s-default span.cm-keyword { color: #ffa759; } 
-.cm-s-default span.cm-builtin { color: #ffcc66; }
-.cm-s-default span.cm-string { color: #bae67e; }
+.cm-darktheme span.cm-comment.cm-attribute { color: #ffd580; }
+.cm-darktheme span.cm-comment.cm-def { color: #d4bfff; }
+.cm-darktheme span.cm-comment.cm-tag { color: #5ccfe6; }
+.cm-darktheme span.cm-comment.cm-type { color: #5998a6; }
 
-.cm-s-default span.cm-variable { color: #cbccc6; }
-.cm-s-default span.cm-variable-2 { color: #f28779; }
-.cm-s-default span.cm-variable-3 { color: #5ccfe6; }
-.cm-s-default span.cm-type { color: #ffa759; }
-.cm-s-default span.cm-def { color: #ffd580; }
-.cm-s-default span.cm-bracket { color: rgba(92, 207, 230, 80); }
-.cm-s-default span.cm-tag { color: #5ccfe6; }
-.cm-s-default span.cm-header { color: #bae67e; }
-.cm-s-default span.cm-link { color: #5ccfe6; }
-.cm-s-default span.cm-error { color: #ff3333; } 
-.cm-s-default .CodeMirror-activeline-background { background: #191e2a; }
-.cm-s-default .CodeMirror-matchingbracket { text-decoration: underline; color: white !important; }
+.cm-darktheme span.cm-property { color: #f29e74; }
+.cm-darktheme span.cm-attribute { color: #ffd580; }  
+.cm-darktheme span.cm-keyword { color: #ffa759; } 
+.cm-darktheme span.cm-builtin { color: #ffcc66; }
+.cm-darktheme span.cm-string { color: #bae67e; }
+
+.cm-darktheme span.cm-variable { color: #cbccc6; }
+.cm-darktheme span.cm-variable-2 { color: #f28779; }
+.cm-darktheme span.cm-variable-3 { color: #5ccfe6; }
+.cm-darktheme span.cm-type { color: #ffa759; }
+.cm-darktheme span.cm-def { color: #ffd580; }
+.cm-darktheme span.cm-bracket { color: rgba(92, 207, 230, 80); }
+.cm-darktheme span.cm-tag { color: #5ccfe6; }
+.cm-darktheme span.cm-header { color: #bae67e; }
+.cm-darktheme span.cm-link { color: #5ccfe6; }
+.cm-darktheme span.cm-error { color: #ff3333; } 
+.cm-darktheme .CodeMirror-activeline-background { background: #191e2a; }
+.cm-darktheme .CodeMirror-matchingbracket { text-decoration: underline; color: white !important; }
+
+/* TABS */
+
+.tabset {
+  margin-top: 1%;
+}
+
+.tabset > .tab-menu > input[type="radio"] {
+  position: absolute;
+  left: -200vw;
+}
+
+.tabset .tab-panel {
+  display: none;
+}
+
+.tabset > .tab-menu > label {
+  position: relative;
+  display: block;
+  
+
+  text-decoration: none;
+  color: var(--white);
+  background-color: var(--btn-bg);
+  font-weight: 600;
+  font-size: smaller;
+  
+  padding-inline: .3em;
+  padding-block: .3em;
+  margin-left: 0em;
+
+  transition: 150ms all;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  border-bottom: 1px solid var(--borders);
+}
+
+.tabset > .tab-menu > label:hover,
+.tabset > .tab-menu > input:focus + label {
+  color: #06c;
+}
+
+.tabset > .tab-menu > label:hover::after,
+.tabset > .tab-menu > input:focus + label::after,
+.tabset > .tab-menu > input:checked + label::after {
+  background: #06c;
+}
+
+.tabset > .tab-menu > input:checked + label {
+  color: #06c;
+  border-right: 1px solid var(--borders);
+  border-left: 1px solid var(--borders);
+}
+
+#tabbed-filters-parent {
+  display: flex;
+  flex-direction: row;
+}
+
+#tabbed-filters-menu {
+  background-color: var(--btn-bg);
+}
+
+#tabbed-filters-content {
+  width:100%
+}
+
+/* Mobile */
+@media only screen and (max-width: 800px) {
+  body {
+    margin-inline: 1%;
+  }
+  #logo-text {
+    display: none;
+  }
+  #logo-img {
+    height: 24px;
+    width: 24px;
+  }
+  #tabbed-filters-parent {
+    flex-direction: column;
+  }
+  fieldset > div {
+    padding-inline: 0;
+  }
+
+  .nav-item {
+    padding-block: .35em;
+  }
+
+  #header {
+    padding-bottom: 5px;
+  }
+
+}
+
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+  bottom: 0;
+  z-index: 99999999;
+}
+
+.flex-break {
+  flex-basis: 100%;
+  height: 0;
+}
+
+.alert{
+  display: none;
+  z-index: 999999999;
+  width:100%;
+  gap: .4em;
+  padding-inline: 1em;
+  padding-block: .6em;
+  border-radius: .3em;
+  background-color: #085820fc;
+  text-align:center;
+  color: var(--white-force);
+  position: absolute;
+}
+
+.alert-animate {
+  display: block;
+}

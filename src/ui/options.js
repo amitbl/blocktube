@@ -13,6 +13,11 @@
   let storageData = {
     filterData: {
       javascript: defaultJSFunction,
+      videoId: ['// Add your video ID filters below', ''],
+      channelId: ['// Add your channel ID filters below', ''],
+      channelName: ['// Add your channel name filters below', ''],
+      comment: ['// Add your comment filters below', ''],
+      title: ['// Add your video title filters below', ''],
     },
     options: {},
     uiPass: '',
@@ -20,11 +25,39 @@
 
   const textAreas = ['title', 'channelName', 'channelId', 'videoId', 'comment'];
 
+  function detectColorScheme(){
+    let theme="light";
+
+    if(storageData.uiTheme){
+      theme = storageData.uiTheme;
+    } else if(!window.matchMedia) {
+      theme = "light";
+    } else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      theme = "dark";
+    }
+
+    if (!storageData.uiTheme) {
+      storageData.uiTheme = theme;
+      saveData();
+    }
+
+    document.documentElement.setAttribute("data-theme", theme);
+    document.querySelectorAll(".CodeMirror").forEach((area) => {
+      if (theme === "dark") {
+        area.classList.add('cm-darktheme');
+      } else {
+        area.classList.remove('cm-darktheme');
+      }
+    });
+
+  }
+
   function loadData() {
     chrome.storage.local.get('storageData', (data) => {
       if (Object.keys(data).length > 0) {
         storageData = data.storageData;
       }
+      detectColorScheme();
       checkForLogin();
     });
   }
@@ -47,6 +80,8 @@
     storageData.filterData.vidLength   = [vidLenMin, vidLenMax];
     storageData.filterData.javascript  = jsEditors['javascript'].getValue();
 
+    storageData.uiTheme = $('ui_theme').value;
+
     storageData.uiPass = $('pass_save').value;
     storageData.options.trending = $('disable_trending').checked;
     storageData.options.shorts = $('disable_shorts').checked;
@@ -63,6 +98,8 @@
     storageData.options.percent_watched_hide = parseInt($('percent_watched_hide').value, 10);
 
     saveData('status_save');
+    detectColorScheme();
+    $('save_btn').classList.add('disabled-btn');
   }
 
   function loginForm() {
@@ -101,6 +138,7 @@
     $('vidLength_1').value         = vidLength[1];
     $('vidLength_type').value      = get('options.vidLength_type', 'allow', obj);
 
+    $('ui_theme').value            = get('uiTheme', 'light', obj);
     $('pass_save').value           = get('uiPass', '', obj);
     $('disable_trending').checked  = get('options.trending', false, obj);
     $('disable_shorts').checked    = get('options.shorts', false, obj);
@@ -123,6 +161,7 @@
     }
 
     setTimeout(_=>Object.values(jsEditors).forEach((v) => v.refresh()), 1); // https://stackoverflow.com/a/19970695
+    $('save_btn').classList.add('disabled-btn');
   }
 
   // !! Helpers
@@ -156,9 +195,11 @@
   function setLabel(label, text) {
     const status = $(label);
     status.textContent = text;
+    status.classList.add('alert-animate');
     setTimeout(() => {
       status.textContent = '';
-    }, 3000);
+      status.classList.remove('alert-animate');
+    }, 1000);
   }
 
   function saveFile(data, fileName) {
@@ -194,7 +235,7 @@
   }
 
   function cmResizer(cm, resizer) {
-    const MIN_HEIGHT = 70;
+    const MIN_HEIGHT = 220;
 
     function heightOf(element) {
       return parseInt(window.getComputedStyle(element).height.replace(/px$/, ""));
@@ -245,6 +286,9 @@
       }
     });
     cmResizer(jsEditors[v], $(v + '_resizer'));
+    jsEditors[v].on("change",() => {
+      $('options').dispatchEvent(new Event('change', { bubbles: true }));
+    });
   });
 
   // !! Start
@@ -252,6 +296,10 @@
 
   $('options').addEventListener('submit', (evt) => {
     evt.preventDefault();
+  });
+
+  $('save_btn').addEventListener('click', (evt) => {
+    if(evt.target.classList.contains('disabled-btn')) return;
     saveForm();
   });
 
@@ -284,4 +332,39 @@
       $('advanced_tab').style.display = "none";
     }
   })
+
+  $('options').addEventListener('change', (evt) => {
+    if (evt.target.tagName === 'INPUT' && evt.target.getAttribute('type') === 'radio') return;
+    $('save_btn').classList.remove('disabled-btn');
+  });
+
+  function initTabs(name) {
+    const element = document.getElementById(name);
+    element.querySelectorAll("input[type='radio']").forEach((box) => {
+      box.addEventListener('click', (e) => {
+        element.querySelectorAll('section').forEach((tab) => {
+          tab.style.display = "none";
+        });
+
+        const tabName = e.target.getAttribute('aria-controls');
+        const tab = document.getElementById(tabName);
+        tab.style.display = 'block';
+
+        tab.querySelectorAll('textarea').forEach((txtarea) => {
+          const areaName = txtarea.getAttribute('id');
+          if (has.call(jsEditors, areaName)) {
+            jsEditors[areaName].refresh()
+          }
+        });
+
+      });
+
+      if (box.checked) {
+        box.click();
+      }
+    });
+  }
+
+  initTabs('tabbed-filters-parent');
+
 }());
