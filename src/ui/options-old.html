@@ -1,0 +1,161 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="cm/codemirror.css" rel="stylesheet" type="text/css">
+    <link href="cm/dialog.css" rel="stylesheet" type="text/css">
+    <link href="cm/fullscreen.css" rel="stylesheet" type="text/css">
+    <link href="style-old.css" rel="stylesheet" type="text/css">
+    <title>BlockTube - Options</title>
+    <link rel="shortcut icon" type="image/png" href="../../assets/icons/16.png"/>
+  </head>
+  <body>
+    <div style="border-bottom: 1px solid #ccc">
+      <h1 style="display:inline">BlockTube</h1>
+      <span style="float:right">[<a target="_blank" href="https://github.com/amitbl/blocktube/wiki">How to use</a>]
+        [<a target="_blank" href="https://github.com/amitbl/blocktube/releases">Changelog</a>]<br /><small style="float:right">v0.3.36</small></span>
+    </div>
+    <div id="main">
+      <form id="login" style="display:none">
+        <p>Extension options are restricted, please login to continue.</p>
+        <div>
+          <label class="block-label" style="margin-right:5px" for="pass_login">Password</label>
+          <input id="pass_login" type="password" size="32" autocomplete="off" class="form-text" />
+        </div>
+        <div>
+          <input type="submit" id="send_login" value="Login" />
+          <div class="status-text" id="status_login"></div>
+        </div>
+      </form>
+      <form id="options" style="display:none">
+        <legend>Filters options</legend>
+        <fieldset>
+          <div>
+            <label class="block-label" for="title">Video title</label>
+            <textarea id="title"></textarea>
+            <div id="title_resizer" class="cm-resizer"></div>
+          </div>
+          <div>
+            <label class="block-label" for="channelName">Channel name</label>
+            <textarea id="channelName"></textarea>
+            <div id="channelName_resizer" class="cm-resizer"></div>
+          </div>
+          <div>
+            <label class="block-label" for="videoId">Video ID</label>
+            <textarea id="videoId"></textarea>
+            <div id="videoId_resizer" class="cm-resizer"></div>
+          </div>
+          <div>
+            <label class="block-label" for="channelId">Channel ID</label>
+            <textarea id="channelId"></textarea>
+            <div id="channelId_resizer" class="cm-resizer"></div>
+          </div>
+          <div>
+            <label class="block-label" for="comment">Comment content</label>
+            <textarea id="comment"></textarea>
+            <div id="comment_resizer" class="cm-resizer"></div>
+          </div>
+        </fieldset>
+        <legend>Advanced blocking</legend>
+        <fieldset>
+          <div>
+            <input id="enable_javascript" type="checkbox" />
+            <label for="enable_javascript">Enable advanced blocking <a target="_blank" href="https://github.com/amitbl/blocktube/wiki/Advanced-Blocking" class="tooltip-link" title="Don't enable this unless you know some Javascript and have read the documentation">?</a></label>
+          </div>
+          <div id="advanced_tab" style="display: none" class="advanced">
+            <label class="block-label" for="javascript">Custom blocking function</label>
+            <textarea id="javascript"></textarea>
+            <div id="javascript_resizer" class="cm-resizer"></div>
+          </div>
+        </fieldset>
+        <legend>Other options</legend>
+        <fieldset>
+          <div>
+            <label class="block-label" for="pass_save">UI Password:</label>
+            <input id="pass_save" type="password" autocomplete="off" />
+          </div>
+          <div>
+            <label class="block-label" for="block_message">Video blocked message:</label>
+            <input id="block_message" type="text" autocomplete="off" />
+          </div>
+          <div>
+            <label class="block-label" for="percent_watched_hide">Hide videos watched more than</label>
+            <input id="percent_watched_hide" size="3" type="number" min="0" max="100" autocomplete="off" /> % <span class="tooltip" title="* This feature uses Youtube's watch time tracking and will only work when logged in&#10; * Matched videos are only hidden and will work on direct access and playlists">?</span>
+          </div>
+          <div>
+            <label class="block-label" for="vidLength_0">Runtime blocking</label>
+            <select id="vidLength_type" class="select">
+              <option value="block">Block</option>
+              <option value="allow">Allow</option>
+            </select>
+            <span style="font-size:small; font-style:italic">videos between</span>
+            <input id="vidLength_0" type="number" min="0" max="99999" size="5" />
+            <small>-</small>
+            <input id="vidLength_1" type="number" min="0" max="99999" size="5" />
+            <span style="font-size:small; font-style:italic">seconds long</span>
+          </div>
+          <div>
+            <input id="disable_mixes" type="checkbox" />
+            <label for="disable_mixes">Block YouTube's auto-generated playlists</label>
+          </div>
+          <div>
+            <input id="disable_trending" type="checkbox" />
+            <label for="disable_trending">Disable Explore page</label>
+          </div>
+          <div>
+            <input id="disable_shorts" type="checkbox" />
+            <label for="disable_shorts">Block Youtube Shorts videos <span class="tooltip" title="This will also block access to the dedicated &quot;Shorts&quot; page">?</span></label>
+          </div>
+          <div>
+            <input id="disable_movies" type="checkbox" />
+            <label for="disable_movies">Block Youtube Movies videos</label>
+          </div>
+          <div>
+            <input id="autoplay" type="checkbox" />
+            <label for="autoplay">Autoplay next video on block</label>
+          </div>
+          <div>
+              <input id="suggestions_only" type="checkbox" />
+              <label for="suggestions_only">Enable suggestions hide-only mode <span class="tooltip" title="This option will make videos hidden, and won't block them when directly visiting them via URL, or when embedded on other sites.">?</span></label>
+          </div>
+          <div>
+            <input id="block_feedback" type="checkbox" />
+            <label for="block_feedback">Click on "Not interested / Don't recommend channel" when blocking using context menus. <span class="tooltip" title="* This option will trigger the normal YouTube operations in addition to BlockTube's. &#10;* This will work only on videos that normally have these options available in menu.&#10;* Clicking on the 'Undo' button will not remove the video from your blocklist.">?</span></label>
+          </div>
+          <div>
+            <input id="disable_you_there" type="checkbox" />
+            <label for="disable_you_there">Disable automatic pause of videos <span class="tooltip" title="This will remove &quot;Video paused. Continue watching?&quot; pop-up messages">?</span></label>
+          </div>
+          <div>
+            <input id="disable_db_normalize" type="checkbox" />
+            <label for="disable_db_normalize">Disable YouTube's audio loudness normalization</label>
+          </div>
+          <div>
+            <a href="options.html">Use new user interface</a>
+          </div>
+        </fieldset>
+        <div class="buttons">
+          <input type="submit" id="save_btn" value="Save" />
+          <input type="button" id="export" value="Export" />
+          <input type="button" id="import" value="Import" />
+          <input type="file" id="myfile" accept="application/json" style="display:none" />
+          <span class="status-text" id="status_save"></span>
+        </div>
+      </form>
+    </div>
+    <script type="text/javascript" src="cm/codemirror.js"></script>
+    <script type="text/javascript" src="cm/matchbrackets.js"></script>
+    <script type="text/javascript" src="cm/active-line.js"></script>
+    <script type="text/javascript" src="cm/closebrackets.js"></script>
+    <script type="text/javascript" src="cm/search.js"></script>
+    <script type="text/javascript" src="cm/searchcursor.js"></script>
+    <script type="text/javascript" src="cm/match-highlighter.js"></script>
+    <script type="text/javascript" src="cm/dialog.js"></script>
+    <script type="text/javascript" src="cm/fullscreen.js"></script>
+    <script type="text/javascript" src="cm/javascript.js"></script>
+    <script type="text/javascript" src="cm/simple.js"></script>
+    <script type="text/javascript" src="cm-syntax.js"></script>
+    <script type="text/javascript" src="options-old.js"></script>
+  </body>
+</html>
