@@ -1,0 +1,187 @@
+body {
+  font: 14px sans-serif;
+}
+
+#options {
+  margin-top: 10px;
+}
+
+.form-textarea {
+  border-width: 1px;
+  border-color: #ccc;
+  width: 100%;
+  resize: vertical;
+  overflow-wrap: normal;
+}
+
+.status-text {
+  margin: 1em;
+  padding-top:5px;
+  font-size: larger;
+  font-weight:bold;
+}
+
+form fieldset {
+  border: none;
+  padding-bottom: 0;
+}
+
+form legend {
+  margin-bottom: 10px;
+  font-size: larger;
+  font-weight: bold;
+  margin-top:5px;
+}
+
+.block-label {
+  display:block;
+  margin-bottom: 2px;
+  font-style: italic;
+}
+
+form label {
+  font-size:small;
+}
+
+form input[type=checkbox] {
+  margin: 0 0 0 0;
+}
+
+form input[type=submit],
+form input[type=button]{
+  background: #4B99AD;
+  padding: 5px 15px 5px 15px;
+  border: none;
+  color: #fff;
+  margin-top:5px;
+}
+
+form input[type=submit]:hover,
+form input[type=button]:hover{
+  background: #4691A4;
+  box-shadow:none;
+  -moz-box-shadow:none;
+  -webkit-box-shadow:none;
+}
+
+#export {
+  background: #FF4444;
+  padding: 5px 15px 5px 15px;
+  border: none;
+  color: #fff;
+  margin-top:5px;
+}
+
+#export:hover{
+  background: #FF5555;
+  box-shadow:none;
+  -moz-box-shadow:none;
+  -webkit-box-shadow:none;
+}
+
+#import {
+  background: #224444;
+  padding: 5px 15px 5px 15px;
+  border: none;
+  color: #fff;
+  margin-top:5px;
+}
+
+#import:hover{
+  background: #225555;
+  box-shadow:none;
+  -moz-box-shadow:none;
+  -webkit-box-shadow:none;
+}
+
+form > fieldset > div {
+  margin-bottom: 5px;
+}
+
+form input[type="text"],
+form input[type="password"],
+form input[type="number"] {
+  border-width: 1px;
+  border-color: #ccc;
+  padding: 3px;
+}
+
+#main {
+  margin-left: 5px;
+}
+
+h1 {
+  margin: 0;
+  margin-bottom: 10px;
+}
+
+.buttons {
+  border-top: 1px solid #ccc;
+  padding-top:5px;
+}
+
+.select {
+  border-width: 1px;
+  border-color: #ccc;
+  padding: 3px;
+}
+
+.advanced {
+  margin-top: 10px;
+}
+
+.tooltip {
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  background-color: #888;
+  text-align: center;
+  color: white;
+}
+
+.tooltip-link {
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  background-color: #888;
+  text-align: center;
+  text-decoration:none;
+  color: white;
+  font-weight: bold;
+}
+
+.CodeMirror {
+  border: 1px solid black;
+  height: auto;
+}
+
+.CodeMirror .CodeMirror-scroll {
+  min-height: 70px;
+  max-height: 200px;
+}
+
+.cm-resizer {
+  background: #f7f7f7;
+  height: 20px;
+  user-select: none;
+  cursor: row-resize;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+}
+
+.cm-resizer:before {
+  content: '\2261'; /* https://en.wikipedia.org/wiki/Triple_bar */
+  color: #999;
+  position: absolute;
+  left: 50%;
+}
+
+.cm-resizer:hover {
+  background: #f0f0f0;
+}
+
+.cm-resizer:hover:before {
+  color: #000;
+}
