@@ -802,7 +802,7 @@
 
   function parseViewCount(viewCount) {
     let views = viewCount.split(" ")[0]; // RTL languages might be an issue here
-    views = parseInt(views.replace(/[.,]/g, ""));
+    views = parseInt(views.replace(/[.,\s]/g, ""));
     return views;
   }
 
