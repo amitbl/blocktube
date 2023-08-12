@@ -1021,8 +1021,8 @@
     }
 
     if (items instanceof Array){
-      const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] } } };
-      const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] } } };
+      const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] }, icon: {iconType: "NOT_INTERESTED"} } };
+      const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] }, icon: {iconType: "NOT_INTERESTED"} } };
       if (storageData.options.block_feedback)
         items.forEach((e) => {
           if (getObjectByPath(e, 'menuServiceItemRenderer.icon.iconType') === 'NOT_INTERESTED' && hasVideo) {
@@ -1184,7 +1184,8 @@
     let data;
     let videoData;
     let channelData;
-    const parentDom = this.parentComponent.eventSink_.parentComponent;
+    const eventSink = this.parentComponent.eventSink_ || this.parentComponent.inst.eventSink_;
+    const parentDom = eventSink.parentComponent;
     const parentData = parentDom.data;
     let removeParent = true;
 
