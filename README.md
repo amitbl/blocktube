@@ -22,7 +22,7 @@ Filter and block unwanted content from YouTube™.
 * [**Firefox AMO**](https://addons.mozilla.org/en-US/firefox/addon/blocktube/)
 
 ## FAQ
-* I'm still using YouTube's old layout desgin, can I use this extension?  
+* I'm still using YouTube's old layout design, can I use this extension?  
   No. Please switch to the new desgin [here](https://www.youtube.com/new)  
   
 * What is the difference between "Channel ID" and "Channel Name"  
