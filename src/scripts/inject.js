@@ -1185,7 +1185,7 @@
     let videoData;
     let channelData;
     const eventSink = this.parentComponent.eventSink_ || this.parentComponent.inst.eventSink_;
-    const parentDom = eventSink.parentComponent;
+    const parentDom = eventSink.parentComponent || eventSink.parentElement.__dataHost.hostElement;
     const parentData = parentDom.data;
     let removeParent = true;
 
