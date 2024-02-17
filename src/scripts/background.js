@@ -7,11 +7,11 @@ let initStorage = false;
 let compiledStorage;
 let storage = {
   filterData: {
-    videoId: ['// Video ID filters', ''],
-    channelId: ['// Channel ID filters', ''],
-    channelName: ['// Channel name filters', ''],
-    comment: ['// Comment filters', ''],
-    title: ['// Video title filters', ''],
+    videoId: [],
+    channelId: [],
+    channelName: [],
+    comment: [],
+    title: [],
     vidLength: [null, null],
     javascript: "",
     percentWatchedHide: null

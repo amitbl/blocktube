@@ -61,6 +61,9 @@
     menuOnTap(...args) {
       window.btExports.menuOnTap.call(this, ...args);
     },
+    menuOnTapMobile(...args) {
+      window.btExports.menuOnTapMobile.call(this, ...args);
+    },
     genericHook(cb) {
       return function (...args) {
         if (window.btDispatched) {
@@ -124,10 +127,6 @@
       }
       return cb.apply(null, args);
     }
-  }
-
-  function postMessage(type, data) {
-    window.postMessage({ from: 'BLOCKTUBE_PAGE', type, data }, document.location.origin);
   }
 
   // Start
@@ -204,6 +203,18 @@
     },
   });
 
+  Object.defineProperty(window, 'loadInitialData', {
+    get() {
+      return this.loadInitialData_;
+    },
+    set(v) {
+      this.loadInitialData_ = (a1) => {
+        if (window.btDispatched) return v(a1);
+        else window.addEventListener('blockTubeReady', v.bind(this, a1));
+      }
+    },
+  });
+
   // player init has moved to window.yt.player.Application.create
   window.yt = createProxyHook('player.Application', ['create', 'createAlternate']);
 
@@ -218,4 +229,25 @@
         },
       });
   });
+
+  // Mobile Context menus hooking
+  class ElementHook extends HTMLElement {
+    connectedCallback() {
+      this.onclick = hooks.menuOnTapMobile;
+      this.ondblclick = hooks.menuOnTapMobile;
+    }
+  }
+  class ButtonRendererHook extends ElementHook {
+  }
+  class MenuServiceItemHook extends ElementHook {
+  }
+  class MenuNavigationItemHook extends ElementHook {
+  }
+  class MenuItemHook extends ElementHook {
+  }
+  customElements.define('ytm-button-renderer', ButtonRendererHook);
+  customElements.define('ytm-menu-service-item-renderer', MenuServiceItemHook);
+  customElements.define('ytm-menu-navigation-item-renderer', MenuNavigationItemHook);
+  customElements.define('ytm-menu-item', MenuItemHook);
+
 }());
