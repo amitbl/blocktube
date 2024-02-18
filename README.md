@@ -9,6 +9,7 @@ Filter and block unwanted content from YouTube™.
 * Block comments via **User** / **Comment content**
 * Block videos within YouTube using context menus
 * Blocked videos do not appear anywhere on the site
+* Support for `m.youtube.com` on Firefox for Android and Kiwi Browser
 * Block complete channels
 * Supports both keywords and raw Regex
 * Does not break or limit any features of YouTube like playlist or autoplay
@@ -22,8 +23,6 @@ Filter and block unwanted content from YouTube™.
 * [**Firefox AMO**](https://addons.mozilla.org/en-US/firefox/addon/blocktube/)
 
 ## FAQ
-* I'm still using YouTube's old layout desgin, can I use this extension?  
-  No. Please switch to the new desgin [here](https://www.youtube.com/new)  
   
 * What is the difference between "Channel ID" and "Channel Name"  
   Channel names on YouTube are not unique and can be duplicated/changed  
