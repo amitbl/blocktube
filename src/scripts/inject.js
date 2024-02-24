@@ -1496,8 +1496,7 @@
   function menuOnTap(event) {
     const menuAction = this.getElementsByTagName('yt-formatted-string')[0].getRawText();
     if (!['Block Channel', 'Block Video'].includes(menuAction)) {
-      if (this.onTap) this.onTap(event);
-      else if (this.onTap_) this.onTap_(event);
+      event.preventDefault();
       return;
     }
 
@@ -1510,7 +1509,7 @@
     let data;
     let videoData;
     let channelData;
-    const eventSink = this.parentComponent.eventSink_ || this.parentComponent.inst.eventSink_;
+    const eventSink = this.parentElement.__dataHost.hostElement.inst.eventSink_ || this.parentComponent.eventSink_ || this.parentComponent.inst.eventSink_;
     const parentDom = eventSink.parentComponent || eventSink.parentElement.__dataHost.hostElement;
     const parentData = parentDom.data;
     let removeParent = true;
