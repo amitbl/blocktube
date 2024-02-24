@@ -6,6 +6,7 @@
   'use strict';
 
   window.btDispatched = false;
+  const isMobileInterface = document.location.hostname.startsWith('m.');
 
   function createProxyHook(path, hookKeys) {
     path = path.split('.');
@@ -88,10 +89,6 @@
           break;
         case 'ytd-guide-renderer':
           args[0].attached = hooks.genericHook(args[0].attached);
-          break;
-        case 'ytd-menu-service-item-renderer':
-          args[0].onTapHook_ = hooks.menuOnTap;
-          args[0].listeners.tap = 'onTapHook_';
           break;
         default:
           break;
@@ -230,24 +227,39 @@
       });
   });
 
-  // Mobile Context menus hooking
-  class ElementHook extends HTMLElement {
-    connectedCallback() {
-      this.onclick = hooks.menuOnTapMobile;
-      this.ondblclick = hooks.menuOnTapMobile;
+  if (isMobileInterface) {
+    // Mobile Context menus hooking
+    class ElementHook extends HTMLElement {
+      connectedCallback() {
+        this.onclick = hooks.menuOnTapMobile;
+        this.ondblclick = hooks.menuOnTapMobile;
+      }
     }
+    class ButtonRendererHook extends ElementHook {
+    }
+    class MenuServiceItemHook extends ElementHook {
+    }
+    class MenuNavigationItemHook extends ElementHook {
+    }
+    class MenuItemHook extends ElementHook {
+    }
+    customElements.define('ytm-button-renderer', ButtonRendererHook);
+    customElements.define('ytm-menu-service-item-renderer', MenuServiceItemHook);
+    customElements.define('ytm-menu-navigation-item-renderer', MenuNavigationItemHook);
+    customElements.define('ytm-menu-item', MenuItemHook);
   }
-  class ButtonRendererHook extends ElementHook {
-  }
-  class MenuServiceItemHook extends ElementHook {
-  }
-  class MenuNavigationItemHook extends ElementHook {
-  }
-  class MenuItemHook extends ElementHook {
-  }
-  customElements.define('ytm-button-renderer', ButtonRendererHook);
-  customElements.define('ytm-menu-service-item-renderer', MenuServiceItemHook);
-  customElements.define('ytm-menu-navigation-item-renderer', MenuNavigationItemHook);
-  customElements.define('ytm-menu-item', MenuItemHook);
 
+  if (!isMobileInterface) {
+    let customElementsRegistryDefine = window.customElements.define;
+    Object.defineProperty(window.customElements, "define", { configurable: true, enumerable: false, value: function(name, constructor) { 
+      if (name === 'ytd-menu-service-item-renderer') {
+        let origCallback = constructor.prototype.connectedCallback;
+        constructor.prototype.connectedCallback = function() {
+          this.onclick = hooks.menuOnTap;
+          origCallback.call(this);
+        }
+      }
+      customElementsRegistryDefine.call(window.customElements, name, constructor);
+    }})
+  }
 }());
