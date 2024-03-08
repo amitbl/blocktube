@@ -1509,7 +1509,10 @@
     let data;
     let videoData;
     let channelData;
-    const eventSink = this.parentElement.__dataHost.hostElement.inst.eventSink_ || this.parentComponent.eventSink_ || this.parentComponent.inst.eventSink_;
+    let eventSink = getObjectByPath(this.parentElement, '__dataHost.hostElement.inst.eventSink_');
+    if (!eventSink) {
+      eventSink = getObjectByPath(this.parentElement, '__dataHost.eventSink_');
+    }
     const parentDom = eventSink.parentComponent || eventSink.parentElement.__dataHost.hostElement;
     const parentData = parentDom.data;
     let removeParent = true;
