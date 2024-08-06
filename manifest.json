@@ -1,0 +1,39 @@
+{
+	"manifest_version": 3,
+	"name": "BlockTube",
+	"version": "0.4.2",
+	"description": "YouTube™ content blocker",
+	"background": {
+		"service_worker": "src/scripts/background.js"
+	},
+	"action": {
+		"default_icon": {
+			"128": "assets/icons/128.png",
+			"16": "assets/icons/16.png",
+			"48": "assets/icons/48.png"
+		},
+		"default_title": "BlockTube Options"
+	},
+	"content_scripts": [
+		{
+			"all_frames": true,
+			"js": ["src/scripts/content_script.js"],
+			"matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
+			"run_at": "document_start"
+    }
+  ],
+	"options_ui": {
+		"open_in_tab": true,
+		"page": "src/ui/options.html"
+	},
+	"permissions": ["storage", "unlimitedStorage"],
+	"update_url": "https://clients2.google.com/service/update2/crx",
+	"web_accessible_resources": [
+		{
+			"resources": ["src/scripts/inject.js", "src/scripts/seed.js"],
+			"matches": ["<all_urls>"]
+    }
+  ],
+	"homepage_url": "https://github.com/amitbl/blocktube",
+	"key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAi6eQqnr3Jv3gwCzL/dqgCCsY2gn1vHaLcfmsAgyDLNwxbkAV3WwydJDJlx6kxe8zP+/OqhpKDpcDPfU6IgagT52wQrijJvJZEgog2/GYqkGku8t/J5sa3GEAuQBSlviPnkpf9O70jL4p7MhPbBIGTAgSPoz7EoVUZ9851MGNoRqzCi3W4cbLsBZnwYmybDlDCFMCRmQfQHqrCYVJ3nGZBFdrb4WXDEJx8LPlCR9AxNau2BVbZvD0dMMbZyvUsnChoIOzTVwcuWTT24S3pP9mycgF0gdZnqErhcF8HwdAf5Nx45W9ymFDIPsKNqZVmxA7I5g359NRtw78R/VxeDEmhwIDAQAB"
+}
