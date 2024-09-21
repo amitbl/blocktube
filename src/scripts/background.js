@@ -92,24 +92,45 @@ const utils = {
         console.error('Where are you my child?');
       }
     });
+  },
+
+  sendReloadToAll() {
+    Object.keys(ports).forEach((p) => {
+      try {
+        ports[p].postMessage({ type: 'reloadRequired'});
+      } catch (e) {
+        console.error('Where are you my child?');
+      }
+    });
   }
 };
-
-chrome.runtime.onConnect.addListener((port) => {
-    port.onDisconnect.addListener((port) => {
-        const key = port.sender.contextId || port.sender.frameId;
-        delete ports[key];
-    });
-    const key = port.sender.contextId || port.sender.frameId;
-    ports[key] = port;
-    if (initStorage) utils.sendFilters(port);
-});
 
 chrome.storage.local.get('storageData', (data) => {
   if (data !== undefined && Object.keys(data).length > 0) {
     storage = data.storageData;
     compiledStorage = utils.compileAll(data.storageData);
   }
+  initStorage = true;
+  utils.sendFiltersToAll();
+
+  chrome.runtime.onConnect.addListener((port) => {
+    port.onDisconnect.addListener((port) => {
+        const key = port.sender.contextId || port.sender.frameId;
+        delete ports[key];
+    });
+    const key = port.sender.contextId || port.sender.frameId;
+    ports[key] = port;
+    port.onMessage.addListener((msg) => {
+      switch (msg.type) {
+        case 'contextBlock': {
+          storage.filterData[msg.data.type].push(...msg.data.entries);
+          chrome.storage.local.set({storageData: storage});
+          break;
+        }
+      }
+    });
+    utils.sendFilters(port);
+  });
 
   chrome.storage.onChanged.addListener((changes) => {
     if (has.call(changes, 'storageData')) {
@@ -119,11 +140,15 @@ chrome.storage.local.get('storageData', (data) => {
     }
   });
 
-  initStorage = true;
-  utils.sendFiltersToAll();
 });
 
 // TODO: Popup UI
-chrome.browserAction.onClicked.addListener(() => {
+chrome.action.onClicked.addListener((tab) => {
   chrome.runtime.openOptionsPage();
 });
+
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === chrome.runtime.OnInstalledReason.UPDATE) {
+    utils.sendReloadToAll();
+  }
+})

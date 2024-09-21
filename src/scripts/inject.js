@@ -201,11 +201,11 @@
       endScreenPlaylistRenderer: baseRules,
       gridPlaylistRenderer: baseRules,
       postRenderer: {
-        channelId: 'navigationEndpoint.browseEndpoint.browseId',
+        channelId: 'authorEndpoint.browseEndpoint.browseId',
         channelName: ['authorText']
       },
       backstagePostRenderer: {
-        channelId: 'navigationEndpoint.browseEndpoint.browseId',
+        channelId: 'authorEndpoint.browseEndpoint.browseId',
         channelName: ['authorText']
       },
 
@@ -250,9 +250,9 @@
       },
 
       // channel page header
-      c4TabbedHeaderRenderer: {
+      channelMetadataRenderer: {
         properties: {
-          channelId: 'channelId',
+          channelId: 'externalId',
           channelName: 'title',
         },
         customFunc: redirectToIndex,
@@ -317,6 +317,13 @@
           channelName: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.channelTitleText',
           title: ['headline'],
           publishTimeText: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.timestampText'
+        }
+      },
+
+      shortsLockupViewModel: {
+        properties: {
+          videoId: 'onTap.innertubeCommand.reelWatchEndpoint.videoId',
+          title: ['accessibilityText'],
         }
       },
 
@@ -409,6 +416,13 @@
       },
     },
     comments: {
+      commentEntityPayload: {
+        channelId: ['author.channelId'],
+        channelName: ['author.displayName'],
+        comment: ['properties.content.content']
+      },
+      commentThreadRenderer: {},
+      commentViewModel: {},
       commentRenderer: {
         channelId: 'authorEndpoint.browseEndpoint.browseId',
         channelName: ['authorText'],
@@ -432,6 +446,7 @@
     this.object = object;
     this.filterRules = filterRules;
     this.contextMenus = contextMenus;
+    this.blockedComments = [];
 
     this.filter();
     try {
@@ -524,7 +539,9 @@
         console.error("Custom function exception", e);
       }
     }
-
+    if (doBlock && objectType === 'commentEntityPayload') {
+      this.blockedComments.push(obj.properties.commentId);
+    }
     return doBlock;
   };
 
@@ -533,8 +550,20 @@
       if (h === 'movieRenderer' || h === 'compactMovieRenderer') return true;
       if (h === 'videoRenderer' && !getObjectByPath(filteredObject, "shortBylineText.runs.navigationEndpoint.browseEndpoint") && filteredObject.longBylineText && filteredObject.badges) return true;
     }
-    if (storageData.options.shorts && h === 'reelItemRenderer') return true;
+    if (storageData.options.shorts && (h === 'shortsLockupViewModel' || h === 'reelItemRenderer') ) return true;
     if (storageData.options.mixes && (h === 'radioRenderer' || h === 'compactRadioRenderer')) return true;
+
+    if (h === 'commentThreadRenderer') {
+      if (this.blockedComments.includes(filteredObject.commentViewModel.commentViewModel.commentId)) {
+        return true;
+      }
+    }
+
+    if (h === 'commentViewModel') {
+      if (this.blockedComments.includes(filteredObject.commentId)) {
+        return true;
+      } 
+    }
 
     return false;
   }
@@ -1317,7 +1346,7 @@
       }
     }
 
-    if (items instanceof Array){
+    if (items instanceof Array) {
       const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] }, icon: {iconType: "NOT_INTERESTED"} } };
       const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] }, icon: {iconType: "NOT_INTERESTED"} } };
       if (storageData.options.block_feedback)
@@ -1411,6 +1440,15 @@
     // Enable JS filtering only if function has something in it
     if (storageData.options.enable_javascript && storageData.filterData.javascript) {
       try {
+        try {
+          if (window.trustedTypes && window.trustedTypes.createPolicy) {
+            window.trustedTypes.createPolicy('default', {
+              createHTML: string => string,
+              createScriptURL: string => string,
+              createScript: string => string,
+            });
+          }
+        } catch (e) {}
         jsFilter = window.eval(storageData.filterData.javascript);
         if (!(jsFilter instanceof Function)) {
           throw Error("Function not found");
@@ -1519,8 +1557,13 @@
 
     // Video player context menu
     if (parentDom.tagName === 'YTD-VIDEO-PRIMARY-INFO-RENDERER' || parentDom.tagName === 'YTD-WATCH-METADATA') {
-      const player = document.getElementsByTagName('ytd-page-manager')[0].data.playerResponse;
-      const owner = document.getElementsByTagName('ytd-video-owner-renderer')[0].data;
+      const pageManager = document.getElementsByTagName('ytd-page-manager')[0];
+      const playerData = pageManager.data || pageManager.getCurrentData();
+      const player = playerData.playerResponse;
+
+      const ownerRenderer = document.getElementsByTagName('ytd-video-owner-renderer')[0];
+      const owner = ownerRenderer.data || ownerRenderer.getCurrentData();
+
       const ownerUCID = owner.title.runs[0].navigationEndpoint.browseEndpoint.browseId;
       let playerUCID = player.videoDetails.channelId;
       if (playerUCID !== ownerUCID) {

@@ -256,7 +256,7 @@
         let origCallback = constructor.prototype.connectedCallback;
         constructor.prototype.connectedCallback = function() {
           this.onclick = hooks.menuOnTap;
-          origCallback.call(this);
+          if (origCallback) origCallback.call(this);
         }
       }
       customElementsRegistryDefine.call(window.customElements, name, constructor);

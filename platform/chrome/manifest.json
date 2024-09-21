@@ -2,17 +2,30 @@
   "name": "BlockTube",
   "version": "{EXT_VERSION}",
   "description": "YouTube™ content blocker",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
       "js": ["src/scripts/content_script.js"],
       "run_at": "document_start",
       "all_frames": true
+    },
+    {
+      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
+      "js": ["src/scripts/seed.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
+      "js": ["src/scripts/inject.js"],
+      "run_at": "document_start",
+      "all_frames": true,
+      "world": "MAIN"
     }
   ],
-  "web_accessible_resources": ["src/scripts/inject.js"],
-  "browser_action": {
+  "action": {
     "default_title": "BlockTube Options",
     "default_icon": {
       "16": "assets/icons/16.png",
@@ -29,7 +42,7 @@
     "unlimitedStorage"
   ],
   "background": {
-    "scripts": ["src/scripts/background.js"]
+    "service_worker": "src/scripts/background.js"
   },
   "icons": {
     "16": "assets/icons/16.png",
