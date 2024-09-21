@@ -1,5 +1,9 @@
 (function () {
   'use strict';
+  
+  let port;
+  let globalStorage;
+  let compiledStorage;
 
   const utils = {
     sendStorage() {
@@ -8,13 +12,6 @@
         type: 'storageData',
         data: compiledStorage || globalStorage,
       }, document.location.origin);
-    },
-    inject() {
-      const s = document.createElement('script');
-      s.src = chrome.extension.getURL('src/scripts/inject.js');
-      s.onload = events.ready;
-      s.async = false;
-      (document.head || document.documentElement).appendChild(s);
     },
     sendReload(msg, duration) {
       window.postMessage({
@@ -25,53 +22,29 @@
     }
   };
 
-  if (document.body) {
-    utils.sendReload();
-    return;
-  }
-
-  // Inject seed
-  const seed = document.createElement('script');
-  seed.textContent = `
-  {SEED_CONTENTS}
-  `;
-  seed.async = false;
-  (document.head || document.documentElement).prepend(seed);
-
-  let globalStorage;
-  let compiledStorage;
-  let ready = false;
-  let port = null;
-
-  const storage = {
-    set(data) {
-      chrome.storage.local.set({ storageData: data });
-    },
-    get(cb) {
-      chrome.storage.local.get('storageData', (storageRes) => {
-        cb(storageRes.storageData);
-      });
-    },
-  };
-
   const events = {
     contextBlock(data) {
-      const entries = [`// Blocked by context menu (${data.info.text})`];
+      if (!data.info.id) return;
+
+      const options = {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric"
+      }
+      let now = new Intl.DateTimeFormat(undefined, options).format(new Date())
+      const entries = [`// Blocked by context menu (${data.info.text}) (${now})`];
       const id = Array.isArray(data.info.id) ? data.info.id : [data.info.id];
       entries.push(...id);
       entries.push('');
-      globalStorage.filterData[data.type].push(...entries);
-      storage.set(globalStorage);
-    },
-    ready() {
-      utils.sendStorage();
-      ready = true;
-    },
+      port.postMessage({'type': 'contextBlock', 'data': {'type': data.type, 'entries': entries}})
+    }
   };
 
   function connectToPort() {
     port = chrome.runtime.connect();
-
     // Listen for messages from background page
     port.onMessage.addListener((msg) => {
       switch (msg.type) {
@@ -79,8 +52,12 @@
           if (msg.data) {
             globalStorage = msg.data.storage;
             compiledStorage = msg.data.compiledStorage;
+            utils.sendStorage();
           }
-          if (ready) utils.sendStorage();
+          break;
+        }
+        case 'reloadRequired': {
+          utils.sendReload();
           break;
         }
         default:
@@ -88,10 +65,9 @@
       }
     });
 
-    // Reload page on extension update/uninstall
     port.onDisconnect.addListener(() => {
-      port = null;
-      utils.sendReload();
+      connectToPort();
+      
     });
   }
 
@@ -107,11 +83,12 @@
         events.contextBlock(event.data.data);
         break;
       }
+      case 'ready': {
+        utils.sendStorage();
+      }
       default:
         break;
     }
   }, true);
 
-  // Inject script to page
-  utils.inject();
 }());

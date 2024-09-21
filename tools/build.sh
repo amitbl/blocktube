@@ -18,16 +18,6 @@ set_version() {
     sed -i -e "s/{EXT_VERSION}/${VERSION}/" ${DEST}/src/ui/options.html
 }
 
-uglify() {
-    pushd $DEST/src/scripts
-    if ! terser --ecma 8 -o seed_.js seed.js; then
-        echo "Build failed, terser is missing. install with \`npm install -g terser\`";
-        exit 1;
-    fi
-    sed -i -e "s/{SEED_CONTENTS}/$(sed 's:[/\\&]:\\&:g' seed_.js)/" content_script.js
-    rm -f seed*.js;
-}
-
 zipfile() {
     cd $DEST
     zip "$DEST/blocktube_${BROWSER}_v${VERSION}.zip" -qr ./*
@@ -41,7 +31,6 @@ build() {
     clean
     copy_files
     set_version
-    uglify
     zipfile
 }
 
@@ -63,4 +52,3 @@ elif [ "$1" == "chrome" ]; then
 else
     clean
 fi
-
