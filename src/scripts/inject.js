@@ -1551,6 +1551,9 @@
     if (!eventSink) {
       eventSink = getObjectByPath(this.parentElement, '__dataHost.eventSink_');
     }
+    if (!eventSink) {
+      eventSink = getObjectByPath(this.parentElement, '__dataHost.forwarder_.eventSink');
+    }
     const parentDom = eventSink.parentComponent || eventSink.parentElement.__dataHost.hostElement;
     const parentData = parentDom.data;
     let removeParent = true;
