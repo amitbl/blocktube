@@ -564,13 +564,13 @@
     }
 
     if (h === 'commentThreadRenderer') {
-      if (this.blockedComments.includes(filteredObject.commentViewModel.commentViewModel.commentId)) {
+      if (this.blockedComments.includes(getObjectByPath(filteredObject, 'commentViewModel.commentViewModel.commentId'))) {
         return true;
       }
     }
 
     if (h === 'commentViewModel') {
-      if (this.blockedComments.includes(filteredObject.commentId)) {
+      if (this.blockedComments.includes(getObjectByPath(filteredObject, 'commentId'))) {
         return true;
       } 
     }
@@ -1158,7 +1158,12 @@
       }
 
       if(!items) return;
-      const blockCh = { menuServiceItemRenderer: { _btOriginalAttr: attr, _btMenuAction: "block_channel", _btOriginalData: channelData, text: { runs: [{ text: 'Block Channel' }] }, "serviceEndpoint": {
+      const blockCh = { menuServiceItemRenderer: { _btOriginalAttr: attr, _btMenuAction: "block_channel", _btOriginalData: channelData, "text": { "runs": [ { "text": "Block Channel" } ]},
+        "icon": {
+          "iconType": "NOT_INTERESTED"
+        },
+        "trackingParams": "Cg==",
+        "serviceEndpoint": {
         "commandMetadata": {
           "webCommandMetadata": {
             "sendPost": true,
@@ -1193,7 +1198,12 @@
           ]
         }
       } } };
-      const blockVid = { menuServiceItemRenderer: {  _btOriginalAttr: attr, _btMenuAction: "block_video", _btOriginalData: videoData, text: { runs: [{ text: 'Block Video' }] }, "serviceEndpoint": {
+      const blockVid = { menuServiceItemRenderer: { _btOriginalAttr: attr, _btMenuAction: "block_video", _btOriginalData: videoData, "text": { "runs": [ { "text": "Block Video" } ]},
+        "icon": {
+          "iconType": "NOT_INTERESTED"
+        },
+        "trackingParams": "Cg==",
+        "serviceEndpoint": {
         "commandMetadata": {
           "webCommandMetadata": {
             "sendPost": true,
@@ -1513,15 +1523,18 @@
   }
 
   function menuOnTapMobile(event) {
-    if (!this.data || !this.data._btOriginalAttr || !this.data._btMenuAction) return;
-
     if (window.btReloadRequired) {
       window.btExports.openToast("BlockTube was updated, this tab needs to be reloaded to use this function", 5000);
       return;
     }
 
+    let data = getObjectByPath(this, '__instance.props.data') || this.data;
+    if (!data || !data._btOriginalData) {
+      return;
+    }
+
     let type;
-    switch (this.data._btMenuAction) {
+    switch (data._btMenuAction) {
       case 'block_channel': {
         type = 'channelId';
         break;
@@ -1534,10 +1547,15 @@
         return;
     }
 
-    postMessage('contextBlockData', { type, info: this.data._btOriginalData });
-    if (this.data._btOriginalAttr === 'slimVideoMetadataSectionRenderer') {
+    postMessage('contextBlockData', { type, info: data._btOriginalData });
+    if (data._btOriginalAttr === 'slimVideoMetadataSectionRenderer') {
       document.getElementById('movie_player').stopVideo();
       alert( (type === 'videoId' ? 'Video' : 'Channel') + ' Blocked');
+    }
+    if (data._btOriginalAttr === 'commentRenderer') {
+      let comments = document.querySelector('ytm-section-list-renderer')
+      storageData.filterData.channelId.push(RegExp('^' + data._btOriginalData.id + '$'));
+      ObjectFilter(comments.data, filterRules.comments, [], false);
     }
   }
 
