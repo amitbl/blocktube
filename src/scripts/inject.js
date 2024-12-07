@@ -367,6 +367,10 @@
 
       tabRenderer: {
         channelId: 'endpoint.commandMetadata.webCommandMetadata.url'
+      },
+
+      lockupViewModel: {
+
       }
 
     },
@@ -552,6 +556,12 @@
     }
     if (storageData.options.shorts && (h === 'shortsLockupViewModel' || h === 'reelItemRenderer') ) return true;
     if (storageData.options.mixes && (h === 'radioRenderer' || h === 'compactRadioRenderer')) return true;
+    if (storageData.options.mixes && h === 'lockupViewModel') {
+      let imgName = getObjectByPath(filteredObject, 'contentImage.collectionThumbnailViewModel.primaryThumbnail.thumbnailViewModel.overlays.thumbnailOverlayBadgeViewModel.thumbnailBadges.thumbnailBadgeViewModel.icon.sources.clientResource.imageName');
+      if (imgName === 'MIX') {
+        return true;
+      }
+    }
 
     if (h === 'commentThreadRenderer') {
       if (this.blockedComments.includes(filteredObject.commentViewModel.commentViewModel.commentId)) {
