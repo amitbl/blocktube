@@ -1073,6 +1073,7 @@
     }
 
     data.filterData.channelId.push(/^TAB_SHORTS$/);
+    data.filterData.channelId.push(/^TAB_SHORTS_CAIRO$/);
     data.filterData.channelId.push(/^.+\/shorts$/);
   }
 
