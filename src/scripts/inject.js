@@ -123,6 +123,8 @@
     'commentRenderer',
     'playlistPanelVideoRenderer',
     'playlistVideoRenderer',
+    // Desktop Shorts
+    'reelPlayerOverlayRenderer',
     // Mobile
     'reelItemRenderer',
     'slimVideoMetadataSectionRenderer',
@@ -1333,6 +1335,10 @@
     let hasVideo = false;
     if (has.call(obj[attr], 'videoActions')) {
       items = obj[attr].videoActions.menuRenderer.items;
+      hasChannel = true;
+      hasVideo = true;
+    } else if (has.call(obj[attr], 'menu')) {
+      items = obj[attr].menu.menuRenderer.items;
       hasChannel = true;
       hasVideo = true;
     } else if (has.call(obj[attr], 'actionMenu')) {
