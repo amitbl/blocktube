@@ -1597,7 +1597,7 @@
     const shortsDom = eventSink.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement
     const ytShortsData = getObjectByPath(eventSink, 'polymerController.__data');
     
-    // Set shortsDom as the last fallback, because eventSink itself exists, but child properties are undefined
+    // Set shortsDom as the last fallback, because eventSink itself exists, but child properties are undefined for Shorts
     const parentDom = eventSink?.parentComponent || eventSink.parentElement?.__dataHost?.hostElement || shortsDom;
     const parentData = parentDom?.data || ytShortsData.data;
 
@@ -1633,7 +1633,6 @@
 
       const ownerRenderer = document.getElementsByTagName('ytd-video-owner-renderer')[0];
       const owner = ownerRenderer.data || ownerRenderer.getCurrentData();
-      console.log("🚀 ~ menuOnTap ~ owner:", owner)
 
       const ownerUCID = owner.title.runs[0].navigationEndpoint.browseEndpoint.browseId;
       let playerUCID = player.videoDetails.channelId;
@@ -1705,6 +1704,7 @@
         parentDom.setAttribute('is-dismissed', '');
       }
     } else {
+      // Video does not get hidden for Shorts
       document.getElementById('movie_player').stopVideo();
     }
     if (this.data.serviceEndpoint) {
