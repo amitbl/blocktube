@@ -1704,7 +1704,6 @@
         parentDom.setAttribute('is-dismissed', '');
       }
     } else {
-      // Video does not get hidden for Shorts
       document.getElementById('movie_player').stopVideo();
     }
     if (this.data.serviceEndpoint) {
