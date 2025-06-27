@@ -1592,21 +1592,52 @@
     if (!eventSink) {
       eventSink = getObjectByPath(this.parentElement.parentElement, 'polymerController.forwarder_.eventSink');
     }
-    const parentDom = eventSink.parentComponent || eventSink.parentElement.__dataHost.hostElement;
-    const parentData = parentDom.data;
+    
+    // Bubble up to <ytd-reel-video-renderer>, because that is the first specific element for Shorts
+    const shortsDom = eventSink.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement
+    const ytShortsData = getObjectByPath(eventSink, 'polymerController.__data');
+    
+    // Set shortsDom as the last fallback, because eventSink itself exists, but child properties are undefined
+    const parentDom = eventSink?.parentComponent || eventSink.parentElement?.__dataHost?.hostElement || shortsDom;
+    const parentData = parentDom?.data || ytShortsData.data;
+
     let removeParent = true;
 
+    // Shorts reel context
+    if(parentDom.tagName === 'YTD-REEL-VIDEO-RENDERER'){
+      const pageManager = document.getElementsByTagName('ytd-page-manager')[0];
+      const playerData = pageManager.data || pageManager.getCurrentData();
+      const player = playerData.playerResponse;
+
+      // As far as I can tell channelId is always the same as the browseId for Shorts.
+      const playerUCID = player.videoDetails.channelId;
+      
+      channelData = {
+        text: player.videoDetails.author,
+        id: playerUCID,
+      };
+      videoData = {
+        text: player.videoDetails.title,
+        id: player.videoDetails.videoId,
+      };
+
+      removeParent = false;
+    } 
     // Video player context menu
-    if (parentDom.tagName === 'YTD-VIDEO-PRIMARY-INFO-RENDERER' || parentDom.tagName === 'YTD-WATCH-METADATA') {
+    else if (
+      parentDom.tagName === 'YTD-VIDEO-PRIMARY-INFO-RENDERER' || 
+      parentDom.tagName === 'YTD-WATCH-METADATA') {
       const pageManager = document.getElementsByTagName('ytd-page-manager')[0];
       const playerData = pageManager.data || pageManager.getCurrentData();
       const player = playerData.playerResponse;
 
       const ownerRenderer = document.getElementsByTagName('ytd-video-owner-renderer')[0];
       const owner = ownerRenderer.data || ownerRenderer.getCurrentData();
+      console.log("🚀 ~ menuOnTap ~ owner:", owner)
 
       const ownerUCID = owner.title.runs[0].navigationEndpoint.browseEndpoint.browseId;
       let playerUCID = player.videoDetails.channelId;
+
       if (playerUCID !== ownerUCID) {
         playerUCID = [playerUCID, ownerUCID];
       }
