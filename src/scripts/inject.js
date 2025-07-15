@@ -528,6 +528,9 @@
             else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_LIVE_NOW") {
               badges.push("live");
             }
+            else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_MEMBERS_ONLY") { 
+              badges.push("members"); 
+            }
           });
           value = badges;
         }
