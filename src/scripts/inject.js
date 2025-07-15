@@ -349,6 +349,13 @@
         channelBadges: 'ownerBadges',
       },
 
+      lockupViewModel: {
+        title: 'metadata.lockupMetadataViewModel.title.content',
+        videoId: 'rendererContext.commandContext.onTap.innertubeCommand.watchEndpoint.videoId',
+        channelId: 'metadata.lockupMetadataViewModel.image.decoratedAvatarViewModel.rendererContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId',
+        channelName: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.content'
+      },
+
       // Mobile top chips
       chipCloudChipRenderer: {
         channelId: 'icon.iconType'
@@ -367,12 +374,7 @@
 
       tabRenderer: {
         channelId: 'endpoint.commandMetadata.webCommandMetadata.url'
-      },
-
-      lockupViewModel: {
-
       }
-
     },
     ytPlayer: {
       args: {
