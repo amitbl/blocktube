@@ -374,6 +374,10 @@
 
       tabRenderer: {
         channelId: 'endpoint.commandMetadata.webCommandMetadata.url'
+      },
+
+      // Empty for blocking short headers
+      gridShelfViewModel: {
       }
     },
     ytPlayer: {
@@ -559,7 +563,7 @@
       if (h === 'movieRenderer' || h === 'compactMovieRenderer') return true;
       if (h === 'videoRenderer' && !getObjectByPath(filteredObject, "shortBylineText.runs.navigationEndpoint.browseEndpoint") && filteredObject.longBylineText && filteredObject.badges) return true;
     }
-    if (storageData.options.shorts && (h === 'shortsLockupViewModel' || h === 'reelItemRenderer') ) return true;
+    if (storageData.options.shorts && (h === 'shortsLockupViewModel' || h === 'reelItemRenderer' || h === 'gridShelfViewModel') ) return true;
     if (storageData.options.mixes && (h === 'radioRenderer' || h === 'compactRadioRenderer')) return true;
     if (storageData.options.mixes && h === 'lockupViewModel') {
       let imgName = getObjectByPath(filteredObject, 'contentImage.collectionThumbnailViewModel.primaryThumbnail.thumbnailViewModel.overlays.thumbnailOverlayBadgeViewModel.thumbnailBadges.thumbnailBadgeViewModel.icon.sources.clientResource.imageName');
