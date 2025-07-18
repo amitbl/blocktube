@@ -252,7 +252,7 @@
   if (!isMobileInterface) {
     let customElementsRegistryDefine = window.customElements.define;
     Object.defineProperty(window.customElements, "define", { configurable: true, enumerable: false, value: function(name, constructor) { 
-      if (name === 'ytd-menu-service-item-renderer') {
+      if (name === 'ytd-menu-service-item-renderer' || name === 'yt-list-item-view-model') {
         let origCallback = constructor.prototype.connectedCallback;
         constructor.prototype.connectedCallback = function() {
           this.onclick = hooks.menuOnTap;

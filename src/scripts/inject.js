@@ -123,6 +123,7 @@
     'commentRenderer',
     'playlistPanelVideoRenderer',
     'playlistVideoRenderer',
+    'lockupViewModel',
     // Mobile
     'reelItemRenderer',
     'slimVideoMetadataSectionRenderer',
@@ -1340,6 +1341,8 @@
     let items;
     let hasChannel = false;
     let hasVideo = false;
+    let isLockupViewModel = false;
+
     if (has.call(obj[attr], 'videoActions')) {
       items = obj[attr].videoActions.menuRenderer.items;
       hasChannel = true;
@@ -1351,8 +1354,27 @@
       obj[attr].actionMenu = {menuRenderer: {items: [] } };
       items = obj[attr].actionMenu.menuRenderer.items;
       hasChannel = true;
-    } else {
+    } else if (attr === 'lockupViewModel') {
+      const sheetmodel = obj[attr].metadata.lockupMetadataViewModel.menuButton.buttonViewModel.onTap.innertubeCommand.showSheetCommand.panelLoadingStrategy.inlineContent.sheetViewModel;
+      items = sheetmodel.content.listViewModel.listItems;
+      const searchIn = mergedFilterRules['lockupViewModel'];
+      const channelIdData = getFlattenByPath(obj.lockupViewModel, searchIn.channelId);
+      const channelNameData = getFlattenByPath(obj.lockupViewModel, searchIn.channelName);
+      const videoIdData = getFlattenByPath(obj.lockupViewModel, searchIn.videoId);
+      const videoNameData = getFlattenByPath(obj.lockupViewModel, searchIn.title);
+      const metadataBlock = { metadata: { channelId: {channelIdData}, channelName: {channelNameData}, videoId: {videoIdData}, videoName: {videoNameData} } };
 
+      Object.defineProperty(sheetmodel, 'blockTube', {
+        value: metadataBlock,
+        writable: true,
+        enumerable: true,
+        configurable: true
+      });
+
+      hasChannel = true;
+      hasVideo = true;
+      isLockupViewModel = true;
+    } else {
       if (attr === 'movieRenderer' || attr === 'compactMovieRenderer') {
         hasChannel = false;
       } else if (has.call(obj[attr], 'shortBylineText') && getObjectByPath(obj[attr], 'shortBylineText.runs.navigationEndpoint.browseEndpoint')) {
@@ -1377,23 +1399,36 @@
     }
 
     if (items instanceof Array) {
-      const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] }, icon: {iconType: "NOT_INTERESTED"} } };
-      const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] }, icon: {iconType: "NOT_INTERESTED"} } };
-      if (storageData.options.block_feedback)
-        items.forEach((e) => {
-          if (getObjectByPath(e, 'menuServiceItemRenderer.icon.iconType') === 'NOT_INTERESTED' && hasVideo) {
-            blockVid.menuServiceItemRenderer.serviceEndpoint = JSON.parse(JSON.stringify(e.menuServiceItemRenderer.serviceEndpoint))
-          } else if (getObjectByPath(e, 'menuServiceItemRenderer.icon.iconType') === 'REMOVE' && hasChannel) {
-            blockCh.menuServiceItemRenderer.serviceEndpoint = JSON.parse(JSON.stringify(e.menuServiceItemRenderer.serviceEndpoint))
-          }
-        });
-      if (hasChannel) items.push(blockCh);
-      if (hasVideo) items.push(blockVid);
+      if (isLockupViewModel) {
+        const blockCh  = { listItemViewModel: { title: { content: 'Block Channel' }, leadingImage: { sources: [{ clientResource: { imageName: "NOT_INTERESTED" } }] }, rendererContext: {} } };
+        const blockVid = { listItemViewModel: { title: { content: 'Block Video'   }, leadingImage: { sources: [{ clientResource: { imageName: "NOT_INTERESTED" } }] }, rendererContext: {} } };
+        // Add renering context from other buttons to setup highlighting
+        blockCh.listItemViewModel.rendererContext  = items[0].listItemViewModel.rendererContext;
+        blockVid.listItemViewModel.rendererContext = items[0].listItemViewModel.rendererContext;
+        // Remove the actions so it doesn't run
+        blockCh.listItemViewModel.rendererContext.commandContext.onTap.innertubeCommand.signalServiceEndpoint.actions = undefined;
+        blockVid.listItemViewModel.rendererContext.commandContext.onTap.innertubeCommand.signalServiceEndpoint.actions = undefined;
 
-      if (hasChannel || hasVideo) {
-        obj[attr]._btOriginalAttr = attr;
+        if (hasChannel) items.push(blockCh);
+        if (hasVideo) items.push(blockVid);
+      } else {
+        const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] }, icon: {iconType: "NOT_INTERESTED"} } };
+        const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] }, icon: {iconType: "NOT_INTERESTED"} } };
+        if (storageData.options.block_feedback)
+          items.forEach((e) => {
+            if (getObjectByPath(e, 'menuServiceItemRenderer.icon.iconType') === 'NOT_INTERESTED' && hasVideo) {
+              blockVid.menuServiceItemRenderer.serviceEndpoint = JSON.parse(JSON.stringify(e.menuServiceItemRenderer.serviceEndpoint))
+            } else if (getObjectByPath(e, 'menuServiceItemRenderer.icon.iconType') === 'REMOVE' && hasChannel) {
+              blockCh.menuServiceItemRenderer.serviceEndpoint = JSON.parse(JSON.stringify(e.menuServiceItemRenderer.serviceEndpoint))
+            }
+          });
+        if (hasChannel) items.push(blockCh);
+        if (hasVideo) items.push(blockVid);
+
+        if (hasChannel || hasVideo) {
+          obj[attr]._btOriginalAttr = attr;
+        }
       }
-
     }
   }
 
@@ -1569,8 +1604,25 @@
     }
   }
 
+  function getActionMenuData(context) {
+    let menuAction = "";
+    let isRecommendedData = false;
+
+    const string = context.getElementsByTagName('yt-formatted-string');
+
+    if (string && Array.isArray(string)) {
+        menuAction = string[0]?.getRawText() || "";
+    } else {
+        isRecommendedData = true;
+        menuAction = context.innerText || "";
+    }
+
+    return { isRecommendedData, menuAction };
+  }
+
   function menuOnTap(event) {
-    const menuAction = this.getElementsByTagName('yt-formatted-string')[0].getRawText();
+    const { isRecommendedData, menuAction } = getActionMenuData(this);
+
     if (!['Block Channel', 'Block Video'].includes(menuAction)) {
       event.preventDefault();
       return;
@@ -1581,23 +1633,34 @@
       return;
     }
 
+    let parentDom;
+    let parentData;
+    if (isRecommendedData) {
+      parentDom = this.parentElement.parentElement.parentElement.parentElement;
+      const parentDomData = parentDom.componentProps.data;
+      const parentDomSymbols = Object.getOwnPropertySymbols(parentDomData);
+      parentData = parentDomData[parentDomSymbols[0]].value;
+    } else {
+      let eventSink = getObjectByPath(this.parentElement.parentElement, 'polymerController.forwarder_.eventSink');
+      if (!eventSink) {
+        eventSink = getObjectByPath(this.parentElement, '__dataHost.eventSink_');
+      }
+      if (!eventSink) {
+        eventSink = getObjectByPath(this.parentElement, '__dataHost.forwarder_.eventSink');
+      }
+      if (!eventSink) {
+        eventSink = getObjectByPath(this.parentElement, '__dataHost.hostElement.inst.eventSink_');
+      }
+
+      parentDom = eventSink.parentComponent || eventSink.parentElement.__dataHost.hostElement;
+      parentData = parentDom.data;
+    }
+
+    let removeParent = true;
     let type;
     let data;
     let videoData;
     let channelData;
-    let eventSink = getObjectByPath(this.parentElement, '__dataHost.hostElement.inst.eventSink_');
-    if (!eventSink) {
-      eventSink = getObjectByPath(this.parentElement, '__dataHost.eventSink_');
-    }
-    if (!eventSink) {
-      eventSink = getObjectByPath(this.parentElement, '__dataHost.forwarder_.eventSink');
-    }
-    if (!eventSink) {
-      eventSink = getObjectByPath(this.parentElement.parentElement, 'polymerController.forwarder_.eventSink');
-    }
-    const parentDom = eventSink.parentComponent || eventSink.parentElement.__dataHost.hostElement;
-    const parentData = parentDom.data;
-    let removeParent = true;
 
     // Video player context menu
     if (parentDom.tagName === 'YTD-VIDEO-PRIMARY-INFO-RENDERER' || parentDom.tagName === 'YTD-WATCH-METADATA') {
@@ -1624,17 +1687,32 @@
 
       removeParent = false;
     } else {
-      let attrKey = parentData._btOriginalAttr;
-      let searchIn = mergedFilterRules[attrKey].properties ? mergedFilterRules[attrKey].properties : mergedFilterRules[attrKey];
+      let searchIn;
+      if (isRecommendedData) {
+        channelData = {
+          id: parentData.blockTube.metadata.channelId,
+          text: parentData.blockTube.metadata.channelName,
+        }
 
-      channelData = {
-        id: getFlattenByPath(parentData, searchIn.channelId),
-        text: getFlattenByPath(parentData, searchIn.channelName),
-      }
+        videoData = {
+          id: parentData.blockTube.metadata.videoId,
+          text: parentData.blockTube.metadata.videoName,
+        }
 
-      videoData = {
-        id: getFlattenByPath(parentData, searchIn.videoId),
-        text: getFlattenByPath(parentData, searchIn.title),
+        removeParent = false
+      } else {
+        let attrKey = parentData._btOriginalAttr;
+        searchIn = mergedFilterRules[attrKey].properties ? mergedFilterRules[attrKey].properties : mergedFilterRules[attrKey];
+
+        channelData = {
+          id: getFlattenByPath(parentData, searchIn.channelId),
+          text: getFlattenByPath(parentData, searchIn.channelName),
+        }
+
+        videoData = {
+          id: getFlattenByPath(parentData, searchIn.videoId),
+          text: getFlattenByPath(parentData, searchIn.title),
+        }
       }
     }
 
