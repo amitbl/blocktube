@@ -1358,11 +1358,11 @@
       const sheetmodel = obj[attr].metadata.lockupMetadataViewModel.menuButton.buttonViewModel.onTap.innertubeCommand.showSheetCommand.panelLoadingStrategy.inlineContent.sheetViewModel;
       items = sheetmodel.content.listViewModel.listItems;
       const searchIn = mergedFilterRules['lockupViewModel'];
-      const channelIdData = getFlattenByPath(obj.lockupViewModel, searchIn.channelId);
-      const channelNameData = getFlattenByPath(obj.lockupViewModel, searchIn.channelName);
-      const videoIdData = getFlattenByPath(obj.lockupViewModel, searchIn.videoId);
-      const videoNameData = getFlattenByPath(obj.lockupViewModel, searchIn.title);
-      const metadataBlock = { metadata: { channelId: {channelIdData}, channelName: {channelNameData}, videoId: {videoIdData}, videoName: {videoNameData} } };
+      const channelId = getFlattenByPath(obj.lockupViewModel, searchIn.channelId);
+      const channelName = getFlattenByPath(obj.lockupViewModel, searchIn.channelName);
+      const videoId = getFlattenByPath(obj.lockupViewModel, searchIn.videoId);
+      const videoName = getFlattenByPath(obj.lockupViewModel, searchIn.title);
+      const metadataBlock = { metadata: { channelId, channelName, videoId, videoName } };
 
       Object.defineProperty(sheetmodel, 'blockTube', {
         value: metadataBlock,
@@ -1698,8 +1698,6 @@
           id: parentData.blockTube.metadata.videoId,
           text: parentData.blockTube.metadata.videoName,
         }
-
-        removeParent = false
       } else {
         let attrKey = parentData._btOriginalAttr;
         searchIn = mergedFilterRules[attrKey].properties ? mergedFilterRules[attrKey].properties : mergedFilterRules[attrKey];
