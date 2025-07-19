@@ -1657,10 +1657,7 @@
     }
 
     let removeParent = true;
-    let type;
-    let data;
-    let videoData;
-    let channelData;
+    let type, data, channelData, videoData;
 
     // Video player context menu
     if (parentDom.tagName === 'YTD-VIDEO-PRIMARY-INFO-RENDERER' || parentDom.tagName === 'YTD-WATCH-METADATA') {
@@ -1743,8 +1740,9 @@
         } else {
           parentDom.remove();
         }
-      }
-      else {
+      } else if (isRecommendedData) {
+        parentDom.parentNode.__dataHost.__restoreFocusNode.parentElement.parentElement.parentElement.parentElement.parentElement.remove()
+      } else {
         parentDom.dismissedRenderer = {
           notificationMultiActionRenderer: {
             responseText: {simpleText: 'Blocked'},
