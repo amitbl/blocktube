@@ -1620,44 +1620,9 @@
     return { isRecommendedData, menuAction };
   }
 
-  function menuOnTap(event) {
-    const { isRecommendedData, menuAction } = getActionMenuData(this);
-
-    if (!['Block Channel', 'Block Video'].includes(menuAction)) {
-      event.preventDefault();
-      return;
-    }
-
-    if (window.btReloadRequired) {
-      window.btExports.openToast("BlockTube was updated, this tab needs to be reloaded to use this function", 5000);
-      return;
-    }
-
-    let parentDom;
-    let parentData;
-    if (isRecommendedData) {
-      parentDom = this.parentElement.parentElement.parentElement.parentElement;
-      const parentDomData = parentDom.componentProps.data;
-      const parentDomSymbols = Object.getOwnPropertySymbols(parentDomData);
-      parentData = parentDomData[parentDomSymbols[0]].value;
-    } else {
-      let eventSink = getObjectByPath(this.parentElement.parentElement, 'polymerController.forwarder_.eventSink');
-      if (!eventSink) {
-        eventSink = getObjectByPath(this.parentElement, '__dataHost.eventSink_');
-      }
-      if (!eventSink) {
-        eventSink = getObjectByPath(this.parentElement, '__dataHost.forwarder_.eventSink');
-      }
-      if (!eventSink) {
-        eventSink = getObjectByPath(this.parentElement, '__dataHost.hostElement.inst.eventSink_');
-      }
-
-      parentDom = eventSink.parentComponent || eventSink.parentElement.__dataHost.hostElement;
-      parentData = parentDom.data;
-    }
-
+  function getBlockData(parentDom, parentData, isRecommendedData, menuAction) {
+    let channelData, videoData;
     let removeParent = true;
-    let type, data, channelData, videoData;
 
     // Video player context menu
     if (parentDom.tagName === 'YTD-VIDEO-PRIMARY-INFO-RENDERER' || parentDom.tagName === 'YTD-WATCH-METADATA') {
@@ -1683,73 +1648,147 @@
       };
 
       removeParent = false;
+    } else if (isRecommendedData) {
+      channelData = {
+        id: parentData.blockTube?.metadata?.channelId,
+        text: parentData.blockTube?.metadata?.channelName,
+      };
+
+      videoData = {
+        id: parentData.blockTube?.metadata?.videoId,
+        text: parentData.blockTube?.metadata?.videoName,
+      };
     } else {
-      let searchIn;
-      if (isRecommendedData) {
-        channelData = {
-          id: parentData.blockTube.metadata.channelId,
-          text: parentData.blockTube.metadata.channelName,
-        }
+      const attrKey = parentData._btOriginalAttr;
+      const searchIn = mergedFilterRules[attrKey]?.properties || mergedFilterRules[attrKey];
 
-        videoData = {
-          id: parentData.blockTube.metadata.videoId,
-          text: parentData.blockTube.metadata.videoName,
-        }
-      } else {
-        let attrKey = parentData._btOriginalAttr;
-        searchIn = mergedFilterRules[attrKey].properties ? mergedFilterRules[attrKey].properties : mergedFilterRules[attrKey];
+      channelData = {
+        id: getFlattenByPath(parentData, searchIn.channelId),
+        text: getFlattenByPath(parentData, searchIn.channelName),
+      };
 
-        channelData = {
-          id: getFlattenByPath(parentData, searchIn.channelId),
-          text: getFlattenByPath(parentData, searchIn.channelName),
-        }
-
-        videoData = {
-          id: getFlattenByPath(parentData, searchIn.videoId),
-          text: getFlattenByPath(parentData, searchIn.title),
-        }
-      }
+      videoData = {
+        id: getFlattenByPath(parentData, searchIn.videoId),
+        text: getFlattenByPath(parentData, searchIn.title),
+      };
     }
 
+    let result;
     switch (menuAction) {
-      case 'Block Channel': {
-        type = 'channelId';
-        data = channelData;
+      case 'Block Channel':
+        result = { type: 'channelId', data: channelData };
         break;
-      }
-      case 'Block Video': {
-        type = 'videoId';
-        data = videoData;
+      case 'Block Video':
+        result = { type: 'videoId', data: videoData };
         break;
-      }
       default:
-        return;
+        return null;
     }
 
-    postMessage('contextBlockData', { type, info: data });
-    if (removeParent) {
-      if (['YTD-BACKSTAGE-POST-RENDERER', 'YTD-POST-RENDERER'].includes(parentDom.tagName)) {
-        parentDom.parentNode.remove();
+    return {
+      ...result,
+      removeParent
+    };
+  }
+
+  function getParentDomAndData(isRecommendedData, element) {
+    let parentDom;
+    let parentData;
+
+    if (isRecommendedData) {
+      // Traverse 4 levels up to find the parent DOM
+      parentDom = element?.parentElement?.parentElement?.parentElement?.parentElement;
+
+      if (!parentDom) {
+        console.warn('Could not find parentDom in recommended data context');
+        return {};
       }
-      else if (['YTD-PLAYLIST-PANEL-VIDEO-RENDERER', 'YTD-MOVIE-RENDERER'].includes(parentDom.tagName)) {
+
+      const parentDomData = parentDom.componentProps?.data;
+      if (!parentDomData) {
+        console.warn('Could not find componentProps.data');
+        return {};
+      }
+
+      const parentDomSymbols = Object.getOwnPropertySymbols(parentDomData);
+      if (parentDomSymbols.length === 0) {
+        console.warn('No symbols found in parentDomData');
+        return {};
+      }
+
+      parentData = parentDomData[parentDomSymbols[0]]?.value;
+    } else {
+      // Try to find eventSink in multiple paths without using intermediate variable
+      const eventSink =
+        getObjectByPath(element.parentElement?.parentElement, 'polymerController.forwarder_.eventSink') ||
+        getObjectByPath(element.parentElement, '__dataHost.eventSink_') ||
+        getObjectByPath(element.parentElement, '__dataHost.forwarder_.eventSink') ||
+        getObjectByPath(element.parentElement, '__dataHost.hostElement.inst.eventSink_');
+
+      if (!eventSink) {
+        console.warn('Could not find eventSink in any expected path');
+        return {};
+      }
+
+      parentDom = eventSink.parentComponent || (eventSink.parentElement && getObjectByPath(eventSink.parentElement, '__dataHost.hostElement'));
+      parentData = parentDom?.data;
+
+      if (!parentDom || !parentData) {
+        console.warn('Failed to extract parentDom or parentData');
+        return {};
+      }
+    }
+
+    return { parentDom, parentData };
+  }
+
+  function removeParentHelper(isRecommendedData, parentDom) {
+    if (['YTD-BACKSTAGE-POST-RENDERER', 'YTD-POST-RENDERER'].includes(parentDom.tagName)) {
+      parentDom.parentNode.remove();
+    } else if (['YTD-PLAYLIST-PANEL-VIDEO-RENDERER', 'YTD-MOVIE-RENDERER'].includes(parentDom.tagName)) {
+      parentDom.remove();
+    } else if ('YTD-COMMENT-RENDERER' === parentDom.tagName) {
+      if (parentDom.parentNode.tagName === 'YTD-COMMENT-THREAD-RENDERER') {
+        parentDom.parentNode.remove();
+      } else {
         parentDom.remove();
       }
-      else if ('YTD-COMMENT-RENDERER' === parentDom.tagName) {
-        if (parentDom.parentNode.tagName === 'YTD-COMMENT-THREAD-RENDERER') {
-          parentDom.parentNode.remove();
-        } else {
-          parentDom.remove();
+    } else if (isRecommendedData) {
+      parentDom.parentNode.__dataHost.__restoreFocusNode.parentElement.parentElement.parentElement.parentElement.parentElement.remove()
+    } else {
+      parentDom.dismissedRenderer = {
+        notificationMultiActionRenderer: {
+          responseText: {simpleText: 'Blocked'},
         }
-      } else if (isRecommendedData) {
-        parentDom.parentNode.__dataHost.__restoreFocusNode.parentElement.parentElement.parentElement.parentElement.parentElement.remove()
-      } else {
-        parentDom.dismissedRenderer = {
-          notificationMultiActionRenderer: {
-            responseText: {simpleText: 'Blocked'},
-          }
-        };
-        parentDom.setAttribute('is-dismissed', '');
-      }
+      };
+      parentDom.setAttribute('is-dismissed', '');
+    }
+  }
+
+  function menuOnTap(event) {
+    const { isRecommendedData, menuAction } = getActionMenuData(this);
+
+    if (!['Block Channel', 'Block Video'].includes(menuAction)) {
+      event.preventDefault();
+      return;
+    }
+
+    if (window.btReloadRequired) {
+      window.btExports.openToast("BlockTube was updated, this tab needs to be reloaded to use this function", 5000);
+      return;
+    }
+
+    // Get the parent dom and data from this
+    const {parentDom, parentData} = getParentDomAndData(isRecommendedData, this);
+
+    // Get the data and type which is used for blocking the video
+    const {type, data, removeParent} = getBlockData(parentDom, parentData, isRecommendedData, menuAction)
+
+    postMessage('contextBlockData', { type, info: data });
+
+    if (removeParent) {
+      // Remove correct component based on parentDom
+      removeParentHelper(isRecommendedData, parentDom)
     } else {
       document.getElementById('movie_player').stopVideo();
     }
