@@ -1614,8 +1614,7 @@
         menuAction = string[0]?.getRawText() || "";
     } else {
       isDataFromRightHandSide = true;
-      const spanString = context.getElementsByTagName('span');
-      menuAction = spanString[1].outerText || "";
+      menuAction = context.innerText || "";
     }
 
     return { isDataFromRightHandSide, menuAction };
