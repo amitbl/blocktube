@@ -1606,21 +1606,22 @@
 
   function getActionMenuData(context) {
     let menuAction = "";
-    let isRecommendedData = false;
+    let isDataFromRightHandSide = false;
 
     const string = context.getElementsByTagName('yt-formatted-string');
 
-    if (string && Array.isArray(string)) {
+    if (string && string.length == 1) {
         menuAction = string[0]?.getRawText() || "";
     } else {
-        isRecommendedData = true;
-        menuAction = context.innerText || "";
+      isDataFromRightHandSide = true;
+      const spanString = context.getElementsByTagName('span');
+      menuAction = spanString[1].outerText || "";
     }
 
-    return { isRecommendedData, menuAction };
+    return { isDataFromRightHandSide, menuAction };
   }
 
-  function getBlockData(parentDom, parentData, isRecommendedData, menuAction) {
+  function getBlockData(parentDom, parentData, isDataFromRightHandSide, menuAction) {
     let channelData, videoData;
     let removeParent = true;
 
@@ -1648,7 +1649,7 @@
       };
 
       removeParent = false;
-    } else if (isRecommendedData) {
+    } else if (isDataFromRightHandSide) {
       channelData = {
         id: parentData.blockTube?.metadata?.channelId,
         text: parentData.blockTube?.metadata?.channelName,
@@ -1691,11 +1692,11 @@
     };
   }
 
-  function getParentDomAndData(isRecommendedData, element) {
+  function getParentDomAndData(isDataFromRightHandSide, element) {
     let parentDom;
     let parentData;
 
-    if (isRecommendedData) {
+    if (isDataFromRightHandSide) {
       // Traverse 4 levels up to find the parent DOM
       parentDom = element?.parentElement?.parentElement?.parentElement?.parentElement;
 
@@ -1730,7 +1731,7 @@
         return {};
       }
 
-      parentDom = eventSink.parentComponent || (eventSink.parentElement && getObjectByPath(eventSink.parentElement, '__dataHost.hostElement'));
+      parentDom = eventSink.parentComponent || eventSink.parentElement.__dataHost.hostElement;
       parentData = parentDom?.data;
 
       if (!parentDom || !parentData) {
@@ -1742,7 +1743,7 @@
     return { parentDom, parentData };
   }
 
-  function removeParentHelper(isRecommendedData, parentDom) {
+  function removeParentHelper(isDataFromRightHandSide, parentDom) {
     if (['YTD-BACKSTAGE-POST-RENDERER', 'YTD-POST-RENDERER'].includes(parentDom.tagName)) {
       parentDom.parentNode.remove();
     } else if (['YTD-PLAYLIST-PANEL-VIDEO-RENDERER', 'YTD-MOVIE-RENDERER'].includes(parentDom.tagName)) {
@@ -1753,7 +1754,7 @@
       } else {
         parentDom.remove();
       }
-    } else if (isRecommendedData) {
+    } else if (isDataFromRightHandSide) {
       parentDom.parentNode.__dataHost.__restoreFocusNode.parentElement.parentElement.parentElement.parentElement.parentElement.remove()
     } else {
       parentDom.dismissedRenderer = {
@@ -1766,7 +1767,7 @@
   }
 
   function menuOnTap(event) {
-    const { isRecommendedData, menuAction } = getActionMenuData(this);
+    const { isDataFromRightHandSide, menuAction } = getActionMenuData(this);
 
     if (!['Block Channel', 'Block Video'].includes(menuAction)) {
       event.preventDefault();
@@ -1779,19 +1780,21 @@
     }
 
     // Get the parent dom and data from this
-    const {parentDom, parentData} = getParentDomAndData(isRecommendedData, this);
+    const {parentDom, parentData} = getParentDomAndData(isDataFromRightHandSide, this);
 
     // Get the data and type which is used for blocking the video
-    const {type, data, removeParent} = getBlockData(parentDom, parentData, isRecommendedData, menuAction)
+    const {type, data, removeParent} = getBlockData(parentDom, parentData, isDataFromRightHandSide, menuAction)
 
+    // Notify system what data should be added to the block list
     postMessage('contextBlockData', { type, info: data });
 
     if (removeParent) {
       // Remove correct component based on parentDom
-      removeParentHelper(isRecommendedData, parentDom)
+      removeParentHelper(isDataFromRightHandSide, parentDom)
     } else {
       document.getElementById('movie_player').stopVideo();
     }
+
     if (this.data.serviceEndpoint) {
       if (this.onTap) this.onTap(event);
       else if (this.onTap_) this.onTap_(event);
