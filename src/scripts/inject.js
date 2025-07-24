@@ -353,7 +353,8 @@
         title: 'metadata.lockupMetadataViewModel.title.content',
         videoId: 'rendererContext.commandContext.onTap.innertubeCommand.watchEndpoint.videoId',
         channelId: 'metadata.lockupMetadataViewModel.image.decoratedAvatarViewModel.rendererContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId',
-        channelName: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.content'
+        channelName: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.content',
+        percentWatched: 'contentImage.thumbnailViewModel.overlays.thumbnailBottomOverlayViewModel.progressBar.thumbnailOverlayProgressBarViewModel.startPercent'
       },
 
       // Mobile top chips
