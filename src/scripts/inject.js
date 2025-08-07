@@ -1393,7 +1393,13 @@
     const videoId = getFlattenByPath(renderer, searchIn.videoId);
     const videoName = getFlattenByPath(renderer, searchIn.title);
 
-    const metadataBlock = { metadata: { channelId, channelName, videoId, videoName } };
+    const metadataBlock = { metadata: { 
+      channelId, 
+      channelName, 
+      videoId, 
+      videoName, 
+      removeObject: true
+    } };
 
     Object.defineProperty(sheetmodel, 'blockTube', {
       value: metadataBlock,
@@ -1443,8 +1449,25 @@
   function injectLockupViewModelButtons(items, hasChannel, hasVideo, storageData) {
     if (!items.length) return;
 
+    const cleanChannelContext = createCleanContext(items, storageData, true);
+    const cleanVideoContext = createCleanContext(items, storageData, false);
+
+    const blockChannelItem = createLockupButtonItem('Block Channel', cleanChannelContext);
+    const blockVideoItem = createLockupButtonItem('Block Video', cleanVideoContext);
+
+    if (hasChannel) items.push(blockChannelItem);
+    if (hasVideo) items.push(blockVideoItem);
+  }
+
+  function createCleanContext(items, storageData, isChannel) {
+    const item = isChannel ? items[6] : items[5];
+    if (storageData.options.block_feedback && item) {
+      const baseContext = item?.listItemViewModel?.rendererContext;
+      return baseContext;
+    }
+
     const baseContext = items[0]?.listItemViewModel?.rendererContext;
-    if (!baseContext) return;
+    if (!baseContext) return null;
 
     const cleanContext = { ...baseContext };
     // Prevent accidental execution
@@ -1452,11 +1475,7 @@
       cleanContext.commandContext.onTap.innertubeCommand.signalServiceEndpoint.actions = undefined;
     }
 
-    const blockChannelItem = createLockupButtonItem('Block Channel', cleanContext);
-    const blockVideoItem = createLockupButtonItem('Block Video', cleanContext);
-
-    if (hasChannel) items.push(blockChannelItem);
-    if (hasVideo) items.push(blockVideoItem);
+    return cleanContext;
   }
 
   function createLockupButtonItem(title, rendererContext) {
@@ -1520,6 +1539,14 @@
     // Attach metadata only if needed
     if (hasChannel || hasVideo) {
       obj[attr]._btOriginalAttr = attr;
+    }
+ 
+    if (isLockupViewModel && storageData.options.block_feedback) {
+      const path = 'metadata.lockupMetadataViewModel.menuButton.buttonViewModel.onTap.innertubeCommand.showSheetCommand.panelLoadingStrategy.inlineContent.sheetViewModel';
+      const sheetmodel = getObjectByPath(obj[attr], path);
+      if (!sheetmodel) return null;
+      if (sheetmodel.blockTube?.metadata)
+        sheetmodel.blockTube.metadata.removeObject = false; // removing handled by yt
     }
   }
 
@@ -1714,6 +1741,7 @@
   function getBlockData(parentDom, parentData, isDataFromRightHandSide, menuAction) {
     let channelData, videoData;
     let removeParent = true;
+    let stopPlayer = false;
 
     // Video player context menu
     if (parentDom.tagName === 'YTD-VIDEO-PRIMARY-INFO-RENDERER' || parentDom.tagName === 'YTD-WATCH-METADATA') {
@@ -1739,6 +1767,7 @@
       };
 
       removeParent = false;
+      stopPlayer = true;
     } else if (isDataFromRightHandSide) {
       channelData = {
         id: parentData.blockTube?.metadata?.channelId,
@@ -1749,6 +1778,9 @@
         id: parentData.blockTube?.metadata?.videoId,
         text: parentData.blockTube?.metadata?.videoName,
       };
+
+      removeParent = parentData.blockTube?.metadata?.removeObject
+      stopPlayer = false
     } else {
       const attrKey = parentData._btOriginalAttr;
       const searchIn = mergedFilterRules[attrKey]?.properties || mergedFilterRules[attrKey];
@@ -1778,7 +1810,8 @@
 
     return {
       ...result,
-      removeParent
+      removeParent,
+      stopPlayer
     };
   }
 
@@ -1873,7 +1906,7 @@
     const {parentDom, parentData} = getParentDomAndData(isDataFromRightHandSide, this);
 
     // Get the data and type which is used for blocking the video
-    const {type, data, removeParent} = getBlockData(parentDom, parentData, isDataFromRightHandSide, menuAction)
+    const {type, data, removeParent, stopPlayer} = getBlockData(parentDom, parentData, isDataFromRightHandSide, menuAction)
 
     // Notify system what data should be added to the block list
     postMessage('contextBlockData', { type, info: data });
@@ -1881,7 +1914,7 @@
     if (removeParent) {
       // Remove correct component based on parentDom
       removeParentHelper(isDataFromRightHandSide, parentDom)
-    } else {
+    } else if (stopPlayer) {
       document.getElementById('movie_player').stopVideo();
     }
 
