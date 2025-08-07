@@ -1334,11 +1334,10 @@
     }
   }
 
-  function addContextMenus(obj) {
-    const attr = contextMenuObjects.find(e => has.call(obj, e));
-    if (attr === undefined) return;
+  function extractMenuItems(obj, attr) {
+    const has = Object.prototype.hasOwnProperty;
 
-    let items;
+    let items = null;
     let hasChannel = false;
     let hasVideo = false;
     let isLockupViewModel = false;
@@ -1351,84 +1350,176 @@
       items = obj[attr].actionMenu.menuRenderer.items;
       hasChannel = true;
     } else if (attr === 'commentRenderer') {
-      obj[attr].actionMenu = {menuRenderer: {items: [] } };
+      obj[attr].actionMenu = { menuRenderer: { items: [] } };
       items = obj[attr].actionMenu.menuRenderer.items;
       hasChannel = true;
     } else if (attr === 'lockupViewModel') {
-      const sheetmodel = obj[attr].metadata.lockupMetadataViewModel.menuButton.buttonViewModel.onTap.innertubeCommand.showSheetCommand.panelLoadingStrategy.inlineContent.sheetViewModel;
-      items = sheetmodel.content.listViewModel.listItems;
-      const searchIn = mergedFilterRules['lockupViewModel'];
-      const channelId = getFlattenByPath(obj.lockupViewModel, searchIn.channelId);
-      const channelName = getFlattenByPath(obj.lockupViewModel, searchIn.channelName);
-      const videoId = getFlattenByPath(obj.lockupViewModel, searchIn.videoId);
-      const videoName = getFlattenByPath(obj.lockupViewModel, searchIn.title);
-      const metadataBlock = { metadata: { channelId, channelName, videoId, videoName } };
-
-      Object.defineProperty(sheetmodel, 'blockTube', {
-        value: metadataBlock,
-        writable: true,
-        enumerable: true,
-        configurable: true
-      });
+      items = extractFromLockupViewModel(obj[attr]);
+      if (!items) return null;
 
       hasChannel = true;
       hasVideo = true;
       isLockupViewModel = true;
     } else {
-      if (attr === 'movieRenderer' || attr === 'compactMovieRenderer') {
-        hasChannel = false;
-      } else if (has.call(obj[attr], 'shortBylineText') && getObjectByPath(obj[attr], 'shortBylineText.runs.navigationEndpoint.browseEndpoint')) {
-        hasChannel = true;
-      } else if (attr === 'reelItemRenderer') {
-        hasChannel = false;
-      }
-
+      items = extractFromGenericRenderer(obj[attr]);
       hasVideo = true;
 
-      items = getObjectByPath(obj[attr], 'menu.menuRenderer.items');
-      const topLevel = getObjectByPath(obj[attr], 'menu.menuRenderer.topLevelButtons');
-      if (!items) {
-        if (!topLevel) {
-          obj[attr].menu = { menuRenderer: { items: [] } };
-          items = obj[attr].menu.menuRenderer.items;
-        } else {
-          obj[attr].menu.menuRenderer.items = [];
-          items = obj[attr].menu.menuRenderer.items;
+      // Determine channel presence
+      if (attr === 'movieRenderer' || attr === 'compactMovieRenderer' || attr === 'reelItemRenderer') {
+        hasChannel = false;
+      } else if (
+        has.call(obj[attr], 'shortBylineText') &&
+        getObjectByPath(obj[attr], 'shortBylineText.runs.navigationEndpoint.browseEndpoint')
+      ) {
+        hasChannel = true;
+      }
+    }
+
+    return { items, hasChannel, hasVideo, isLockupViewModel };
+  }
+
+  // Specific extractor for lockupViewModel
+  function extractFromLockupViewModel(renderer) {
+    const path = 'metadata.lockupMetadataViewModel.menuButton.buttonViewModel.onTap.innertubeCommand.showSheetCommand.panelLoadingStrategy.inlineContent.sheetViewModel';
+    const sheetmodel = getObjectByPath(renderer, path);
+    if (!sheetmodel) return null;
+
+    const items = sheetmodel.content?.listViewModel?.listItems;
+    if (!items) return null;
+
+    const searchIn = mergedFilterRules['lockupViewModel'];
+    const channelId = getFlattenByPath(renderer, searchIn.channelId);
+    const channelName = getFlattenByPath(renderer, searchIn.channelName);
+    const videoId = getFlattenByPath(renderer, searchIn.videoId);
+    const videoName = getFlattenByPath(renderer, searchIn.title);
+
+    const metadataBlock = { metadata: { channelId, channelName, videoId, videoName } };
+
+    Object.defineProperty(sheetmodel, 'blockTube', {
+      value: metadataBlock,
+      writable: true,
+      enumerable: true,
+      configurable: true
+    });
+
+    return items;
+  }
+
+// Generic fallback for renderers with menu.menuRenderer.items
+  function extractFromGenericRenderer(renderer) {
+    let items = getObjectByPath(renderer, 'menu.menuRenderer.items');
+    const topLevel = getObjectByPath(renderer, 'menu.menuRenderer.topLevelButtons');
+
+    if (!items) {
+      if (!topLevel) {
+        renderer.menu = { menuRenderer: { items: [] } };
+      } else {
+        renderer.menu.menuRenderer.items = [];
+      }
+      items = renderer.menu.menuRenderer.items;
+    }
+
+    return items;
+  }
+
+  function findAndExtractMenuItems(obj) {
+    const attr = contextMenuObjects.find(e => Object.prototype.hasOwnProperty.call(obj, e));
+    if (!attr) return null;
+
+    const result = extractMenuItems(obj, attr);
+    if (!result || !Array.isArray(result.items)) return null;
+
+    return { ...result, attr };
+  }
+
+  function injectBlockMenuItems(items, hasChannel, hasVideo, isLockupViewModel, storageData) {
+    if (isLockupViewModel) {
+      injectLockupViewModelButtons(items, hasChannel, hasVideo, storageData);
+    } else {
+      injectStandardMenuButtons(items, hasChannel, hasVideo, storageData);
+    }
+  }
+
+  function injectLockupViewModelButtons(items, hasChannel, hasVideo, storageData) {
+    if (!items.length) return;
+
+    const baseContext = items[0]?.listItemViewModel?.rendererContext;
+    if (!baseContext) return;
+
+    const cleanContext = { ...baseContext };
+    // Prevent accidental execution
+    if (cleanContext.commandContext?.onTap?.innertubeCommand?.signalServiceEndpoint) {
+      cleanContext.commandContext.onTap.innertubeCommand.signalServiceEndpoint.actions = undefined;
+    }
+
+    const blockChannelItem = createLockupButtonItem('Block Channel', cleanContext);
+    const blockVideoItem = createLockupButtonItem('Block Video', cleanContext);
+
+    if (hasChannel) items.push(blockChannelItem);
+    if (hasVideo) items.push(blockVideoItem);
+  }
+
+  function createLockupButtonItem(title, rendererContext) {
+    const item = {
+      listItemViewModel: {
+        title: { content: title },
+        leadingImage: {
+          sources: [{ clientResource: { imageName: "NOT_INTERESTED" } }]
+        },
+        rendererContext
+      }
+    };
+
+    return item;
+  }
+
+  function injectStandardMenuButtons(items, hasChannel, hasVideo, storageData) {
+    const blockChannelItem = createStandardBlockItem('Block Channel');
+    const blockVideoItem = createStandardBlockItem('Block Video');
+
+    if (storageData.options.block_feedback) {
+      for (const item of items) {
+        const endpoint = item?.menuServiceItemRenderer?.serviceEndpoint;
+        if (!endpoint) continue;
+
+        const iconType = getObjectByPath(item, 'menuServiceItemRenderer.icon.iconType');
+        if (iconType === 'NOT_INTERESTED' && hasVideo) {
+          blockVideoItem.menuServiceItemRenderer.serviceEndpoint = deepClone(endpoint);
+        } else if (iconType === 'REMOVE' && hasChannel) {
+          blockChannelItem.menuServiceItemRenderer.serviceEndpoint = deepClone(endpoint);
         }
       }
     }
 
-    if (items instanceof Array) {
-      if (isLockupViewModel) {
-        const blockCh  = { listItemViewModel: { title: { content: 'Block Channel' }, leadingImage: { sources: [{ clientResource: { imageName: "NOT_INTERESTED" } }] }, rendererContext: {} } };
-        const blockVid = { listItemViewModel: { title: { content: 'Block Video'   }, leadingImage: { sources: [{ clientResource: { imageName: "NOT_INTERESTED" } }] }, rendererContext: {} } };
-        // Add renering context from other buttons to setup highlighting
-        blockCh.listItemViewModel.rendererContext  = items[0].listItemViewModel.rendererContext;
-        blockVid.listItemViewModel.rendererContext = items[0].listItemViewModel.rendererContext;
-        // Remove the actions so it doesn't run
-        blockCh.listItemViewModel.rendererContext.commandContext.onTap.innertubeCommand.signalServiceEndpoint.actions = undefined;
-        blockVid.listItemViewModel.rendererContext.commandContext.onTap.innertubeCommand.signalServiceEndpoint.actions = undefined;
+    if (hasChannel) items.push(blockChannelItem);
+    if (hasVideo) items.push(blockVideoItem);
+  }
 
-        if (hasChannel) items.push(blockCh);
-        if (hasVideo) items.push(blockVid);
-      } else {
-        const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] }, icon: {iconType: "NOT_INTERESTED"} } };
-        const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] }, icon: {iconType: "NOT_INTERESTED"} } };
-        if (storageData.options.block_feedback)
-          items.forEach((e) => {
-            if (getObjectByPath(e, 'menuServiceItemRenderer.icon.iconType') === 'NOT_INTERESTED' && hasVideo) {
-              blockVid.menuServiceItemRenderer.serviceEndpoint = JSON.parse(JSON.stringify(e.menuServiceItemRenderer.serviceEndpoint))
-            } else if (getObjectByPath(e, 'menuServiceItemRenderer.icon.iconType') === 'REMOVE' && hasChannel) {
-              blockCh.menuServiceItemRenderer.serviceEndpoint = JSON.parse(JSON.stringify(e.menuServiceItemRenderer.serviceEndpoint))
-            }
-          });
-        if (hasChannel) items.push(blockCh);
-        if (hasVideo) items.push(blockVid);
-
-        if (hasChannel || hasVideo) {
-          obj[attr]._btOriginalAttr = attr;
-        }
+  function createStandardBlockItem(text) {
+    return {
+      menuServiceItemRenderer: {
+        text: { runs: [{ text }] },
+        icon: { iconType: "NOT_INTERESTED" }
       }
+    };
+  }
+
+  function deepClone(obj) {
+    // Simple deep clone (for plain objects, no functions/cycles)
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  function addContextMenus(obj) {
+    const extracted = findAndExtractMenuItems(obj);
+    if (!extracted) return;
+
+    const { items, hasChannel, hasVideo, isLockupViewModel, attr } = extracted;
+
+    injectBlockMenuItems(items, hasChannel, hasVideo, isLockupViewModel, storageData);
+
+    // Attach metadata only if needed
+    if (hasChannel || hasVideo) {
+      obj[attr]._btOriginalAttr = attr;
     }
   }
 
