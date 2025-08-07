@@ -1411,7 +1411,7 @@
     return items;
   }
 
-// Generic fallback for renderers with menu.menuRenderer.items
+  // Generic fallback for renderers with menu.menuRenderer.items
   function extractFromGenericRenderer(renderer) {
     let items = getObjectByPath(renderer, 'menu.menuRenderer.items');
     const topLevel = getObjectByPath(renderer, 'menu.menuRenderer.topLevelButtons');
@@ -1440,30 +1440,32 @@
 
   function injectBlockMenuItems(items, hasChannel, hasVideo, isLockupViewModel, storageData) {
     if (isLockupViewModel) {
-      injectLockupViewModelButtons(items, hasChannel, hasVideo, storageData);
+      return injectLockupViewModelButtons(items, hasChannel, hasVideo, storageData);
     } else {
-      injectStandardMenuButtons(items, hasChannel, hasVideo, storageData);
+      return injectStandardMenuButtons(items, hasChannel, hasVideo, storageData);
     }
   }
 
   function injectLockupViewModelButtons(items, hasChannel, hasVideo, storageData) {
     if (!items.length) return;
 
-    const cleanChannelContext = createCleanContext(items, storageData, true);
-    const cleanVideoContext = createCleanContext(items, storageData, false);
+    const { removeItem: removeItemChannel, cleanChannelContext } = createCleanContext(items, storageData, true);
+    const { removeItem: removeItemVideo, cleanVideoContext } = createCleanContext(items, storageData, false);   
 
     const blockChannelItem = createLockupButtonItem('Block Channel', cleanChannelContext);
     const blockVideoItem = createLockupButtonItem('Block Video', cleanVideoContext);
 
     if (hasChannel) items.push(blockChannelItem);
     if (hasVideo) items.push(blockVideoItem);
+
+    return removeItemChannel && removeItemVideo
   }
 
   function createCleanContext(items, storageData, isChannel) {
     const item = isChannel ? items[6] : items[5];
     if (storageData.options.block_feedback && item) {
       const baseContext = item?.listItemViewModel?.rendererContext;
-      return baseContext;
+      return {removeItem: false, baseContext};
     }
 
     const baseContext = items[0]?.listItemViewModel?.rendererContext;
@@ -1475,7 +1477,7 @@
       cleanContext.commandContext.onTap.innertubeCommand.signalServiceEndpoint.actions = undefined;
     }
 
-    return cleanContext;
+    return {removeItem: true, cleanContext};
   }
 
   function createLockupButtonItem(title, rendererContext) {
@@ -1512,6 +1514,8 @@
 
     if (hasChannel) items.push(blockChannelItem);
     if (hasVideo) items.push(blockVideoItem);
+
+    return false;
   }
 
   function createStandardBlockItem(text) {
@@ -1534,19 +1538,18 @@
 
     const { items, hasChannel, hasVideo, isLockupViewModel, attr } = extracted;
 
-    injectBlockMenuItems(items, hasChannel, hasVideo, isLockupViewModel, storageData);
+    const removeItem = injectBlockMenuItems(items, hasChannel, hasVideo, isLockupViewModel, storageData);
 
     // Attach metadata only if needed
     if (hasChannel || hasVideo) {
       obj[attr]._btOriginalAttr = attr;
     }
  
-    if (isLockupViewModel && storageData.options.block_feedback) {
+    if (isLockupViewModel && storageData.options.block_feedback && !removeItem) {
       const path = 'metadata.lockupMetadataViewModel.menuButton.buttonViewModel.onTap.innertubeCommand.showSheetCommand.panelLoadingStrategy.inlineContent.sheetViewModel';
       const sheetmodel = getObjectByPath(obj[attr], path);
-      if (!sheetmodel) return null;
-      if (sheetmodel.blockTube?.metadata)
-        sheetmodel.blockTube.metadata.removeObject = false; // removing handled by yt
+      if (sheetmodel?.blockTube?.metadata)
+        sheetmodel.blockTube.metadata.removeObject = false; // Removing handled by yt
     }
   }
 
