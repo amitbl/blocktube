@@ -27,7 +27,8 @@ let storage = {
     block_message: "",
     block_feedback: false,
     disable_db_normalize: false,
-    disable_you_there: false
+    disable_you_there: false,
+    apply_filter: true,
   },
 };
 
@@ -140,11 +141,6 @@ chrome.storage.local.get('storageData', (data) => {
     }
   });
 
-});
-
-// TODO: Popup UI
-chrome.action.onClicked.addListener((tab) => {
-  chrome.runtime.openOptionsPage();
 });
 
 chrome.runtime.onInstalled.addListener((details) => {
