@@ -1449,8 +1449,8 @@
   function injectLockupViewModelButtons(items, hasChannel, hasVideo, storageData) {
     if (!items.length) return;
 
-    const { removeItem: removeItemChannel, cleanChannelContext } = createCleanContext(items, storageData, true);
-    const { removeItem: removeItemVideo, cleanVideoContext } = createCleanContext(items, storageData, false);   
+    const { removeItem: removeItemChannel, baseContext: cleanChannelContext } = createCleanContext(items, storageData, true);
+    const { removeItem: removeItemVideo,   baseContext: cleanVideoContext } = createCleanContext(items, storageData, false);
 
     const blockChannelItem = createLockupButtonItem('Block Channel', cleanChannelContext);
     const blockVideoItem = createLockupButtonItem('Block Video', cleanVideoContext);
