@@ -1477,7 +1477,7 @@
       cleanContext.commandContext.onTap.innertubeCommand.signalServiceEndpoint.actions = undefined;
     }
 
-    return {removeItem: true, cleanContext};
+    return {removeItem: true, baseContext: cleanContext};
   }
 
   function createLockupButtonItem(title, rendererContext) {
