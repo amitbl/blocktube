@@ -1449,7 +1449,7 @@
   }
 
   function storageReceived(data) {
-    if (data === undefined || !data.options.apply_filter) return;
+    if (data === undefined || data.options.apply_filter === false) return;
     transformToRegExp(data);
     if (data.options.trending) blockTrending(data);
     if (data.options.mixes) blockMixes(data);
