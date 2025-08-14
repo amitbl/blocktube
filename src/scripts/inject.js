@@ -1095,7 +1095,7 @@
   }
 
   function fixAutoplay() {
-    if (!this.object.playerOverlays) return;
+    if (!this?.object?.playerOverlays) return;
     if (isMobileInterface) return fixAutoPlayMobile.call(this);
 
     if (getObjectByPath(this.object, 'playerOverlays.playerOverlayRenderer.autoplay') === undefined) {
