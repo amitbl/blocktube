@@ -160,6 +160,7 @@
     channelId: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
     channelBadges: 'ownerBadges',
     channelName: [
+      'ownerText',
       'shortBylineText',
       'longBylineText',
     ],
@@ -237,6 +238,8 @@
       videoPrimaryInfoRenderer: {
         properties: {
           title: 'title',
+          videoId: 'videoId',
+          channelId: 'owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId',
         },
         customFunc: redirectToNext,
       },
@@ -313,16 +316,16 @@
       reelItemRenderer: {
         properties: {
           videoId: 'videoId',
-          channelId: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.channelNavigationEndpoint.browseEndpoint.browseId',
-          channelName: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.channelTitleText',
+          channelId: 'navigationEndpoint.browseEndpoint.browseId',
+          channelName: 'channelTitleText',
           title: ['headline'],
-          publishTimeText: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.timestampText'
         }
       },
 
       shortsLockupViewModel: {
         properties: {
           videoId: 'onTap.innertubeCommand.reelWatchEndpoint.videoId',
+          channelId: 'onTap.innertubeCommand.reelWatchEndpoint.channelId',
           title: ['accessibilityText'],
         }
       },
@@ -428,14 +431,15 @@
       commentThreadRenderer: {},
       commentViewModel: {},
       commentRenderer: {
-        channelId: 'authorEndpoint.browseEndpoint.browseId',
-        channelName: ['authorText'],
-        comment: ['contentText'],
+        channelId: 'author.channelId',
+        channelName: ['author.name'],
+        comment: ['content.content'],
+        commentId: 'commentId',
       },
       liveChatTextMessageRenderer: {
-        channelId: 'authorExternalChannelId',
-        channelName: ['authorName'],
-        comment: 'message',
+        channelId: 'author.channelId',
+        channelName: ['author.name'],
+        comment: 'message.content',
       },
     }
   }
