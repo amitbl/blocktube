@@ -771,7 +771,13 @@
     }
 
     if (this && this.object) this.object = undefined;
-    document.location = '/';
+    const index = document.location.search.indexOf('&list=');
+    if (index !== -1) {
+      const value = document.location.search.substring(0, index);
+      document.location = document.location.pathname + value
+    } else {
+      document.location = '/';
+    }
   }
 
   function censorTitle() {
