@@ -141,7 +141,8 @@
     'expandedShelfContentsRenderer',
     'comment',
     'commentThreadRenderer',
-    'reelShelfRenderer'
+    'reelShelfRenderer',
+    'richSectionRenderer'
   ];
 
   // those filter properties require RegExp checking
@@ -379,6 +380,9 @@
 
       // Empty for blocking short headers
       gridShelfViewModel: {
+      },
+
+      richSectionRenderer: {
       }
     },
     ytPlayer: {
