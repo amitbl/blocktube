@@ -325,7 +325,8 @@
       shortsLockupViewModel: {
         properties: {
           videoId: 'onTap.innertubeCommand.reelWatchEndpoint.videoId',
-          title: ['accessibilityText'],
+          title: 'overlayMetadata.primaryText.content',
+          viewCount: 'overlayMetadata.secondaryText.content'
         }
       },
 
@@ -352,11 +353,13 @@
       },
 
       lockupViewModel: {
+        videoId: 'contentId',
         title: 'metadata.lockupMetadataViewModel.title.content',
-        videoId: 'rendererContext.commandContext.onTap.innertubeCommand.watchEndpoint.videoId',
+        channelName: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.content',
+        vidLength: 'contentImage.thumbnailViewModel.overlays.thumbnailOverlayBadgeViewModel.thumbnailBadges.thumbnailBadgeViewModel.text',
+        viewCount: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts.text.content',
         channelId: ['metadata.lockupMetadataViewModel.image.decoratedAvatarViewModel.rendererContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId', 
                     'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.commandRuns.onTap.innertubeCommand.browseEndpoint.browseId'],
-        channelName: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.content',
         percentWatched: 'contentImage.thumbnailViewModel.overlays.thumbnailBottomOverlayViewModel.progressBar.thumbnailOverlayProgressBarViewModel.startPercent'
       },
 
@@ -556,7 +559,7 @@
       try {
         doBlock = !!jsFilter(friendlyVideoObj, objectType);
       } catch (e) {
-        console.error("Custom function exception", e);
+        console.error("Custom function exception", e, "friendlyVideoObj: ", friendlyVideoObj, "objectType: ", objectType);
       }
     }
     if (doBlock && objectType === 'commentEntityPayload') {
@@ -932,7 +935,34 @@
     let nextObj = obj;
 
     const exist = paths.every((v) => {
+      // support bracket/index notation like "metadataRows[1]"
+      if (/\[.*\]/.test(v)) {
+        // split base name and all numeric indices like "a[1][2]"
+        const parts = [];
+        const baseMatch = v.match(/^([^\[]+)/);
+        if (baseMatch && baseMatch[1]) parts.push(baseMatch[1]);
+        const idxMatches = [...v.matchAll(/\[(\d+)\]/g)].map(m => parseInt(m[1], 10));
+
+        // navigate to base property first (if present)
+        for (let p = 0; p < parts.length; p += 1) {
+          const key = parts[p];
+          if (!nextObj || !has.call(nextObj, key)) return false;
+          nextObj = nextObj[key];
+        }
+
+        // then apply numeric indices in order
+        for (let k = 0; k < idxMatches.length; k += 1) {
+          const idx = idxMatches[k];
+          if (!Array.isArray(nextObj) || idx < 0 || idx >= nextObj.length) return false;
+          nextObj = nextObj[idx];
+        }
+
+        return true;
+      }
+
+      // segment is a plain token (no bracket)
       if (nextObj instanceof Array) {
+        // when we have an array of objects, find an element that contains the key v
         const found = nextObj.find(o => has.call(o, v));
         if (found === undefined) return false;
         nextObj = found[v];
@@ -968,9 +998,30 @@
   }
 
   function parseViewCount(viewCount) {
-    let views = viewCount.split(" ")[0]; // RTL languages might be an issue here
-    views = parseInt(views.replace(/[.,]/g, ""));
-    return views;
+    const parts = viewCount.split(" ");
+    if (parts[1] !== "views" && parts[1] !== "view") return undefined; // Fail if not english formatting
+    let views = parts[0];
+    
+    // Handle abbreviated formats (K, M, B)
+    const multipliers = {
+      'K': 1000,
+      'M': 1000000,
+      'B': 1000000000
+    };
+    
+    // Check if it ends with a multiplier
+    const lastChar = views.slice(-1).toUpperCase();
+    let multiplier = 1;
+    let numericPart = views;
+    
+    if (multipliers[lastChar]) {
+      multiplier = multipliers[lastChar];
+      numericPart = views.slice(0, -1); // Remove the letter
+    }
+    
+    // Return the final count
+    console.debug(viewCount + ", " + numericPart * multiplier);
+    return (numericPart * multiplier);
   }
 
   function transformToRegExp(data) {
