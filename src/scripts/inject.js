@@ -123,6 +123,7 @@
     'commentRenderer',
     'playlistPanelVideoRenderer',
     'playlistVideoRenderer',
+    'lockupViewModel',
     // Mobile
     'reelItemRenderer',
     'slimVideoMetadataSectionRenderer',
@@ -141,7 +142,8 @@
     'expandedShelfContentsRenderer',
     'comment',
     'commentThreadRenderer',
-    'reelShelfRenderer'
+    'reelShelfRenderer',
+    'richSectionRenderer'
   ];
 
   // those filter properties require RegExp checking
@@ -349,6 +351,15 @@
         channelBadges: 'ownerBadges',
       },
 
+      lockupViewModel: {
+        title: 'metadata.lockupMetadataViewModel.title.content',
+        videoId: 'rendererContext.commandContext.onTap.innertubeCommand.watchEndpoint.videoId',
+        channelId: ['metadata.lockupMetadataViewModel.image.decoratedAvatarViewModel.rendererContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId', 
+                    'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.commandRuns.onTap.innertubeCommand.browseEndpoint.browseId'],
+        channelName: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.content',
+        percentWatched: 'contentImage.thumbnailViewModel.overlays.thumbnailBottomOverlayViewModel.progressBar.thumbnailOverlayProgressBarViewModel.startPercent'
+      },
+
       // Mobile top chips
       chipCloudChipRenderer: {
         channelId: 'icon.iconType'
@@ -369,10 +380,12 @@
         channelId: 'endpoint.commandMetadata.webCommandMetadata.url'
       },
 
-      lockupViewModel: {
+      // Empty for blocking short headers
+      gridShelfViewModel: {
+      },
 
+      richSectionRenderer: {
       }
-
     },
     ytPlayer: {
       args: {
@@ -526,6 +539,9 @@
             else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_LIVE_NOW") {
               badges.push("live");
             }
+            else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_MEMBERS_ONLY") { 
+              badges.push("members"); 
+            }
           });
           value = badges;
         }
@@ -554,7 +570,7 @@
       if (h === 'movieRenderer' || h === 'compactMovieRenderer') return true;
       if (h === 'videoRenderer' && !getObjectByPath(filteredObject, "shortBylineText.runs.navigationEndpoint.browseEndpoint") && filteredObject.longBylineText && filteredObject.badges) return true;
     }
-    if (storageData.options.shorts && (h === 'shortsLockupViewModel' || h === 'reelItemRenderer') ) return true;
+    if (storageData.options.shorts && (h === 'shortsLockupViewModel' || h === 'reelItemRenderer' || h === 'gridShelfViewModel') ) return true;
     if (storageData.options.mixes && (h === 'radioRenderer' || h === 'compactRadioRenderer')) return true;
     if (storageData.options.mixes && h === 'lockupViewModel') {
       let imgName = getObjectByPath(filteredObject, 'contentImage.collectionThumbnailViewModel.primaryThumbnail.thumbnailViewModel.overlays.thumbnailOverlayBadgeViewModel.thumbnailBadges.thumbnailBadgeViewModel.icon.sources.clientResource.imageName');
@@ -760,7 +776,13 @@
     }
 
     if (this && this.object) this.object = undefined;
-    document.location = '/';
+    const index = document.location.search.indexOf('&list=');
+    if (index !== -1) {
+      const value = document.location.search.substring(0, index);
+      document.location = document.location.pathname + value
+    } else {
+      document.location = '/';
+    }
   }
 
   function censorTitle() {
@@ -1078,7 +1100,7 @@
   }
 
   function fixAutoplay() {
-    if (!this.object.playerOverlays) return;
+    if (!this?.object?.playerOverlays) return;
     if (isMobileInterface) return fixAutoPlayMobile.call(this);
 
     if (getObjectByPath(this.object, 'playerOverlays.playerOverlayRenderer.autoplay') === undefined) {
@@ -1324,13 +1346,14 @@
     }
   }
 
-  function addContextMenus(obj) {
-    const attr = contextMenuObjects.find(e => has.call(obj, e));
-    if (attr === undefined) return;
+  function extractMenuItems(obj, attr) {
+    const has = Object.prototype.hasOwnProperty;
 
-    let items;
+    let items = null;
     let hasChannel = false;
     let hasVideo = false;
+    let isLockupViewModel = false;
+
     if (has.call(obj[attr], 'videoActions')) {
       items = obj[attr].videoActions.menuRenderer.items;
       hasChannel = true;
@@ -1339,52 +1362,206 @@
       items = obj[attr].actionMenu.menuRenderer.items;
       hasChannel = true;
     } else if (attr === 'commentRenderer') {
-      obj[attr].actionMenu = {menuRenderer: {items: [] } };
+      obj[attr].actionMenu = { menuRenderer: { items: [] } };
       items = obj[attr].actionMenu.menuRenderer.items;
       hasChannel = true;
+    } else if (attr === 'lockupViewModel') {
+      items = extractFromLockupViewModel(obj[attr]);
+      if (!items) return null;
+
+      hasChannel = true;
+      hasVideo = true;
+      isLockupViewModel = true;
     } else {
-
-      if (attr === 'movieRenderer' || attr === 'compactMovieRenderer') {
-        hasChannel = false;
-      } else if (has.call(obj[attr], 'shortBylineText') && getObjectByPath(obj[attr], 'shortBylineText.runs.navigationEndpoint.browseEndpoint')) {
-        hasChannel = true;
-      } else if (attr === 'reelItemRenderer') {
-        hasChannel = false;
-      }
-
+      items = extractFromGenericRenderer(obj[attr]);
       hasVideo = true;
 
-      items = getObjectByPath(obj[attr], 'menu.menuRenderer.items');
-      const topLevel = getObjectByPath(obj[attr], 'menu.menuRenderer.topLevelButtons');
-      if (!items) {
-        if (!topLevel) {
-          obj[attr].menu = { menuRenderer: { items: [] } };
-          items = obj[attr].menu.menuRenderer.items;
-        } else {
-          obj[attr].menu.menuRenderer.items = [];
-          items = obj[attr].menu.menuRenderer.items;
+      // Determine channel presence
+      if (attr === 'movieRenderer' || attr === 'compactMovieRenderer' || attr === 'reelItemRenderer') {
+        hasChannel = false;
+      } else if (
+        has.call(obj[attr], 'shortBylineText') &&
+        getObjectByPath(obj[attr], 'shortBylineText.runs.navigationEndpoint.browseEndpoint')
+      ) {
+        hasChannel = true;
+      }
+    }
+
+    return { items, hasChannel, hasVideo, isLockupViewModel };
+  }
+
+  // Specific extractor for lockupViewModel
+  function extractFromLockupViewModel(renderer) {
+    const path = 'metadata.lockupMetadataViewModel.menuButton.buttonViewModel.onTap.innertubeCommand.showSheetCommand.panelLoadingStrategy.inlineContent.sheetViewModel';
+    const sheetmodel = getObjectByPath(renderer, path);
+    if (!sheetmodel) return null;
+
+    const items = sheetmodel.content?.listViewModel?.listItems;
+    if (!items) return null;
+
+    const searchIn = mergedFilterRules['lockupViewModel'];
+    const channelId = getFlattenByPath(renderer, searchIn.channelId);
+    const channelName = getFlattenByPath(renderer, searchIn.channelName);
+    const videoId = getFlattenByPath(renderer, searchIn.videoId);
+    const videoName = getFlattenByPath(renderer, searchIn.title);
+
+    const metadataBlock = { metadata: { 
+      channelId, 
+      channelName, 
+      videoId, 
+      videoName, 
+      removeObject: true
+    } };
+
+    Object.defineProperty(sheetmodel, 'blockTube', {
+      value: metadataBlock,
+      writable: true,
+      enumerable: true,
+      configurable: true
+    });
+
+    return items;
+  }
+
+  // Generic fallback for renderers with menu.menuRenderer.items
+  function extractFromGenericRenderer(renderer) {
+    let items = getObjectByPath(renderer, 'menu.menuRenderer.items');
+    const topLevel = getObjectByPath(renderer, 'menu.menuRenderer.topLevelButtons');
+
+    if (!items) {
+      if (!topLevel) {
+        renderer.menu = { menuRenderer: { items: [] } };
+      } else {
+        renderer.menu.menuRenderer.items = [];
+      }
+      items = renderer.menu.menuRenderer.items;
+    }
+
+    return items;
+  }
+
+  function findAndExtractMenuItems(obj) {
+    const attr = contextMenuObjects.find(e => Object.prototype.hasOwnProperty.call(obj, e));
+    if (!attr) return null;
+
+    const result = extractMenuItems(obj, attr);
+    if (!result || !Array.isArray(result.items)) return null;
+
+    return { ...result, attr };
+  }
+
+  function injectBlockMenuItems(items, hasChannel, hasVideo, isLockupViewModel, storageData) {
+    if (isLockupViewModel) {
+      return injectLockupViewModelButtons(items, hasChannel, hasVideo, storageData);
+    } else {
+      return injectStandardMenuButtons(items, hasChannel, hasVideo, storageData);
+    }
+  }
+
+  function injectLockupViewModelButtons(items, hasChannel, hasVideo, storageData) {
+    if (!items.length) return;
+
+    const { removeItem: removeItemChannel, baseContext: cleanChannelContext } = createCleanContext(items, storageData, true);
+    const { removeItem: removeItemVideo,   baseContext: cleanVideoContext } = createCleanContext(items, storageData, false);
+
+    const blockChannelItem = createLockupButtonItem('Block Channel', cleanChannelContext);
+    const blockVideoItem = createLockupButtonItem('Block Video', cleanVideoContext);
+
+    if (hasChannel) items.push(blockChannelItem);
+    if (hasVideo) items.push(blockVideoItem);
+
+    return removeItemChannel && removeItemVideo
+  }
+
+  function createCleanContext(items, storageData, isChannel) {
+    const item = isChannel ? items[6] : items[5];
+    if (storageData.options.block_feedback && item) {
+      const baseContext = item?.listItemViewModel?.rendererContext;
+      return {removeItem: false, baseContext};
+    }
+
+    const baseContext = items[0]?.listItemViewModel?.rendererContext;
+    if (!baseContext) return null;
+
+    const cleanContext = { ...baseContext };
+    // Prevent accidental execution
+    if (cleanContext.commandContext?.onTap?.innertubeCommand?.signalServiceEndpoint) {
+      cleanContext.commandContext.onTap.innertubeCommand.signalServiceEndpoint.actions = undefined;
+    }
+
+    return {removeItem: true, baseContext: cleanContext};
+  }
+
+  function createLockupButtonItem(title, rendererContext) {
+    const item = {
+      listItemViewModel: {
+        title: { content: title },
+        leadingImage: {
+          sources: [{ clientResource: { imageName: "NOT_INTERESTED" } }]
+        },
+        rendererContext
+      }
+    };
+
+    return item;
+  }
+
+  function injectStandardMenuButtons(items, hasChannel, hasVideo, storageData) {
+    const blockChannelItem = createStandardBlockItem('Block Channel');
+    const blockVideoItem = createStandardBlockItem('Block Video');
+
+    if (storageData.options.block_feedback) {
+      for (const item of items) {
+        const endpoint = item?.menuServiceItemRenderer?.serviceEndpoint;
+        if (!endpoint) continue;
+
+        const iconType = getObjectByPath(item, 'menuServiceItemRenderer.icon.iconType');
+        if (iconType === 'NOT_INTERESTED' && hasVideo) {
+          blockVideoItem.menuServiceItemRenderer.serviceEndpoint = deepClone(endpoint);
+        } else if (iconType === 'REMOVE' && hasChannel) {
+          blockChannelItem.menuServiceItemRenderer.serviceEndpoint = deepClone(endpoint);
         }
       }
     }
 
-    if (items instanceof Array) {
-      const blockCh = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Channel' }] }, icon: {iconType: "NOT_INTERESTED"} } };
-      const blockVid = { menuServiceItemRenderer: { text: { runs: [{ text: 'Block Video' }] }, icon: {iconType: "NOT_INTERESTED"} } };
-      if (storageData.options.block_feedback)
-        items.forEach((e) => {
-          if (getObjectByPath(e, 'menuServiceItemRenderer.icon.iconType') === 'NOT_INTERESTED' && hasVideo) {
-            blockVid.menuServiceItemRenderer.serviceEndpoint = JSON.parse(JSON.stringify(e.menuServiceItemRenderer.serviceEndpoint))
-          } else if (getObjectByPath(e, 'menuServiceItemRenderer.icon.iconType') === 'REMOVE' && hasChannel) {
-            blockCh.menuServiceItemRenderer.serviceEndpoint = JSON.parse(JSON.stringify(e.menuServiceItemRenderer.serviceEndpoint))
-          }
-        });
-      if (hasChannel) items.push(blockCh);
-      if (hasVideo) items.push(blockVid);
+    if (hasChannel) items.push(blockChannelItem);
+    if (hasVideo) items.push(blockVideoItem);
 
-      if (hasChannel || hasVideo) {
-        obj[attr]._btOriginalAttr = attr;
+    return false;
+  }
+
+  function createStandardBlockItem(text) {
+    return {
+      menuServiceItemRenderer: {
+        text: { runs: [{ text }] },
+        icon: { iconType: "NOT_INTERESTED" }
       }
+    };
+  }
 
+  function deepClone(obj) {
+    // Simple deep clone (for plain objects, no functions/cycles)
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  function addContextMenus(obj) {
+    const extracted = findAndExtractMenuItems(obj);
+    if (!extracted) return;
+
+    const { items, hasChannel, hasVideo, isLockupViewModel, attr } = extracted;
+
+    const removeItem = injectBlockMenuItems(items, hasChannel, hasVideo, isLockupViewModel, storageData);
+
+    // Attach metadata only if needed
+    if (hasChannel || hasVideo) {
+      obj[attr]._btOriginalAttr = attr;
+    }
+ 
+    if (isLockupViewModel && storageData.options.block_feedback && !removeItem) {
+      const path = 'metadata.lockupMetadataViewModel.menuButton.buttonViewModel.onTap.innertubeCommand.showSheetCommand.panelLoadingStrategy.inlineContent.sheetViewModel';
+      const sheetmodel = getObjectByPath(obj[attr], path);
+      if (sheetmodel?.blockTube?.metadata)
+        sheetmodel.blockTube.metadata.removeObject = false; // Removing handled by yt
     }
   }
 
@@ -1449,7 +1626,7 @@
   }
 
   function storageReceived(data) {
-    if (data === undefined) return;
+    if (data === undefined || data.options.apply_filter === false) return;
     transformToRegExp(data);
     if (data.options.trending) blockTrending(data);
     if (data.options.mixes) blockMixes(data);
@@ -1560,35 +1737,26 @@
     }
   }
 
-  function menuOnTap(event) {
-    const menuAction = this.getElementsByTagName('yt-formatted-string')[0].getRawText();
-    if (!['Block Channel', 'Block Video'].includes(menuAction)) {
-      event.preventDefault();
-      return;
+  function getActionMenuData(context) {
+    let menuAction = "";
+    let isDataFromRightHandSide = false;
+
+    const string = context.getElementsByTagName('yt-formatted-string');
+
+    if (string && string.length == 1) {
+        menuAction = string[0]?.getRawText() || "";
+    } else {
+      isDataFromRightHandSide = true;
+      menuAction = context.innerText || "";
     }
 
-    if (window.btReloadRequired) {
-      window.btExports.openToast("BlockTube was updated, this tab needs to be reloaded to use this function", 5000);
-      return;
-    }
+    return { isDataFromRightHandSide, menuAction };
+  }
 
-    let type;
-    let data;
-    let videoData;
-    let channelData;
-    let eventSink = getObjectByPath(this.parentElement, '__dataHost.hostElement.inst.eventSink_');
-    if (!eventSink) {
-      eventSink = getObjectByPath(this.parentElement, '__dataHost.eventSink_');
-    }
-    if (!eventSink) {
-      eventSink = getObjectByPath(this.parentElement, '__dataHost.forwarder_.eventSink');
-    }
-    if (!eventSink) {
-      eventSink = getObjectByPath(this.parentElement.parentElement, 'polymerController.forwarder_.eventSink');
-    }
-    const parentDom = eventSink.parentComponent || eventSink.parentElement.__dataHost.hostElement;
-    const parentData = parentDom.data;
+  function getBlockData(parentDom, parentData, isDataFromRightHandSide, menuAction) {
+    let channelData, videoData;
     let removeParent = true;
+    let stopPlayer = false;
 
     // Video player context menu
     if (parentDom.tagName === 'YTD-VIDEO-PRIMARY-INFO-RENDERER' || parentDom.tagName === 'YTD-WATCH-METADATA') {
@@ -1614,62 +1782,157 @@
       };
 
       removeParent = false;
+      stopPlayer = true;
+    } else if (isDataFromRightHandSide) {
+      channelData = {
+        id: parentData.blockTube?.metadata?.channelId,
+        text: parentData.blockTube?.metadata?.channelName,
+      };
+
+      videoData = {
+        id: parentData.blockTube?.metadata?.videoId,
+        text: parentData.blockTube?.metadata?.videoName,
+      };
+
+      removeParent = parentData.blockTube?.metadata?.removeObject
+      stopPlayer = false
     } else {
-      let attrKey = parentData._btOriginalAttr;
-      let searchIn = mergedFilterRules[attrKey].properties ? mergedFilterRules[attrKey].properties : mergedFilterRules[attrKey];
+      const attrKey = parentData._btOriginalAttr;
+      const searchIn = mergedFilterRules[attrKey]?.properties || mergedFilterRules[attrKey];
 
       channelData = {
         id: getFlattenByPath(parentData, searchIn.channelId),
         text: getFlattenByPath(parentData, searchIn.channelName),
-      }
+      };
 
       videoData = {
         id: getFlattenByPath(parentData, searchIn.videoId),
         text: getFlattenByPath(parentData, searchIn.title),
-      }
+      };
     }
 
+    let result;
     switch (menuAction) {
-      case 'Block Channel': {
-        type = 'channelId';
-        data = channelData;
+      case 'Block Channel':
+        result = { type: 'channelId', data: channelData };
         break;
-      }
-      case 'Block Video': {
-        type = 'videoId';
-        data = videoData;
+      case 'Block Video':
+        result = { type: 'videoId', data: videoData };
         break;
-      }
       default:
-        return;
+        return null;
     }
 
-    postMessage('contextBlockData', { type, info: data });
-    if (removeParent) {
-      if (['YTD-BACKSTAGE-POST-RENDERER', 'YTD-POST-RENDERER'].includes(parentDom.tagName)) {
-        parentDom.parentNode.remove();
+    return {
+      ...result,
+      removeParent,
+      stopPlayer
+    };
+  }
+
+  function getParentDomAndData(isDataFromRightHandSide, element) {
+    let parentDom;
+    let parentData;
+
+    if (isDataFromRightHandSide) {
+      // Traverse 4 levels up to find the parent DOM
+      parentDom = element?.parentElement?.parentElement?.parentElement?.parentElement;
+
+      if (!parentDom) {
+        console.warn('Could not find parentDom in recommended data context');
+        return {};
       }
-      else if (['YTD-PLAYLIST-PANEL-VIDEO-RENDERER', 'YTD-MOVIE-RENDERER'].includes(parentDom.tagName)) {
+
+      const parentDomData = parentDom.componentProps?.data;
+      if (!parentDomData) {
+        console.warn('Could not find componentProps.data');
+        return {};
+      }
+
+      const parentDomSymbols = Object.getOwnPropertySymbols(parentDomData);
+      if (parentDomSymbols.length === 0) {
+        console.warn('No symbols found in parentDomData');
+        return {};
+      }
+
+      parentData = parentDomData[parentDomSymbols[0]]?.value;
+    } else {
+      // Try to find eventSink in multiple paths without using intermediate variable
+      const eventSink =
+        getObjectByPath(element.parentElement?.parentElement, 'polymerController.forwarder_.eventSink') ||
+        getObjectByPath(element.parentElement, '__dataHost.eventSink_') ||
+        getObjectByPath(element.parentElement, '__dataHost.forwarder_.eventSink') ||
+        getObjectByPath(element.parentElement, '__dataHost.hostElement.inst.eventSink_');
+
+      if (!eventSink) {
+        console.warn('Could not find eventSink in any expected path');
+        return {};
+      }
+
+      parentDom = eventSink.parentComponent || eventSink.parentElement.__dataHost.hostElement;
+      parentData = parentDom?.data;
+
+      if (!parentDom || !parentData) {
+        console.warn('Failed to extract parentDom or parentData');
+        return {};
+      }
+    }
+
+    return { parentDom, parentData };
+  }
+
+  function removeParentHelper(isDataFromRightHandSide, parentDom) {
+    if (['YTD-BACKSTAGE-POST-RENDERER', 'YTD-POST-RENDERER'].includes(parentDom.tagName)) {
+      parentDom.parentNode.remove();
+    } else if (['YTD-PLAYLIST-PANEL-VIDEO-RENDERER', 'YTD-MOVIE-RENDERER'].includes(parentDom.tagName)) {
+      parentDom.remove();
+    } else if ('YTD-COMMENT-RENDERER' === parentDom.tagName) {
+      if (parentDom.parentNode.tagName === 'YTD-COMMENT-THREAD-RENDERER') {
+        parentDom.parentNode.remove();
+      } else {
         parentDom.remove();
       }
-      else if ('YTD-COMMENT-RENDERER' === parentDom.tagName) {
-        if (parentDom.parentNode.tagName === 'YTD-COMMENT-THREAD-RENDERER') {
-          parentDom.parentNode.remove();
-        } else {
-          parentDom.remove();
-        }
-      }
-      else {
-        parentDom.dismissedRenderer = {
-          notificationMultiActionRenderer: {
-            responseText: {simpleText: 'Blocked'},
-          }
-        };
-        parentDom.setAttribute('is-dismissed', '');
-      }
+    } else if (isDataFromRightHandSide) {
+      parentDom.parentNode.__dataHost.__restoreFocusNode.parentElement.parentElement.parentElement.parentElement.parentElement.remove()
     } else {
+      parentDom.dismissedRenderer = {
+        notificationMultiActionRenderer: {
+          responseText: {simpleText: 'Blocked'},
+        }
+      };
+      parentDom.setAttribute('is-dismissed', '');
+    }
+  }
+
+  function menuOnTap(event) {
+    const { isDataFromRightHandSide, menuAction } = getActionMenuData(this);
+
+    if (!['Block Channel', 'Block Video'].includes(menuAction)) {
+      event.preventDefault();
+      return;
+    }
+
+    if (window.btReloadRequired) {
+      window.btExports.openToast("BlockTube was updated, this tab needs to be reloaded to use this function", 5000);
+      return;
+    }
+
+    // Get the parent dom and data from this
+    const {parentDom, parentData} = getParentDomAndData(isDataFromRightHandSide, this);
+
+    // Get the data and type which is used for blocking the video
+    const {type, data, removeParent, stopPlayer} = getBlockData(parentDom, parentData, isDataFromRightHandSide, menuAction)
+
+    // Notify system what data should be added to the block list
+    postMessage('contextBlockData', { type, info: data });
+
+    if (removeParent) {
+      // Remove correct component based on parentDom
+      removeParentHelper(isDataFromRightHandSide, parentDom)
+    } else if (stopPlayer) {
       document.getElementById('movie_player').stopVideo();
     }
+
     if (this.data.serviceEndpoint) {
       if (this.onTap) this.onTap(event);
       else if (this.onTap_) this.onTap_(event);
