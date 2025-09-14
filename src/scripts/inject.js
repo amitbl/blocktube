@@ -463,6 +463,7 @@
   }
 
   ObjectFilter.prototype.isDataEmpty = function () {
+    if (storageData.options.apply_filter === false) return true;
     if (storageData.options.shorts || storageData.options.movies || storageData.options.mixes) return false;
     if (!isNaN(storageData.options.percent_watched_hide)) return false;
 
@@ -477,6 +478,7 @@
   };
 
   ObjectFilter.prototype.matchFilterData = function (filters, obj, objectType) {
+    if (storageData.options.apply_filter === false) return false;
     const friendlyVideoObj = {};
 
     let doBlock = Object.keys(filters).some((h) => {
@@ -550,6 +552,7 @@
   };
 
   ObjectFilter.prototype.isExtendedMatched = function(filteredObject, h) {
+    if (storageData.options.apply_filter === false) return false;
     if (storageData.options.movies) {
       if (h === 'movieRenderer' || h === 'compactMovieRenderer') return true;
       if (h === 'videoRenderer' && !getObjectByPath(filteredObject, "shortBylineText.runs.navigationEndpoint.browseEndpoint") && filteredObject.longBylineText && filteredObject.badges) return true;
@@ -679,7 +682,7 @@
   // !! Custom filtering functions
 
   function disableEmbedPlayer(ytData) {
-    if (storageData.options.suggestions_only) {
+    if (storageData.options.suggestions_only || storageData.options.apply_filter === false) {
       return false;
     }
 
@@ -688,7 +691,7 @@
   }
 
   function disablePlayer(ytData) {
-    if (storageData.options.suggestions_only) {
+    if (storageData.options.suggestions_only || storageData.options.apply_filter === false) {
       return false;
     }
 
@@ -755,7 +758,7 @@
   }
 
   function redirectToIndex() {
-    if (storageData && storageData.options.suggestions_only) {
+    if (storageData && (storageData.options.suggestions_only || storageData.options.apply_filter === false)) {
       return false;
     }
 
@@ -847,7 +850,7 @@
 
     currentBlock = false;
 
-    if (storageData.options.suggestions_only) {
+    if (storageData.options.suggestions_only || storageData.options.apply_filter === false) {
       return false;
     }
 
@@ -1449,7 +1452,7 @@
   }
 
   function storageReceived(data) {
-    if (data === undefined || data.options.apply_filter === false) return;
+    if (data === undefined) return;
     transformToRegExp(data);
     if (data.options.trending) blockTrending(data);
     if (data.options.mixes) blockMixes(data);
