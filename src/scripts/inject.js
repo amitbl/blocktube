@@ -1514,19 +1514,19 @@
     return { ...result, attr };
   }
 
-  function injectBlockMenuItems(items, hasChannel, hasVideo, isLockupViewModel, storageData) {
+  function injectBlockMenuItems(items, hasChannel, hasVideo, isLockupViewModel, currentObj, storageData) {
     if (isLockupViewModel) {
-      return injectLockupViewModelButtons(items, hasChannel, hasVideo, storageData);
+      return injectLockupViewModelButtons(items, hasChannel, hasVideo, currentObj,  storageData);
     } else {
       return injectStandardMenuButtons(items, hasChannel, hasVideo, storageData);
     }
   }
 
-  function injectLockupViewModelButtons(items, hasChannel, hasVideo, storageData) {
+  function injectLockupViewModelButtons(items, hasChannel, hasVideo, currentObj, storageData) {
     if (!items.length) return;
 
-    const { removeItem: removeItemChannel, baseContext: cleanChannelContext } = createCleanContext(items, storageData, true);
-    const { removeItem: removeItemVideo,   baseContext: cleanVideoContext } = createCleanContext(items, storageData, false);
+    const cleanChannelContext = createCleanContext(items, storageData, true, currentObj);
+    const cleanVideoContext = createCleanContext(items, storageData, false, currentObj);
 
     const blockChannelItem = createLockupButtonItem('Block Channel', cleanChannelContext);
     const blockVideoItem = createLockupButtonItem('Block Video', cleanVideoContext);
@@ -1534,26 +1534,65 @@
     if (hasChannel) items.push(blockChannelItem);
     if (hasVideo) items.push(blockVideoItem);
 
-    return removeItemChannel && removeItemVideo
+    return true;
   }
 
-  function createCleanContext(items, storageData, isChannel) {
+  function createCleanContext(items, storageData, isChannel, currentObj) {
     const item = isChannel ? items[6] : items[5];
     if (storageData.options.block_feedback && item) {
-      const baseContext = item?.listItemViewModel?.rendererContext;
-      return {removeItem: false, baseContext};
+        return item?.listItemViewModel?.rendererContext;
     }
 
     const baseContext = items[0]?.listItemViewModel?.rendererContext;
     if (!baseContext) return null;
-
-    const cleanContext = { ...baseContext };
-    // Prevent accidental execution
-    if (cleanContext.commandContext?.onTap?.innertubeCommand?.signalServiceEndpoint) {
-      cleanContext.commandContext.onTap.innertubeCommand.signalServiceEndpoint.actions = undefined;
+  
+    const msg = isChannel ? 'Channel Blocked' : 'Video Blocked';
+    const cleanContext = deepClone(baseContext);
+  
+    if (cleanContext.commandContext?.onTap) {
+      let onTap = cleanContext.commandContext?.onTap;
+      onTap.innertubeCommand = {
+        "clickTrackingParams": "",
+        "commandMetadata": {
+          "webCommandMetadata": {
+            "sendPost": false,
+            "apiUrl": ""
+          }
+        },
+        "feedbackEndpoint": {
+          "feedbackToken": "",
+          "uiActions": {
+            "hideEnclosingContainer": true
+          },
+          "actions": [
+            {
+              "clickTrackingParams": "",
+              "replaceEnclosingAction": {
+                "item": {
+                  "notificationMultiActionRenderer": {
+                    "responseText": {
+                      "accessibility": {
+                        "accessibilityData": {
+                          "label": msg
+                        }
+                      },
+                      "simpleText": msg
+                    },
+                    "buttons": [
+                    ],
+                    "trackingParams": "",
+                    "dismissalViewStyle": "DISMISSAL_VIEW_STYLE_COMPACT_TALL"
+                  }
+                }
+              }
+            }
+          ],
+          "contentId": currentObj.contentId
+        }
+      }
     }
 
-    return {removeItem: true, baseContext: cleanContext};
+    return cleanContext;
   }
 
   function createLockupButtonItem(title, rendererContext) {
@@ -1614,18 +1653,11 @@
 
     const { items, hasChannel, hasVideo, isLockupViewModel, attr } = extracted;
 
-    const removeItem = injectBlockMenuItems(items, hasChannel, hasVideo, isLockupViewModel, storageData);
+    injectBlockMenuItems(items, hasChannel, hasVideo, isLockupViewModel, obj[attr], storageData);
 
     // Attach metadata only if needed
     if (hasChannel || hasVideo) {
       obj[attr]._btOriginalAttr = attr;
-    }
- 
-    if (isLockupViewModel && storageData.options.block_feedback && !removeItem) {
-      const path = 'metadata.lockupMetadataViewModel.menuButton.buttonViewModel.onTap.innertubeCommand.showSheetCommand.panelLoadingStrategy.inlineContent.sheetViewModel';
-      const sheetmodel = getObjectByPath(obj[attr], path);
-      if (sheetmodel?.blockTube?.metadata)
-        sheetmodel.blockTube.metadata.removeObject = false; // Removing handled by yt
     }
   }
 
@@ -1864,7 +1896,7 @@
         text: parentData.blockTube?.metadata?.videoName,
       };
 
-      removeParent = parentData.blockTube?.metadata?.removeObject
+      removeParent = false
       stopPlayer = false
     } else {
       const attrKey = parentData._btOriginalAttr;
@@ -1939,7 +1971,7 @@
         return {};
       }
 
-      parentDom = eventSink.parentComponent || eventSink.parentElement.__dataHost.hostElement;
+      parentDom = eventSink.parentComponent || eventSink.parentElement.__dataHost?.hostElement || eventSink.parentElement?.parentElement;
       parentData = parentDom?.data;
 
       if (!parentDom || !parentData) {
@@ -1962,8 +1994,6 @@
       } else {
         parentDom.remove();
       }
-    } else if (isDataFromRightHandSide) {
-      parentDom.parentNode.__dataHost.__restoreFocusNode.parentElement.parentElement.parentElement.parentElement.parentElement.remove()
     } else {
       parentDom.dismissedRenderer = {
         notificationMultiActionRenderer: {
