@@ -27,7 +27,7 @@
   ],
   "action": {
     "default_title": "BlockTube Options",
-    "default_popup": "popup/popup.html",
+    "default_popup": "src/popup/popup.html",
     "default_icon": {
       "16": "assets/icons/16.png",
       "48": "assets/icons/48.png",
