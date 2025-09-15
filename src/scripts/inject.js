@@ -1014,7 +1014,7 @@
     // Check if it ends with a multiplier
     const lastChar = views.slice(-1).toUpperCase();
     let multiplier = 1;
-    let numericPart = views;
+    let numericPart = views.replace(',', '');
     
     if (multipliers[lastChar]) {
       multiplier = multipliers[lastChar];
@@ -1022,7 +1022,6 @@
     }
     
     // Return the final count
-    console.debug(viewCount + ", " + numericPart * multiplier);
     return (numericPart * multiplier);
   }
 
