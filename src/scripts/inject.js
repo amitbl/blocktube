@@ -495,6 +495,8 @@
   ObjectFilter.prototype.matchFilterData = function (filters, obj, objectType) {
     const friendlyVideoObj = {};
 
+    if (document.location.pathname === '/feed/history' && storageData.options.disable_on_history) return false;
+
     let doBlock = Object.keys(filters).some((h) => {
       const filterPath = filters[h];
       if (filterPath === undefined) return false;

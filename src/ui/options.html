@@ -140,7 +140,8 @@
             <input id="vidLength_1" type="number" min="0" max="99999" size="5" />
             <span style="font-size:small; font-style:italic">seconds long</span>
           </div>
-          <div>
+          <div class="multi-column-content">
+          <div style="margin-top: 0">
             <input id="disable_mixes" type="checkbox" />
             <label for="disable_mixes">Block YouTube's auto-generated playlists</label>
           </div>
@@ -172,9 +173,14 @@
             <input id="disable_you_there" type="checkbox" />
             <label for="disable_you_there">Disable automatic pause of videos <span class="tooltip" title="This will remove &quot;Video paused. Continue watching?&quot; pop-up messages">?</span></label>
           </div>
-          <div style="margin: 0">
+          <div>
             <input id="disable_db_normalize" type="checkbox" />
             <label for="disable_db_normalize">Disable YouTube's audio loudness normalization</label>
+          </div>
+          <div>
+            <input id="disable_on_history" type="checkbox" />
+            <label for="disable_on_history">Disable blocking on watch history page</label>
+          </div>
           </div>
         </fieldset>
         <div class="buttons sticky">

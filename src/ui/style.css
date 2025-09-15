@@ -491,3 +491,11 @@ input#import {
 .alert-animate {
   display: block;
 }
+
+@media screen and (min-width: 1025px) {
+.multi-column-content {
+  column-count: 2; /* Divides the content into two columns */
+  column-gap: 20px; /* Adds a gap between the columns */
+  /* Other properties like column-rule can be added */
+}
+}

@@ -90,6 +90,7 @@
     storageData.options.autoplay = $('autoplay').checked;
     storageData.options.suggestions_only = $('suggestions_only').checked;
     storageData.options.disable_db_normalize = $('disable_db_normalize').checked;
+    storageData.options.disable_on_history = $('disable_on_history').checked;
     storageData.options.disable_you_there = $('disable_you_there').checked;
     storageData.options.block_feedback = $('block_feedback').checked;
     storageData.options.enable_javascript = $('enable_javascript').checked;
@@ -146,6 +147,7 @@
     $('disable_mixes').checked     = get('options.mixes', false, obj);
     $('autoplay').checked          = get('options.autoplay', false, obj);
     $('disable_db_normalize').checked = get('options.disable_db_normalize', false, obj);
+    $('disable_on_history').checked = get('options.disable_on_history', false, obj);
     $('disable_you_there').checked   = get('options.disable_you_there', false, obj);
     $('suggestions_only').checked  = get('options.suggestions_only', false, obj);
     $('block_feedback').checked    = get('options.block_feedback', false, obj);
