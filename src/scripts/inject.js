@@ -1072,6 +1072,8 @@
   }
 
   function fetchFilter(url, resp) {
+    if (storageData === undefined) return;
+
     if (['/youtubei/v1/search', '/youtubei/v1/browse'].includes(url.pathname)) {
       ObjectFilter(resp, filterRules.main, [], true);
     }
@@ -1089,6 +1091,8 @@
   }
 
   function spfFilter(url, resp) {
+    if (storageData === undefined) return;
+
     let ytDataArr = resp.part || resp.response.parts || resp.response;
     ytDataArr = (ytDataArr instanceof Array) ? ytDataArr : [ytDataArr];
 
@@ -1679,7 +1683,11 @@
   }
 
   function storageReceived(data) {
-    if (data === undefined || data.options.apply_filter === false) return;
+    if (data === undefined) {
+      window.btDispatched = true;
+      window.dispatchEvent(new Event('blockTubeReady'));
+      return;
+    }
     transformToRegExp(data);
     if (data.options.trending) blockTrending(data);
     if (data.options.mixes) blockMixes(data);
@@ -1713,7 +1721,7 @@
       jsFilterEnabled = false;
     }
 
-    if (shouldStartHook) {
+    if (shouldStartHook && !window.btDispatched) {
       startHook();
     }
   }
@@ -1754,6 +1762,8 @@
   }
 
   function menuOnTapMobile(event) {
+    if (storageData === undefined) return;
+
     if (window.btReloadRequired) {
       window.btExports.openToast("BlockTube was updated, this tab needs to be reloaded to use this function", 5000);
       return;
@@ -1958,6 +1968,8 @@
   }
 
   function menuOnTap(event) {
+    if (storageData === undefined) return;
+
     const { isDataFromRightHandSide, menuAction } = getActionMenuData(this);
 
     if (!['Block Channel', 'Block Video'].includes(menuAction)) {

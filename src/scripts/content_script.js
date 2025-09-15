@@ -4,13 +4,14 @@
   let port;
   let globalStorage;
   let compiledStorage;
+  let enabled;
 
   const utils = {
     sendStorage() {
       window.postMessage({
         from: 'BLOCKTUBE_CONTENT',
         type: 'storageData',
-        data: compiledStorage || globalStorage,
+        data: enabled ? (compiledStorage || globalStorage) : undefined,
       }, document.location.origin);
     },
     sendReload(msg, duration) {
@@ -52,6 +53,7 @@
           if (msg.data) {
             globalStorage = msg.data.storage;
             compiledStorage = msg.data.compiledStorage;
+            enabled = msg.data.enabled;
             utils.sendStorage();
           }
           break;

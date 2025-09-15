@@ -3,6 +3,7 @@
 const has = Object.prototype.hasOwnProperty;
 const unicodeBoundry = "[ \n\r\t!@#$%^&*()_\\-=+\\[\\]\\\\\\|;:'\",\\.\\/<>\\?`~:]+";
 const ports = {};
+let enabled = true;
 let initStorage = false;
 let compiledStorage;
 let storage = {
@@ -82,13 +83,13 @@ const utils = {
   },
 
   sendFilters(port) {
-    port.postMessage({ type: 'filtersData', data: { storage, compiledStorage } });
+    port.postMessage({ type: 'filtersData', data: { storage, compiledStorage, enabled } });
   },
 
   sendFiltersToAll() {
     Object.keys(ports).forEach((p) => {
       try {
-        ports[p].postMessage({ type: 'filtersData', data: { storage, compiledStorage } });
+        ports[p].postMessage({ type: 'filtersData', data: { storage, compiledStorage, enabled } });
       } catch (e) {
         console.error('Where are you my child?');
       }
@@ -106,10 +107,13 @@ const utils = {
   }
 };
 
-chrome.storage.local.get('storageData', (data) => {
+chrome.storage.local.get(['storageData', 'enabled'], (data) => {
   if (data !== undefined && Object.keys(data).length > 0) {
     storage = data.storageData;
     compiledStorage = utils.compileAll(data.storageData);
+  }
+  if (Object.hasOwn(data, 'enabled')) {
+    enabled = data.enabled
   }
   initStorage = true;
   utils.sendFiltersToAll();
@@ -137,6 +141,10 @@ chrome.storage.local.get('storageData', (data) => {
     if (has.call(changes, 'storageData')) {
       storage = changes.storageData.newValue;
       compiledStorage = utils.compileAll(changes.storageData.newValue);
+      utils.sendFiltersToAll();
+    }
+    if (has.call(changes, 'enabled')) {
+      enabled = changes.enabled.newValue;
       utils.sendFiltersToAll();
     }
   });
