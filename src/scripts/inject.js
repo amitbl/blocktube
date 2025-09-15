@@ -1201,9 +1201,14 @@
     }
 
     const regularVid = secondaryResults.findIndex(x => has.call(x, 'compactVideoRenderer'));
-    const vidObj = secondaryResults[regularVid].compactVideoRenderer;
-
-    return vidObj.videoId;
+    if (regularVid > -1) {
+      const vidObj = secondaryResults[regularVid].compactVideoRenderer;
+      return vidObj.videoId;
+    } else {
+      const regularVid = secondaryResults.findIndex(x => has.call(x, 'lockupViewModel'));
+      const vidObj = secondaryResults[regularVid].lockupViewModel;
+      return vidObj.contentId;
+    }
   }
 
   function addContextMenusMobile(obj) {
