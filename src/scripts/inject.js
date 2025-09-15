@@ -1429,9 +1429,12 @@
     } else if (attr === 'lockupViewModel') {
       items = extractFromLockupViewModel(obj[attr]);
       if (!items) return null;
+      let imgName = getObjectByPath(obj[attr], 'contentImage.collectionThumbnailViewModel.primaryThumbnail.thumbnailViewModel.overlays.thumbnailOverlayBadgeViewModel.thumbnailBadges.thumbnailBadgeViewModel.icon.sources.clientResource.imageName');
+      if (imgName !== 'MIX') {
+          hasChannel = true;
+          hasVideo = true;
+      }
 
-      hasChannel = true;
-      hasVideo = true;
       isLockupViewModel = true;
     } else {
       items = extractFromGenericRenderer(obj[attr]);
