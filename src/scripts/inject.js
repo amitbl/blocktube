@@ -2,67 +2,210 @@
   'use strict';
   const has = Object.prototype.hasOwnProperty;
 
+  // When YouTube updates, only these constants should need changes.
+  const DATA_PATHS = {
+    // Common
+    VIDEO_ID: 'videoId',
+    TITLE: ['title'],
+    CHANNEL_ID_BROWSE: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
+    CHANNEL_NAME_BYLINE: ['shortBylineText', 'longBylineText'],
+    THUMBNAIL_OVERLAYS_TIME: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text',
+    THUMBNAIL_OVERLAYS_RESUME: 'thumbnailOverlays.thumbnailOverlayResumePlaybackRenderer.percentDurationWatched',
+    OWNER_BADGES: 'ownerBadges',
+    BADGES: 'badges',
+    VIEW_COUNT_TEXT: ['viewCountText'],
+    PUBLISHED_TIME_TEXT: ['publishedTimeText'],
+
+    // Post/BackstagePost
+    POST_AUTHOR_ID: 'authorEndpoint.browseEndpoint.browseId',
+    POST_AUTHOR_NAME: ['authorText'],
+
+    // Watch Card
+    WATCH_CARD_VIDEO_ID: 'navigationEndpoint.watchEndpoint.videoId',
+    WATCH_CARD_CHANNEL_ID: 'subtitles.runs.navigationEndpoint.browseEndpoint.browseId',
+    WATCH_CARD_CHANNEL_NAME: 'subtitles',
+
+    // Shelf
+    SHELF_CHANNEL_ID: 'endpoint.browseEndpoint.browseId',
+
+    // Video Info Renderers
+    PRIMARY_INFO_TITLE: 'title',
+    SECONDARY_INFO_CHANNEL_ID: 'owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId',
+    SECONDARY_INFO_CHANNEL_NAME: 'owner.videoOwnerRenderer.title',
+
+    // Channel Metadata
+    CHANNEL_META_ID: 'externalId',
+    CHANNEL_META_NAME: 'title',
+
+    // Grid/Mini Channel
+    GRID_CHANNEL_ID: 'channelId',
+    GRID_CHANNEL_NAME: 'title',
+
+    // Guide Entry
+    GUIDE_CHANNEL_ID: 'navigationEndpoint.browseEndpoint.browseId',
+    GUIDE_CHANNEL_NAME: ['title', 'formattedTitle'],
+
+    // Universal Watch Card
+    UNIVERSAL_WATCH_CARD_CHANNEL_ID: 'header.watchCardRichHeaderRenderer.titleNavigationEndpoint.browseEndpoint.browseId',
+    UNIVERSAL_WATCH_CARD_CHANNEL_NAME: 'header.watchCardRichHeaderRenderer.title',
+
+    // Playlist
+    PLAYLIST_CHANNEL_ID: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
+    PLAYLIST_CHANNEL_NAME: ['shortBylineText'],
+    PLAYLIST_TITLE: 'title',
+
+    // Compact Channel Recommendation
+    COMPACT_CHANNEL_REC_ID: 'channelEndpoint.browseEndpoint.browseId',
+    COMPACT_CHANNEL_REC_NAME: ['channelTitle'],
+
+    // Autoplay Overlay
+    AUTOPLAY_CHANNEL_ID: 'byline.runs.navigationEndpoint.browseEndpoint.browseId',
+    AUTOPLAY_CHANNEL_NAME: 'byline',
+    AUTOPLAY_TITLE: ['videoTitle'],
+
+    // Reel Item (Shorts)
+    REEL_CHANNEL_ID: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.channelNavigationEndpoint.browseEndpoint.browseId',
+    REEL_CHANNEL_NAME: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.channelTitleText',
+    REEL_TITLE: ['headline'],
+    REEL_PUBLISH_TIME: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.timestampText',
+
+    // Shorts Lockup View Model
+    SHORTS_LOCKUP_VIDEO_ID: 'onTap.innertubeCommand.reelWatchEndpoint.videoId',
+    SHORTS_LOCKUP_TITLE: 'overlayMetadata.primaryText.content',
+    SHORTS_LOCKUP_VIEW_COUNT: 'overlayMetadata.secondaryText.content',
+
+    // Channel Featured Video
+    CHANNEL_FEATURED_LENGTH: 'lengthText',
+
+    // Video with Context
+    VIDEO_WITH_CONTEXT_TITLE: 'headline',
+    VIDEO_WITH_CONTEXT_VIEW_COUNT: 'shortViewCountText',
+
+    // Compact Channel
+    COMPACT_CHANNEL_ID: 'channelId',
+    COMPACT_CHANNEL_NAME: 'displayName',
+
+    // Lockup View Model
+    LOCKUP_VIDEO_ID: 'contentId',
+    LOCKUP_TITLE: 'metadata.lockupMetadataViewModel.title.content',
+    LOCKUP_CHANNEL_NAME: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.content',
+    LOCKUP_LENGTH: 'contentImage.thumbnailViewModel.overlays.thumbnailOverlayBadgeViewModel.thumbnailBadges.thumbnailBadgeViewModel.text',
+    LOCKUP_VIEW_COUNT: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts.text.content',
+    LOCKUP_CHANNEL_ID: ['metadata.lockupMetadataViewModel.image.decoratedAvatarViewModel.rendererContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId',
+      'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.commandRuns.onTap.innertubeCommand.browseEndpoint.browseId'],
+    LOCKUP_PERCENT_WATCHED: 'contentImage.thumbnailViewModel.overlays.thumbnailBottomOverlayViewModel.progressBar.thumbnailOverlayProgressBarViewModel.startPercent',
+
+    // Mobile Top Chips
+    CHIP_ICON: 'icon.iconType',
+
+    // Mobile Slim Video
+    SLIM_VIDEO_ID: 'videoId',
+    SLIM_TITLE: 'contents.slimVideoInformationRenderer.title',
+    SLIM_CHANNEL_ID: 'contents.slimOwnerRenderer.navigationEndpoint.browseEndpoint.browseId',
+    SLIM_CHANNEL_NAME: 'contents.slimOwnerRenderer.title',
+
+    // Tab Renderer
+    TAB_URL: 'endpoint.commandMetadata.webCommandMetadata.url',
+
+    // Player Args
+    PLAYER_ARGS_VIDEO_ID: ['video_id', 'raw_player_response.videoDetails.videoId'],
+    PLAYER_ARGS_CHANNEL_ID: ['ucid', 'raw_player_response.videoDetails.channelId'],
+    PLAYER_ARGS_CHANNEL_NAME: ['author', 'raw_player_response.videoDetails.author'],
+    PLAYER_ARGS_TITLE: ['title', 'raw_player_response.videoDetails.title'],
+    PLAYER_ARGS_LENGTH: ['length_seconds', 'raw_player_response.videoDetails.lengthSeconds'],
+
+    // Player Video Details
+    PLAYER_DETAILS_VIDEO_ID: 'videoId',
+    PLAYER_DETAILS_CHANNEL_ID: 'channelId',
+    PLAYER_DETAILS_CHANNEL_NAME: 'author',
+    PLAYER_DETAILS_TITLE: 'title',
+    PLAYER_DETAILS_LENGTH: 'lengthSeconds',
+
+    // Player Vars (Embed)
+    PLAYER_VARS_VIDEO_ID: ['video_id'],
+    PLAYER_VARS_CHANNEL_ID: ['raw_player_response.embedPreview.thumbnailPreviewRenderer.videoDetails.embeddedPlayerOverlayVideoDetailsRenderer.expandedRenderer.embeddedPlayerOverlayVideoDetailsExpandedRenderer.subscribeButton.subscribeButtonRenderer.channelId'],
+    PLAYER_VARS_CHANNEL_NAME: ['raw_player_response.embedPreview.thumbnailPreviewRenderer.videoDetails.embeddedPlayerOverlayVideoDetailsRenderer.expandedRenderer.embeddedPlayerOverlayVideoDetailsExpandedRenderer.title'],
+    PLAYER_VARS_TITLE: ['raw_player_response.embedPreview.thumbnailPreviewRenderer.title'],
+    PLAYER_VARS_LENGTH: ['raw_player_response.embedPreview.thumbnailPreviewRenderer.videoDurationSeconds'],
+
+    // Guide
+    GUIDE_ENTRY_CHANNEL_ID: ['navigationEndpoint.browseEndpoint.browseId', 'icon.iconType'],
+    GUIDE_ENTRY_CHANNEL_NAME: ['title', 'formattedTitle'],
+    PIVOT_BAR_ITEM_ID: 'icon.iconType',
+
+    // Comments
+    COMMENT_ENTITY_CHANNEL_ID: ['author.channelId'],
+    COMMENT_ENTITY_CHANNEL_NAME: ['author.displayName'],
+    COMMENT_ENTITY_CONTENT: ['properties.content.content'],
+    COMMENT_RENDERER_CHANNEL_ID: 'authorEndpoint.browseEndpoint.browseId',
+    COMMENT_RENDERER_CHANNEL_NAME: ['authorText'],
+    COMMENT_RENDERER_CONTENT: ['contentText'],
+    LIVE_CHAT_CHANNEL_ID: 'authorExternalChannelId',
+    LIVE_CHAT_CHANNEL_NAME: ['authorName'],
+    LIVE_CHAT_MESSAGE: 'message',
+  };
+
   // Thanks to uBlock origin
-  const defineProperty = function(chain, cValue, middleware = undefined) {
+  const defineProperty = function (chain, cValue, middleware = undefined) {
     let aborted = false;
-    const mustAbort = function(v) {
-      if ( aborted ) { return true; }
+    const mustAbort = function (v) {
+      if (aborted) { return true; }
       aborted =
-            (v !== undefined && v !== null) &&
-            (cValue !== undefined && cValue !== null) &&
-            (typeof v !== typeof cValue);
+        (v !== undefined && v !== null) &&
+        (cValue !== undefined && cValue !== null) &&
+        (typeof v !== typeof cValue);
       return aborted;
     };
     // https://github.com/uBlockOrigin/uBlock-issues/issues/156
     //   Support multiple trappers for the same property.
-    const trapProp = function(owner, prop, configurable, handler) {
-      if ( handler.init(owner[prop]) === false ) { return; }
+    const trapProp = function (owner, prop, configurable, handler) {
+      if (handler.init(owner[prop]) === false) { return; }
       const odesc = Object.getOwnPropertyDescriptor(owner, prop);
       let prevGetter, prevSetter;
-      if ( odesc instanceof Object ) {
-        if ( odesc.configurable === false ) { return; }
-        if ( odesc.get instanceof Function ) {
+      if (odesc instanceof Object) {
+        if (odesc.configurable === false) { return; }
+        if (odesc.get instanceof Function) {
           prevGetter = odesc.get;
         }
-        if ( odesc.set instanceof Function ) {
+        if (odesc.set instanceof Function) {
           prevSetter = odesc.set;
         }
       }
       Object.defineProperty(owner, prop, {
         configurable,
         get() {
-          if ( prevGetter !== undefined ) {
+          if (prevGetter !== undefined) {
             prevGetter();
           }
           return handler.getter(); // cValue
         },
         set(a) {
-          if ( prevSetter !== undefined ) {
+          if (prevSetter !== undefined) {
             prevSetter(a);
           }
           handler.setter(a);
         }
       });
     };
-    const trapChain = function(owner, chain) {
+    const trapChain = function (owner, chain) {
       const pos = chain.indexOf('.');
-      if ( pos === -1 ) {
+      if (pos === -1) {
         trapProp(owner, chain, true, {
           v: undefined,
-          init: function(v) {
-            if ( mustAbort(v) ) { return false; }
+          init: function (v) {
+            if (mustAbort(v)) { return false; }
             this.v = v;
             return true;
           },
-          getter: function() {
+          getter: function () {
             return cValue;
           },
-          setter: function(a) {
+          setter: function (a) {
             if (middleware instanceof Function) {
               cValue = a;
               middleware(a);
             } else {
-              if ( mustAbort(a) === false ) { return; }
+              if (mustAbort(a) === false) { return; }
               cValue = a;
             }
           }
@@ -72,22 +215,22 @@
       const prop = chain.slice(0, pos);
       const v = owner[prop];
       chain = chain.slice(pos + 1);
-      if ( v instanceof Object || typeof v === 'object' && v !== null ) {
+      if (v instanceof Object || typeof v === 'object' && v !== null) {
         trapChain(v, chain);
         return;
       }
       trapProp(owner, prop, true, {
         v: undefined,
-        init: function(v) {
+        init: function (v) {
           this.v = v;
           return true;
         },
-        getter: function() {
+        getter: function () {
           return this.v;
         },
-        setter: function(a) {
+        setter: function (a) {
           this.v = a;
-          if ( a instanceof Object ) {
+          if (a instanceof Object) {
             trapChain(a, chain);
           }
         }
@@ -158,38 +301,33 @@
   // TODO: add rules descriptions
   // !! Filter Rules definitions
   const baseRules = {
-    videoId: 'videoId',
-    channelId: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
-    channelBadges: 'ownerBadges',
-    channelName: [
-      'shortBylineText',
-      'longBylineText',
-    ],
-    title: ['title'],
-    vidLength: ['thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text'],
-    viewCount: [
-        'viewCountText'
-    ],
-    badges: 'badges',
-    publishTimeText: ['publishedTimeText'],
-    percentWatched: 'thumbnailOverlays.thumbnailOverlayResumePlaybackRenderer.percentDurationWatched'
+    videoId: DATA_PATHS.VIDEO_ID,
+    channelId: DATA_PATHS.CHANNEL_ID_BROWSE,
+    channelBadges: DATA_PATHS.OWNER_BADGES,
+    channelName: DATA_PATHS.CHANNEL_NAME_BYLINE,
+    title: DATA_PATHS.TITLE,
+    vidLength: DATA_PATHS.THUMBNAIL_OVERLAYS_TIME,
+    viewCount: DATA_PATHS.VIEW_COUNT_TEXT,
+    badges: DATA_PATHS.BADGES,
+    publishTimeText: DATA_PATHS.PUBLISHED_TIME_TEXT,
+    percentWatched: DATA_PATHS.THUMBNAIL_OVERLAYS_RESUME,
   };
 
   const filterRules = {
     main: {
       compactMovieRenderer: {
-        videoId: 'videoId',
-        title: ['title'],
-        vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text',
-        badges: 'badges',
-        percentWatched: 'thumbnailOverlays.thumbnailOverlayResumePlaybackRenderer.percentDurationWatched'
+        videoId: DATA_PATHS.VIDEO_ID,
+        title: DATA_PATHS.TITLE,
+        vidLength: DATA_PATHS.THUMBNAIL_OVERLAYS_TIME,
+        badges: DATA_PATHS.BADGES,
+        percentWatched: DATA_PATHS.THUMBNAIL_OVERLAYS_RESUME,
       },
       movieRenderer: {
-        videoId: 'videoId',
-        title: ['title'],
-        vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text',
-        badges: 'badges',
-        percentWatched: 'thumbnailOverlays.thumbnailOverlayResumePlaybackRenderer.percentDurationWatched'
+        videoId: DATA_PATHS.VIDEO_ID,
+        title: DATA_PATHS.TITLE,
+        vidLength: DATA_PATHS.THUMBNAIL_OVERLAYS_TIME,
+        badges: DATA_PATHS.BADGES,
+        percentWatched: DATA_PATHS.THUMBNAIL_OVERLAYS_RESUME,
       },
       gridVideoRenderer: baseRules,
       videoRenderer: baseRules,
@@ -203,31 +341,31 @@
       endScreenPlaylistRenderer: baseRules,
       gridPlaylistRenderer: baseRules,
       postRenderer: {
-        channelId: 'authorEndpoint.browseEndpoint.browseId',
-        channelName: ['authorText']
+        channelId: DATA_PATHS.POST_AUTHOR_ID,
+        channelName: DATA_PATHS.POST_AUTHOR_NAME,
       },
       backstagePostRenderer: {
-        channelId: 'authorEndpoint.browseEndpoint.browseId',
-        channelName: ['authorText']
+        channelId: DATA_PATHS.POST_AUTHOR_ID,
+        channelName: DATA_PATHS.POST_AUTHOR_NAME,
       },
 
       watchCardCompactVideoRenderer: {
-        title: 'title',
-        channelId: 'subtitles.runs.navigationEndpoint.browseEndpoint.browseId',
-        channelName: 'subtitles',
-        videoId: 'navigationEndpoint.watchEndpoint.videoId',
+        title: DATA_PATHS.PRIMARY_INFO_TITLE,
+        channelId: DATA_PATHS.WATCH_CARD_CHANNEL_ID,
+        channelName: DATA_PATHS.WATCH_CARD_CHANNEL_NAME,
+        videoId: DATA_PATHS.WATCH_CARD_VIDEO_ID,
       },
 
       shelfRenderer: {
-        channelId: 'endpoint.browseEndpoint.browseId',
+        channelId: DATA_PATHS.SHELF_CHANNEL_ID,
       },
 
       channelVideoPlayerRenderer: {
-        title: 'title',
+        title: DATA_PATHS.PRIMARY_INFO_TITLE,
       },
 
       channelRenderer: {
-        properties: {...baseRules, title: undefined},
+        properties: { ...baseRules, title: undefined },
         related: 'shelfRenderer'
       },
 
@@ -238,15 +376,15 @@
 
       videoPrimaryInfoRenderer: {
         properties: {
-          title: 'title',
+          title: DATA_PATHS.PRIMARY_INFO_TITLE,
         },
         customFunc: redirectToNext,
       },
 
       videoSecondaryInfoRenderer: {
         properties: {
-          channelId: 'owner.videoOwnerRenderer.navigationEndpoint.browseEndpoint.browseId',
-          channelName: 'owner.videoOwnerRenderer.title',
+          channelId: DATA_PATHS.SECONDARY_INFO_CHANNEL_ID,
+          channelName: DATA_PATHS.SECONDARY_INFO_CHANNEL_NAME,
         },
         customFunc: redirectToNext,
       },
@@ -254,133 +392,132 @@
       // channel page header
       channelMetadataRenderer: {
         properties: {
-          channelId: 'externalId',
-          channelName: 'title',
+          channelId: DATA_PATHS.CHANNEL_META_ID,
+          channelName: DATA_PATHS.CHANNEL_META_NAME,
         },
         customFunc: redirectToIndex,
       },
 
       // related channels
       gridChannelRenderer: {
-        channelId: 'channelId',
-        channelName: 'title',
+        channelId: DATA_PATHS.GRID_CHANNEL_ID,
+        channelName: DATA_PATHS.GRID_CHANNEL_NAME,
       },
 
       miniChannelRenderer: {
-        channelId: 'channelId',
-        channelName: 'title',
+        channelId: DATA_PATHS.MINI_CHANNEL_ID,
+        channelName: DATA_PATHS.GRID_CHANNEL_NAME,
       },
 
       // sidemenu subscribed channels
       guideEntryRenderer: {
-        channelId: 'navigationEndpoint.browseEndpoint.browseId',
-        channelName: ['title', 'formattedTitle'],
+        channelId: DATA_PATHS.GUIDE_CHANNEL_ID,
+        channelName: DATA_PATHS.GUIDE_CHANNEL_NAME,
       },
 
       universalWatchCardRenderer: {
         properties: {
-          channelId: 'header.watchCardRichHeaderRenderer.titleNavigationEndpoint.browseEndpoint.browseId',
-          channelName: 'header.watchCardRichHeaderRenderer.title',
+          channelId: DATA_PATHS.UNIVERSAL_WATCH_CARD_CHANNEL_ID,
+          channelName: DATA_PATHS.UNIVERSAL_WATCH_CARD_CHANNEL_NAME,
         },
       },
 
       playlist: {
         properties: {
-          channelId: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
-          channelName: ['shortBylineText'],
-          title: 'title',
+          channelId: DATA_PATHS.PLAYLIST_CHANNEL_ID,
+          channelName: DATA_PATHS.PLAYLIST_CHANNEL_NAME,
+          title: DATA_PATHS.PLAYLIST_TITLE,
         },
         customFunc: redirectToIndex,
       },
 
       compactChannelRecommendationCardRenderer: {
         properties: {
-          channelId: 'channelEndpoint.browseEndpoint.browseId',
-          channelName: ['channelTitle'],
+          channelId: DATA_PATHS.COMPACT_CHANNEL_REC_ID,
+          channelName: DATA_PATHS.COMPACT_CHANNEL_REC_NAME,
         },
       },
 
       playerOverlayAutoplayRenderer: {
         properties: {
-          videoId: 'videoId',
-          channelId: 'byline.runs.navigationEndpoint.browseEndpoint.browseId',
-          channelName: 'byline',
-          title: ['videoTitle'],
-          publishTimeText: 'publishedTimeText',
-          vidLength: 'thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text',
+          videoId: DATA_PATHS.VIDEO_ID,
+          channelId: DATA_PATHS.AUTOPLAY_CHANNEL_ID,
+          channelName: DATA_PATHS.AUTOPLAY_CHANNEL_NAME,
+          title: DATA_PATHS.AUTOPLAY_TITLE,
+          publishTimeText: DATA_PATHS.PUBLISHED_TIME_TEXT,
+          vidLength: DATA_PATHS.THUMBNAIL_OVERLAYS_TIME,
         },
         customFunc: markAutoplay,
       },
 
       reelItemRenderer: {
         properties: {
-          videoId: 'videoId',
-          channelId: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.channelNavigationEndpoint.browseEndpoint.browseId',
-          channelName: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.channelTitleText',
-          title: ['headline'],
-          publishTimeText: 'navigationEndpoint.reelWatchEndpoint.overlay.reelPlayerOverlayRenderer.reelPlayerHeaderSupportedRenderers.reelPlayerHeaderRenderer.timestampText'
+          videoId: DATA_PATHS.VIDEO_ID,
+          channelId: DATA_PATHS.REEL_CHANNEL_ID,
+          channelName: DATA_PATHS.REEL_CHANNEL_NAME,
+          title: DATA_PATHS.REEL_TITLE,
+          publishTimeText: DATA_PATHS.REEL_PUBLISH_TIME,
         }
       },
 
       shortsLockupViewModel: {
         properties: {
-          videoId: 'onTap.innertubeCommand.reelWatchEndpoint.videoId',
-          title: 'overlayMetadata.primaryText.content',
-          viewCount: 'overlayMetadata.secondaryText.content'
+          videoId: DATA_PATHS.SHORTS_LOCKUP_VIDEO_ID,
+          title: DATA_PATHS.SHORTS_LOCKUP_TITLE,
+          viewCount: DATA_PATHS.SHORTS_LOCKUP_VIEW_COUNT,
         }
       },
 
       richShelfRenderer: {
-        channelId: 'endpoint.browseEndpoint.browseId'
+        channelId: DATA_PATHS.SHELF_CHANNEL_ID,
       },
 
       channelFeaturedVideoRenderer: {
         ...baseRules,
-        vidLength: 'lengthText'
+        vidLength: DATA_PATHS.CHANNEL_FEATURED_LENGTH,
       },
 
       videoWithContextRenderer: {
         ...baseRules,
-        title: 'headline',
-        vidLength: ['thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text'],
-        viewCount: 'shortViewCountText',
+        title: DATA_PATHS.VIDEO_WITH_CONTEXT_TITLE,
+        vidLength: [DATA_PATHS.THUMBNAIL_OVERLAYS_TIME],
+        viewCount: DATA_PATHS.VIDEO_WITH_CONTEXT_VIEW_COUNT,
       },
 
       compactChannelRenderer: {
-        channelId: 'channelId',
-        channelName: 'displayName',
-        channelBadges: 'ownerBadges',
+        channelId: DATA_PATHS.COMPACT_CHANNEL_ID,
+        channelName: DATA_PATHS.COMPACT_CHANNEL_NAME,
+        channelBadges: DATA_PATHS.OWNER_BADGES,
       },
 
       lockupViewModel: {
-        videoId: 'contentId',
-        title: 'metadata.lockupMetadataViewModel.title.content',
-        channelName: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.content',
-        vidLength: 'contentImage.thumbnailViewModel.overlays.thumbnailOverlayBadgeViewModel.thumbnailBadges.thumbnailBadgeViewModel.text',
-        viewCount: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts.text.content',
-        channelId: ['metadata.lockupMetadataViewModel.image.decoratedAvatarViewModel.rendererContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId', 
-                    'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.commandRuns.onTap.innertubeCommand.browseEndpoint.browseId'],
-        percentWatched: 'contentImage.thumbnailViewModel.overlays.thumbnailBottomOverlayViewModel.progressBar.thumbnailOverlayProgressBarViewModel.startPercent'
+        videoId: DATA_PATHS.LOCKUP_VIDEO_ID,
+        title: DATA_PATHS.LOCKUP_TITLE,
+        channelName: DATA_PATHS.LOCKUP_CHANNEL_NAME,
+        vidLength: DATA_PATHS.LOCKUP_LENGTH,
+        viewCount: DATA_PATHS.LOCKUP_VIEW_COUNT,
+        channelId: DATA_PATHS.LOCKUP_CHANNEL_ID,
+        percentWatched: DATA_PATHS.LOCKUP_PERCENT_WATCHED,
       },
 
       // Mobile top chips
       chipCloudChipRenderer: {
-        channelId: 'icon.iconType'
+        channelId: DATA_PATHS.CHIP_ICON,
       },
 
       // Mobile Video page data
       slimVideoMetadataSectionRenderer: {
         properties: {
-          videoId: 'videoId',
-          title: 'contents.slimVideoInformationRenderer.title',
-          channelId: 'contents.slimOwnerRenderer.navigationEndpoint.browseEndpoint.browseId',
-          channelName: 'contents.slimOwnerRenderer.title'
+          videoId: DATA_PATHS.SLIM_VIDEO_ID,
+          title: DATA_PATHS.SLIM_TITLE,
+          channelId: DATA_PATHS.SLIM_CHANNEL_ID,
+          channelName: DATA_PATHS.SLIM_CHANNEL_NAME,
         },
         customFunc: redirectToNextMobile,
       },
 
       tabRenderer: {
-        channelId: 'endpoint.commandMetadata.webCommandMetadata.url'
+        channelId: DATA_PATHS.TAB_URL,
       },
 
       // Empty for blocking short headers
@@ -393,31 +530,31 @@
     ytPlayer: {
       args: {
         properties: {
-          videoId: ['video_id', 'raw_player_response.videoDetails.videoId'],
-          channelId: ['ucid', 'raw_player_response.videoDetails.channelId'],
-          channelName: ['author', 'raw_player_response.videoDetails.author'],
-          title: ['title', 'raw_player_response.videoDetails.title'],
-          vidLength: ['length_seconds', 'raw_player_response.videoDetails.lengthSeconds']
+          videoId: DATA_PATHS.PLAYER_ARGS_VIDEO_ID,
+          channelId: DATA_PATHS.PLAYER_ARGS_CHANNEL_ID,
+          channelName: DATA_PATHS.PLAYER_ARGS_CHANNEL_NAME,
+          title: DATA_PATHS.PLAYER_ARGS_TITLE,
+          vidLength: DATA_PATHS.PLAYER_ARGS_LENGTH,
         },
         customFunc: disableEmbedPlayer,
       },
       videoDetails: {
         properties: {
-          videoId: 'videoId',
-          channelId: 'channelId',
-          channelName: 'author',
-          title: 'title',
-          vidLength: 'lengthSeconds',
+          videoId: DATA_PATHS.PLAYER_DETAILS_VIDEO_ID,
+          channelId: DATA_PATHS.PLAYER_DETAILS_CHANNEL_ID,
+          channelName: DATA_PATHS.PLAYER_DETAILS_CHANNEL_NAME,
+          title: DATA_PATHS.PLAYER_DETAILS_TITLE,
+          vidLength: DATA_PATHS.PLAYER_DETAILS_LENGTH,
         },
         customFunc: disablePlayer,
       },
       PLAYER_VARS: {
         properties: {
-          videoId: ['video_id'],
-          channelId: ['raw_player_response.embedPreview.thumbnailPreviewRenderer.videoDetails.embeddedPlayerOverlayVideoDetailsRenderer.expandedRenderer.embeddedPlayerOverlayVideoDetailsExpandedRenderer.subscribeButton.subscribeButtonRenderer.channelId'],
-          channelName: ['raw_player_response.embedPreview.thumbnailPreviewRenderer.videoDetails.embeddedPlayerOverlayVideoDetailsRenderer.expandedRenderer.embeddedPlayerOverlayVideoDetailsExpandedRenderer.title'],
-          title: ['raw_player_response.embedPreview.thumbnailPreviewRenderer.title'],
-          vidLength: ['raw_player_response.embedPreview.thumbnailPreviewRenderer.videoDurationSeconds']
+          videoId: DATA_PATHS.PLAYER_VARS_VIDEO_ID,
+          channelId: DATA_PATHS.PLAYER_VARS_CHANNEL_ID,
+          channelName: DATA_PATHS.PLAYER_VARS_CHANNEL_NAME,
+          title: DATA_PATHS.PLAYER_VARS_TITLE,
+          vidLength: DATA_PATHS.PLAYER_VARS_LENGTH,
         },
         customFunc: disableEmbedPlayer
       }
@@ -426,32 +563,32 @@
       // sidemenu subscribed channels
       guideEntryRenderer: {
         properties: {
-          channelId: ['navigationEndpoint.browseEndpoint.browseId', 'icon.iconType'],
-          channelName: ['title', 'formattedTitle'],
+          channelId: DATA_PATHS.GUIDE_ENTRY_CHANNEL_ID,
+          channelName: DATA_PATHS.GUIDE_ENTRY_CHANNEL_NAME,
         },
       },
       // Mobile buttom navigation bar
       pivotBarItemRenderer: {
-          channelId: 'icon.iconType'
+        channelId: DATA_PATHS.PIVOT_BAR_ITEM_ID,
       },
     },
     comments: {
       commentEntityPayload: {
-        channelId: ['author.channelId'],
-        channelName: ['author.displayName'],
-        comment: ['properties.content.content']
+        channelId: DATA_PATHS.COMMENT_ENTITY_CHANNEL_ID,
+        channelName: DATA_PATHS.COMMENT_ENTITY_CHANNEL_NAME,
+        comment: DATA_PATHS.COMMENT_ENTITY_CONTENT,
       },
       commentThreadRenderer: {},
       commentViewModel: {},
       commentRenderer: {
-        channelId: 'authorEndpoint.browseEndpoint.browseId',
-        channelName: ['authorText'],
-        comment: ['contentText'],
+        channelId: DATA_PATHS.COMMENT_RENDERER_CHANNEL_ID,
+        channelName: DATA_PATHS.COMMENT_RENDERER_CHANNEL_NAME,
+        comment: DATA_PATHS.COMMENT_RENDERER_CONTENT,
       },
       liveChatTextMessageRenderer: {
-        channelId: 'authorExternalChannelId',
-        channelName: ['authorName'],
-        comment: 'message',
+        channelId: DATA_PATHS.LIVE_CHAT_CHANNEL_ID,
+        channelName: DATA_PATHS.LIVE_CHAT_CHANNEL_NAME,
+        comment: DATA_PATHS.LIVE_CHAT_MESSAGE,
       },
     }
   }
@@ -471,7 +608,7 @@
     this.filter();
     try {
       postActions.forEach(x => x.call(this));
-    } catch(e) {
+    } catch (e) {
       console.error("postActions Exception");
       console.error(e);
     }
@@ -483,7 +620,7 @@
     if (!isNaN(storageData.options.percent_watched_hide)) return false;
 
     if (!isNaN(storageData.filterData.vidLength[0]) ||
-        !isNaN(storageData.filterData.vidLength[1])) return false;
+      !isNaN(storageData.filterData.vidLength[1])) return false;
 
     for (let idx = 0; idx < regexProps.length; idx += 1) {
       if (storageData.filterData[regexProps[idx]].length > 0) return false;
@@ -508,8 +645,8 @@
       if (value === undefined) return false;
 
       if (h === 'percentWatched' && storageData.options.percent_watched_hide && objectType != 'playlistPanelVideoRenderer'
-           && !['/feed/history', '/feed/library', '/playlist'].includes(document.location.pathname)
-           && parseInt(value) >= storageData.options.percent_watched_hide) return true;
+        && !['/feed/history', '/feed/library', '/playlist'].includes(document.location.pathname)
+        && parseInt(value) >= storageData.options.percent_watched_hide) return true;
 
       if (regexProps.includes(h) && properties.some(prop => prop && prop.test(value))) return true;
 
@@ -544,8 +681,8 @@
             else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_LIVE_NOW") {
               badges.push("live");
             }
-            else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_MEMBERS_ONLY") { 
-              badges.push("members"); 
+            else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_MEMBERS_ONLY") {
+              badges.push("members");
             }
           });
           value = badges;
@@ -570,12 +707,12 @@
     return doBlock;
   };
 
-  ObjectFilter.prototype.isExtendedMatched = function(filteredObject, h) {
+  ObjectFilter.prototype.isExtendedMatched = function (filteredObject, h) {
     if (storageData.options.movies) {
       if (h === 'movieRenderer' || h === 'compactMovieRenderer') return true;
       if (h === 'videoRenderer' && !getObjectByPath(filteredObject, "shortBylineText.runs.navigationEndpoint.browseEndpoint") && filteredObject.longBylineText && filteredObject.badges) return true;
     }
-    if (storageData.options.shorts && (h === 'shortsLockupViewModel' || h === 'reelItemRenderer' || h === 'gridShelfViewModel') ) return true;
+    if (storageData.options.shorts && (h === 'shortsLockupViewModel' || h === 'reelItemRenderer' || h === 'gridShelfViewModel')) return true;
     if (storageData.options.mixes && (h === 'radioRenderer' || h === 'compactRadioRenderer')) return true;
     if (storageData.options.mixes && h === 'lockupViewModel') {
       let imgName = getObjectByPath(filteredObject, 'contentImage.collectionThumbnailViewModel.primaryThumbnail.thumbnailViewModel.overlays.thumbnailOverlayBadgeViewModel.thumbnailBadges.thumbnailBadgeViewModel.icon.sources.clientResource.imageName');
@@ -593,7 +730,7 @@
     if (h === 'commentViewModel') {
       if (this.blockedComments.includes(getObjectByPath(filteredObject, 'commentId'))) {
         return true;
-      } 
+      }
     }
 
     return false;
@@ -1003,24 +1140,24 @@
     const parts = viewCount.split(" ");
     if (parts[1] !== "views" && parts[1] !== "view") return undefined; // Fail if not english formatting
     let views = parts[0];
-    
+
     // Handle abbreviated formats (K, M, B)
     const multipliers = {
       'K': 1000,
       'M': 1000000,
       'B': 1000000000
     };
-    
+
     // Check if it ends with a multiplier
     const lastChar = views.slice(-1).toUpperCase();
     let multiplier = 1;
     let numericPart = views.replace(',', '');
-    
+
     if (multipliers[lastChar]) {
       multiplier = multipliers[lastChar];
       numericPart = views.slice(0, -1); // Remove the letter
     }
-    
+
     // Return the final count
     return (numericPart * multiplier);
   }
@@ -1063,9 +1200,9 @@
       }
       const streamConfig = getObjectByPath(start_obj, 'streamingData.adaptiveFormats', []);
       streamConfig.forEach((conf) => {
-          if (conf.loudnessDb !== undefined) {
-            conf.loudnessDb = 0.0;
-          }
+        if (conf.loudnessDb !== undefined) {
+          conf.loudnessDb = 0.0;
+        }
       })
     }
   }
@@ -1237,91 +1374,99 @@
       if (has.call(obj[attr], 'actionMenu')) {
         items = obj[attr].actionMenu.menuRenderer.items;
       } else if (attr === 'commentRenderer') {
-        obj[attr].actionMenu = {menuRenderer: {items: [] } };
+        obj[attr].actionMenu = { menuRenderer: { items: [] } };
         items = obj[attr].actionMenu.menuRenderer.items;
       }
 
-      if(!items) return;
-      const blockCh = { menuServiceItemRenderer: { _btOriginalAttr: attr, _btMenuAction: "block_channel", _btOriginalData: channelData, "text": { "runs": [ { "text": "Block Channel" } ]},
-        "icon": {
-          "iconType": "NOT_INTERESTED"
-        },
-        "trackingParams": "Cg==",
-        "serviceEndpoint": {
-        "commandMetadata": {
-          "webCommandMetadata": {
-            "sendPost": true,
-            "apiUrl": "data:text/plain;base64,Cg=="
-          }
-        },
-        "feedbackEndpoint": {
-          "uiActions": {
-            "hideEnclosingContainer": true
+      if (!items) return;
+      const blockCh = {
+        menuServiceItemRenderer: {
+          _btOriginalAttr: attr, _btMenuAction: "block_channel", _btOriginalData: channelData, "text": { "runs": [{ "text": "Block Channel" }] },
+          "icon": {
+            "iconType": "NOT_INTERESTED"
           },
-          "actions": [
-            {
-              "replaceEnclosingAction": {
-                "item": {
-                  "notificationMultiActionRenderer": {
-                    "responseText": {
-                      "runs": [
-                        {
-                          "text": "Channel blocked"
-                        }
-                      ],
-                      "accessibility": {
-                        "accessibilityData": {
-                          "label": "Channel blocked"
+          "trackingParams": "Cg==",
+          "serviceEndpoint": {
+            "commandMetadata": {
+              "webCommandMetadata": {
+                "sendPost": true,
+                "apiUrl": "data:text/plain;base64,Cg=="
+              }
+            },
+            "feedbackEndpoint": {
+              "uiActions": {
+                "hideEnclosingContainer": true
+              },
+              "actions": [
+                {
+                  "replaceEnclosingAction": {
+                    "item": {
+                      "notificationMultiActionRenderer": {
+                        "responseText": {
+                          "runs": [
+                            {
+                              "text": "Channel blocked"
+                            }
+                          ],
+                          "accessibility": {
+                            "accessibilityData": {
+                              "label": "Channel blocked"
+                            }
+                          }
                         }
                       }
                     }
                   }
                 }
-              }
+              ]
             }
-          ]
-        }
-      } } };
-      const blockVid = { menuServiceItemRenderer: { _btOriginalAttr: attr, _btMenuAction: "block_video", _btOriginalData: videoData, "text": { "runs": [ { "text": "Block Video" } ]},
-        "icon": {
-          "iconType": "NOT_INTERESTED"
-        },
-        "trackingParams": "Cg==",
-        "serviceEndpoint": {
-        "commandMetadata": {
-          "webCommandMetadata": {
-            "sendPost": true,
-            "apiUrl": "data:text/plain;base64,Cg=="
           }
-        },
-        "feedbackEndpoint": {
-          "uiActions": {
-            "hideEnclosingContainer": true
+        }
+      };
+      const blockVid = {
+        menuServiceItemRenderer: {
+          _btOriginalAttr: attr, _btMenuAction: "block_video", _btOriginalData: videoData, "text": { "runs": [{ "text": "Block Video" }] },
+          "icon": {
+            "iconType": "NOT_INTERESTED"
           },
-          "actions": [
-            {
-              "replaceEnclosingAction": {
-                "item": {
-                  "notificationMultiActionRenderer": {
-                    "responseText": {
-                      "runs": [
-                        {
-                          "text": "Video blocked"
-                        }
-                      ],
-                      "accessibility": {
-                        "accessibilityData": {
-                          "label": "Video blocked"
+          "trackingParams": "Cg==",
+          "serviceEndpoint": {
+            "commandMetadata": {
+              "webCommandMetadata": {
+                "sendPost": true,
+                "apiUrl": "data:text/plain;base64,Cg=="
+              }
+            },
+            "feedbackEndpoint": {
+              "uiActions": {
+                "hideEnclosingContainer": true
+              },
+              "actions": [
+                {
+                  "replaceEnclosingAction": {
+                    "item": {
+                      "notificationMultiActionRenderer": {
+                        "responseText": {
+                          "runs": [
+                            {
+                              "text": "Video blocked"
+                            }
+                          ],
+                          "accessibility": {
+                            "accessibilityData": {
+                              "label": "Video blocked"
+                            }
+                          }
                         }
                       }
                     }
                   }
                 }
-              }
+              ]
             }
-          ]
+          }
         }
-      } } };
+      };
       if (channelData.id) items.push(blockCh);
       if (videoData.id) items.push(blockVid);
     } else if (attr === 'slimVideoMetadataSectionRenderer') { // Mobile Video page
@@ -1361,7 +1506,7 @@
               }
             },
             {
-              "slimMetadataButtonRenderer":  {
+              "slimMetadataButtonRenderer": {
                 "button": {
                   "buttonRenderer": {
                     "_btOriginalData": channelData,
@@ -1385,7 +1530,7 @@
                         "label": "Block Channel"
                       }
                     },
-                    "navigationEndpoint": {"commandMetadata": {"webCommandMetadata": {"ignoreNavigation": true}}, "urlEndpoint": {}}
+                    "navigationEndpoint": { "commandMetadata": { "webCommandMetadata": { "ignoreNavigation": true } }, "urlEndpoint": {} }
                   }
                 }
               }
@@ -1431,8 +1576,8 @@
       if (!items) return null;
       let imgName = getObjectByPath(obj[attr], 'contentImage.collectionThumbnailViewModel.primaryThumbnail.thumbnailViewModel.overlays.thumbnailOverlayBadgeViewModel.thumbnailBadges.thumbnailBadgeViewModel.icon.sources.clientResource.imageName');
       if (imgName !== 'MIX') {
-          hasChannel = true;
-          hasVideo = true;
+        hasChannel = true;
+        hasVideo = true;
       }
 
       isLockupViewModel = true;
@@ -1469,13 +1614,15 @@
     const videoId = getFlattenByPath(renderer, searchIn.videoId);
     const videoName = getFlattenByPath(renderer, searchIn.title);
 
-    const metadataBlock = { metadata: { 
-      channelId, 
-      channelName, 
-      videoId, 
-      videoName, 
-      removeObject: true
-    } };
+    const metadataBlock = {
+      metadata: {
+        channelId,
+        channelName,
+        videoId,
+        videoName,
+        removeObject: true
+      }
+    };
 
     Object.defineProperty(sheetmodel, 'blockTube', {
       value: metadataBlock,
@@ -1516,7 +1663,7 @@
 
   function injectBlockMenuItems(items, hasChannel, hasVideo, isLockupViewModel, currentObj, storageData) {
     if (isLockupViewModel) {
-      return injectLockupViewModelButtons(items, hasChannel, hasVideo, currentObj,  storageData);
+      return injectLockupViewModelButtons(items, hasChannel, hasVideo, currentObj, storageData);
     } else {
       return injectStandardMenuButtons(items, hasChannel, hasVideo, storageData);
     }
@@ -1540,15 +1687,15 @@
   function createCleanContext(items, storageData, isChannel, currentObj) {
     const item = isChannel ? items[6] : items[5];
     if (storageData.options.block_feedback && item) {
-        return item?.listItemViewModel?.rendererContext;
+      return item?.listItemViewModel?.rendererContext;
     }
 
     const baseContext = items[0]?.listItemViewModel?.rendererContext;
     if (!baseContext) return null;
-  
+
     const msg = isChannel ? 'Channel Blocked' : 'Video Blocked';
     const cleanContext = deepClone(baseContext);
-  
+
     if (cleanContext.commandContext?.onTap) {
       let onTap = cleanContext.commandContext?.onTap;
       onTap.innertubeCommand = {
@@ -1746,7 +1893,7 @@
               createScript: string => string,
             });
           }
-        } catch (e) {}
+        } catch (e) { }
         jsFilter = window.eval(storageData.filterData.javascript);
         if (!(jsFilter instanceof Function)) {
           throw Error("Function not found");
@@ -1830,7 +1977,7 @@
     postMessage('contextBlockData', { type, info: data._btOriginalData });
     if (data._btOriginalAttr === 'slimVideoMetadataSectionRenderer') {
       document.getElementById('movie_player').stopVideo();
-      alert( (type === 'videoId' ? 'Video' : 'Channel') + ' Blocked');
+      alert((type === 'videoId' ? 'Video' : 'Channel') + ' Blocked');
     }
     if (data._btOriginalAttr === 'commentRenderer') {
       let comments = document.querySelector('ytm-section-list-renderer')
@@ -1846,7 +1993,7 @@
     const string = context.getElementsByTagName('yt-formatted-string');
 
     if (string && string.length == 1) {
-        menuAction = string[0]?.getRawText() || "";
+      menuAction = string[0]?.getRawText() || "";
     } else {
       isDataFromRightHandSide = true;
       menuAction = context.innerText || "";
@@ -1997,7 +2144,7 @@
     } else {
       parentDom.dismissedRenderer = {
         notificationMultiActionRenderer: {
-          responseText: {simpleText: 'Blocked'},
+          responseText: { simpleText: 'Blocked' },
         }
       };
       parentDom.setAttribute('is-dismissed', '');
@@ -2020,10 +2167,10 @@
     }
 
     // Get the parent dom and data from this
-    const {parentDom, parentData} = getParentDomAndData(isDataFromRightHandSide, this);
+    const { parentDom, parentData } = getParentDomAndData(isDataFromRightHandSide, this);
 
     // Get the data and type which is used for blocking the video
-    const {type, data, removeParent, stopPlayer} = getBlockData(parentDom, parentData, isDataFromRightHandSide, menuAction)
+    const { type, data, removeParent, stopPlayer } = getBlockData(parentDom, parentData, isDataFromRightHandSide, menuAction)
 
     // Notify system what data should be added to the block list
     postMessage('contextBlockData', { type, info: data });
