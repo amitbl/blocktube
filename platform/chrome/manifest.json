@@ -5,21 +5,43 @@
   "manifest_version": 3,
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
-      "js": ["src/scripts/content_script.js"],
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://m.youtube.com/*"
+      ],
+      "js": [
+        "src/scripts/content_script.js"
+      ],
       "run_at": "document_start",
       "all_frames": true
     },
     {
-      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
-      "js": ["src/scripts/seed.js"],
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://m.youtube.com/*"
+      ],
+      "js": [
+        "src/scripts/seed.js"
+      ],
       "run_at": "document_start",
       "all_frames": true,
       "world": "MAIN"
     },
     {
-      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
-      "js": ["src/scripts/inject.js"],
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://m.youtube.com/*"
+      ],
+      "js": [
+        "src/scripts/inject/constants.js",
+        "src/scripts/inject/utils.js",
+        "src/scripts/inject/filter-rules.js",
+        "src/scripts/inject/custom-actions.js",
+        "src/scripts/inject/context-menu.js",
+        "src/scripts/inject/object-filter.js",
+        "src/scripts/inject/network.js",
+        "src/scripts/inject/main.js"
+      ],
       "run_at": "document_start",
       "all_frames": true,
       "world": "MAIN"
