@@ -438,8 +438,8 @@
     comments: {
       commentEntityPayload: {
         channelId: ['author.channelId'],
-        channelName: ['author.displayName'],
-        comment: ['properties.content.content']
+        channelName: ['microformat.microformatDataRenderer.videoDetails.comments[3].name', 'author.displayName'],
+        comment: ['microformat.microformatDataRenderer.videoDetails.comments[2]', 'properties.content.content']
       },
       commentThreadRenderer: {},
       commentViewModel: {},
