@@ -20,15 +20,15 @@ Filter and block unwanted content from YouTube™.
 ## Install
 
 * [**Chrome Webstore**](https://chrome.google.com/webstore/detail/blocktube/bbeaicapbccfllodepmimpkgecanonai?hl=en-US)
-* [**Firefox AMO**](https://addons.mozilla.org/en-US/firefox/addon/blocktube/)
+* [**Firefox AMO**](https://addons.mozilla.org/firefox/addon/blocktube/)
 
 ## FAQ
   
 * What is the difference between "Channel ID" and "Channel Name"  
-  Channel names on YouTube are not unique and can be duplicated/changed  
+  Channel names on YouTube are not unique and can be duplicated/changed,  
   whereas Channel ID is a unique identification string that never changes.  
-  If you want to block a specific single channel the preferred method is using it's ID,  
-  If you want to block multiple channels sharing similar name use it's name.
+  If you want to block a specific single channel the preferred method is to use its ID.  
+  If you want to block multiple channels sharing a similar name, use its name.
 
 * How can I get a channel's ID?  
   Channel ID looks like this: UCXXXXXXXXXXXXXXXX  
@@ -80,7 +80,7 @@ Chrome: https://developer.chrome.com/docs/extensions/mv3/getstarted/development-
 
 * User-friendly options UI
 * Sync options to cloud provider / enterprise policies
-* Whitelist mode
+* Allowlist mode
 * Dynamic rules (match multiple rules to block a video)
 
 ## License
@@ -89,4 +89,4 @@ This project is licensed under the GPLv3 License - see the [LICENSE](LICENSE) fi
 
 ## Acknowledgments
 
-* Extension Icon from: http://www.designbolts.com/2013/09/08/40-free-shaded-social-media-icons/
+* Extension icon from: https://www.designbolts.com/2013/09/08/40-free-shaded-social-media-icons/
