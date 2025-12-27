@@ -1155,6 +1155,71 @@
     data.filterData.channelId.push(/^.+\/shorts$/);
   }
 
+  // Utility to wait for an element to exist in the DOM.
+  // {string} selector The CSS selector for the element.
+  // {function(HTMLElement): void} callback The function to call when the element is found.
+  function waitForElement(selector, callback) {
+    const element = document.querySelector(selector);
+    if (element) {
+      callback(element);
+    } else {
+      const observer = new MutationObserver((mutationsList, observer) => {
+        const foundElement = document.querySelector(selector);
+        if (foundElement) {
+          callback(foundElement);
+          observer.disconnect(); // Stop observing once found
+        }
+      });
+
+      // Start observing the document body for subtree modifications
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    }
+  }
+
+  function blockChipsShelves(data) {
+    const selector = '.ytdChipsShelfWithVideoShelfRendererHost';
+    let observerInstance; // To hold the MutationObserver instance
+
+    // Function to remove elements immediately
+    function removeElements() {
+      const elementsToRemove = document.querySelectorAll(selector);
+      elementsToRemove.forEach(el => {
+        el.remove();
+      });
+    }
+
+    // Perform initial removal once document.body is available.
+    waitForElement('body', () => {
+      removeElements();
+    });
+
+    // --- Set up a MutationObserver to watch for dynamically added elements ---
+    // Ensure that document.body exists before observing it.
+    waitForElement('body', (bodyElement) => {
+      observerInstance = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+          if (mutation.addedNodes) {
+            mutation.addedNodes.forEach(node => {
+              // Ensure node is an Element before checking matches/querySelector
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                if (node.matches(selector)) { // Check if the added node itself matches
+                  node.remove();
+                } else if (node.querySelector(selector)) { // Check if a child of the added node matches
+                  node.querySelectorAll(selector).forEach(el => {
+                    el.remove();
+                  });
+                }
+              }
+            });
+          }
+        });
+      });
+
+      // Start observing the document body for additions of child elements
+      observerInstance.observe(bodyElement, { childList: true, subtree: true });
+    });
+  }
+
   function fixAutoplay() {
     if (!this?.object?.playerOverlays) return;
     if (isMobileInterface) return fixAutoPlayMobile.call(this);
@@ -1731,6 +1796,7 @@
     if (data.options.trending) blockTrending(data);
     if (data.options.mixes) blockMixes(data);
     if (data.options.shorts) blockShorts(data);
+    if (data.options.chips_shelves) blockChipsShelves(data);
 
     const shouldStartHook = (storageData === undefined);
     storageData = data;

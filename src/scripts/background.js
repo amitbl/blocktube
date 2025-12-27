@@ -20,6 +20,7 @@ let storage = {
   options: {
     trending: false,
     mixes: false,
+    chips_shelves: false,
     shorts: false,
     movies: false,
     suggestions_only: false,
