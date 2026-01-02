@@ -124,6 +124,7 @@
     'playlistPanelVideoRenderer',
     'playlistVideoRenderer',
     'lockupViewModel',
+    'videoCardRenderer',
     // Mobile
     'reelItemRenderer',
     'slimVideoMetadataSectionRenderer',
@@ -360,6 +361,17 @@
         viewCount: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts.text.content',
         channelId: ['metadata.lockupMetadataViewModel.image.decoratedAvatarViewModel.rendererContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId', 
                     'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.commandRuns.onTap.innertubeCommand.browseEndpoint.browseId'],
+        percentWatched: 'contentImage.thumbnailViewModel.overlays.thumbnailBottomOverlayViewModel.progressBar.thumbnailOverlayProgressBarViewModel.startPercent',
+        publishTimeText: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts[1].text.content'
+      },
+
+      videoCardRenderer: {
+        videoId: 'videoId',
+        title: 'title',
+        channelName: 'bylineText',
+        vidLength: 'lengthText.simpleText',
+        viewCount: 'metadataText.simpleText',
+        channelId: ['bylineText.runs.navigationEndpoint.browseEndpoint.browseId'],
         percentWatched: 'contentImage.thumbnailViewModel.overlays.thumbnailBottomOverlayViewModel.progressBar.thumbnailOverlayProgressBarViewModel.startPercent'
       },
 
@@ -1446,6 +1458,11 @@
       } else if (
         has.call(obj[attr], 'shortBylineText') &&
         getObjectByPath(obj[attr], 'shortBylineText.runs.navigationEndpoint.browseEndpoint')
+      ) {
+        hasChannel = true;
+      } else if (
+        has.call(obj[attr], 'bylineText') &&
+        getObjectByPath(obj[attr], 'bylineText.runs.navigationEndpoint.browseEndpoint')
       ) {
         hasChannel = true;
       }
