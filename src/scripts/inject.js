@@ -1555,7 +1555,11 @@
   }
 
   function createCleanContext(items, storageData, isChannel, currentObj) {
-    const item = isChannel ? items[6] : items[5];
+    let item;
+    if (items.length === 8)
+      item = isChannel ? items[6] : items[5];
+    else
+      item = isChannel ? items[5] : items[4];
     if (storageData.options.block_feedback && item) {
         return item?.listItemViewModel?.rendererContext;
     }
