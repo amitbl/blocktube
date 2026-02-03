@@ -848,6 +848,10 @@
   }
 
   function redirectToNextMobile() {
+    if (!currentBlock) {
+      return false;
+    }
+
     currentBlock = false;
 
     if (storageData.options.suggestions_only) {
