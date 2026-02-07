@@ -1088,7 +1088,19 @@
     if (['/youtubei/v1/search', '/youtubei/v1/browse'].includes(url.pathname)) {
       ObjectFilter(resp, filterRules.main, [], true);
     }
-    else if (url.pathname === '/youtubei/v1/next') {
+    else if (url.pathname === '/youtubei/v1/get_watch') {
+      if (!(resp instanceof Array)) return;
+      resp.forEach((o => {
+        if (o.responseType === 'STREAMING_WATCH_RESPONSE_TYPE_PLAYER_RESPONSE') {
+          ObjectFilter(o.playerResponse, filterRules.ytPlayer, [playerMiscFilters]);
+        } else if (o.responseType === 'STREAMING_WATCH_RESPONSE_TYPE_WATCH_NEXT_RESPONSE') {
+          const postActions = [fixAutoplay];
+          if (currentBlock) postActions.push(redirectToNext);
+          ObjectFilter(o.watchNextResponse, mergedFilterRules, postActions, true);
+        }
+      }))
+    }
+    else if (['/youtubei/v1/next'].includes(url.pathname)) {
       const postActions = [fixAutoplay];
       if (currentBlock) postActions.push(redirectToNext);
       ObjectFilter(resp, mergedFilterRules, postActions, true);
