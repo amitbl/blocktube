@@ -263,4 +263,26 @@
       customElementsRegistryDefine.call(window.customElements, name, constructor);
     }})
   }
+
+  // "Fix" which forcefully reloads the page when going to a watch video
+  // Needed because not all information is available when you click on a video on the home page
+  window.addEventListener('yt-navigate-finish', function(event) {
+    if (location.pathname === '/watch') {
+        const currentUrl = location.href;
+        const reloadFlag = sessionStorage.getItem('bt_reload_check');
+
+        // If the current URL is NOT the one we just reloaded for
+        if (reloadFlag !== currentUrl) {
+            // Set the flag FIRST
+            sessionStorage.setItem('bt_reload_check', currentUrl);
+         
+            // Perform the reload
+            location.reload();
+        }
+    } else {
+        // Clear the flag if they go back to Home or Search 
+        // so clicking the same video later triggers a fresh check
+        sessionStorage.removeItem('bt_reload_check');
+    }
+  });
 }());
