@@ -35,7 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Restore the switch state from storage
-  chrome.storage.local.get("enabled", (result) => {
+  chrome.storage.local.get(["enabled", "storageData"], (result) => {
+    if (result.storageData && result.storageData.uiPass) {
+      if (chrome.runtime.openOptionsPage) {
+        chrome.runtime.openOptionsPage();
+        window.close();
+      }
+    }
+
     if (result.enabled === undefined) {
       result.enabled = true;
     }
@@ -56,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById("options-button").addEventListener("click", () => {
     if (chrome.runtime.openOptionsPage) {
       chrome.runtime.openOptionsPage();
+      window.close();
     }
   });
 });
