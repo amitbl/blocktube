@@ -1170,9 +1170,32 @@
   }
 
   function blockShorts(data) {
-    if (document.location.pathname.startsWith('/shorts/')) {
-      redirectToIndex();
-    }
+    if (location.host !== 'www.youtube.com') return;
+
+    const handleRedirect = url => {
+      const path = new URL(url, location.origin).pathname;
+
+      // Redirect Shorts experience and Shorts videos to Home menu
+      if (/^\/shorts(?:\/[^/]+)?\/?$/.test(path)) {
+        redirectToIndex();
+        return true;
+      }
+
+      // Redirect Shorts menu URL of channels to channel home: channel URL (ID-based), handle URL, custom URL, legacy username URL (and its direct form; for example, https://www.youtube.com/YouTube/shorts)
+	  // Also affects primary hashtag page for Shorts videos (for example, https://www.youtube.com/hashtag/shorts), which will cause it to redirect to Home menu
+      if (/^\/(?:[^/]+\/)?[^/]+\/shorts\/?$/.test(path)) {
+        location.replace(path.replace(/\/shorts\/?$/, ''));
+        return true;
+      }
+
+      return false;
+    };
+
+    // Run on page load
+    handleRedirect(location.href);
+
+    // Redirect single-page application (SPA) transitions (for example, launching Shorts through a playlist, or some ways of forming URLs)
+    document.addEventListener('yt-navigate-start', e => handleRedirect(e?.detail?.url), true);
 
     data.filterData.channelId.push(/^TAB_SHORTS$/);
     data.filterData.channelId.push(/^TAB_SHORTS_CAIRO$/);
