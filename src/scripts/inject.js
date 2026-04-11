@@ -1567,13 +1567,20 @@
   }
 
   function createCleanContext(items, storageData, isChannel, currentObj) {
-    let item;
-    if (items.length === 8)
-      item = isChannel ? items[6] : items[5];
-    else
-      item = isChannel ? items[5] : items[4];
-    if (storageData.options.block_feedback && item) {
+    if (storageData.options.block_feedback && items.length > 0) {
+      // Search by imageName: homepage has REMOVE/NOT_INTERESTED, history page has DELETE
+      const targetIcons = isChannel ? ['REMOVE', 'DELETE'] : ['NOT_INTERESTED', 'DELETE'];
+      let item;
+      for (const icon of targetIcons) {
+        item = items.find(i => {
+          const imageName = getObjectByPath(i, 'listItemViewModel.leadingImage.sources.clientResource.imageName');
+          return imageName === icon;
+        });
+        if (item) break;
+      }
+      if (item) {
         return item?.listItemViewModel?.rendererContext;
+      }
     }
 
     const baseContext = items[0]?.listItemViewModel?.rendererContext;
