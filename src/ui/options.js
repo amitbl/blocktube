@@ -340,6 +340,13 @@
     $('save_btn').classList.remove('disabled-btn');
   });
 
+  window.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') { // Ctrl + S
+      event.preventDefault();
+      saveForm();
+    }
+  }, true);
+
   function initTabs(name) {
     const element = document.getElementById(name);
     element.querySelectorAll("input[type='radio']").forEach((box) => {
