@@ -176,6 +176,17 @@
     percentWatched: 'thumbnailOverlays.thumbnailOverlayResumePlaybackRenderer.percentDurationWatched'
   };
 
+  const BADGE_MAP = {
+    "BADGE_STYLE_TYPE_VERIFIED": "verified",
+    "BADGE_STYLE_TYPE_VERIFIED_ARTIST": "artist",
+    "BADGE_STYLE_TYPE_LIVE_NOW": "live",
+    "BADGE_STYLE_TYPE_MEMBERS_ONLY": "members",
+    "BADGE_VERIFIED": "verified",
+    "BADGE_VERIFIED_ARTIST": "artist",
+    "BADGE_LIVE_NOW": "live",
+    "BADGE_MEMBERS_ONLY": "members"
+  };
+
   const filterRules = {
     main: {
       compactMovieRenderer: {
@@ -357,6 +368,7 @@
         videoId: 'contentId',
         title: 'metadata.lockupMetadataViewModel.title.content',
         channelName: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.content',
+        badges: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].badges',
         vidLength: 'contentImage.thumbnailViewModel.overlays.thumbnailOverlayBadgeViewModel.thumbnailBadges.thumbnailBadgeViewModel.text',
         viewCount: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts.text.content',
         channelId: ['metadata.lockupMetadataViewModel.image.decoratedAvatarViewModel.rendererContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId', 
@@ -545,21 +557,13 @@
           value = parseViewCount(value);
         } else if (h === 'channelBadges' || h === 'badges') {
           const badges = [];
-          value.forEach(br => {
-            /* Channels */
-            if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_VERIFIED") {
-              badges.push("verified");
-            } else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_VERIFIED_ARTIST") {
-              badges.push("artist");
-            }
-            /* Videos */
-            else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_LIVE_NOW") {
-              badges.push("live");
-            }
-            else if (br.metadataBadgeRenderer.style === "BADGE_STYLE_TYPE_MEMBERS_ONLY") { 
-              badges.push("members"); 
-            }
-          });
+          if (Array.isArray(value)) {
+            value.forEach(br => {
+              const rawStyle = br?.badgeViewModel?.badgeStyle || br?.metadataBadgeRenderer?.style;
+              const mapped = BADGE_MAP[rawStyle];
+              if (mapped) badges.push(mapped);
+            });
+          }
           value = badges;
         }
         friendlyVideoObj[h] = value;
