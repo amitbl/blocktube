@@ -2,6 +2,7 @@
 
 const has = Object.prototype.hasOwnProperty;
 const unicodeBoundry = "[ \n\r\t!@#$%^&*()_\\-=+\\[\\]\\\\\\|;:'\",\\.\\/<>\\?`~:]+";
+const blockSelectedTitleMenuId = 'blocktube-block-selected-title';
 const ports = {};
 let enabled = true;
 let initStorage = false;
@@ -104,11 +105,83 @@ const utils = {
         console.error('Where are you my child?');
       }
     });
+  },
+
+  normalizeSelectedText(text) {
+    return (text || '').replace(/\s+/g, ' ').trim();
+  },
+
+  getContextBlockEntries(label, entries) {
+    const options = {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric"
+    };
+    const now = new Intl.DateTimeFormat(undefined, options).format(new Date());
+
+    return [`// Blocked by context menu (${label}) (${now})`, ...entries, ''];
+  },
+
+  addFilterEntries(type, entries) {
+    chrome.storage.local.get('storageData', (data) => {
+      const nextStorage = data.storageData || storage;
+
+      if (!nextStorage.filterData) {
+        nextStorage.filterData = {};
+      }
+
+      if (!Array.isArray(nextStorage.filterData[type])) {
+        nextStorage.filterData[type] = [];
+      }
+
+      nextStorage.filterData[type].push(...entries);
+      chrome.storage.local.set({ storageData: nextStorage });
+    });
   }
 };
 
+function createContextMenus() {
+  if (!chrome.contextMenus) return;
+
+  chrome.contextMenus.remove(blockSelectedTitleMenuId, () => {
+    if (chrome.runtime.lastError) {
+      // Ignore missing menu item when the extension starts for the first time.
+    }
+
+    chrome.contextMenus.create({
+      id: blockSelectedTitleMenuId,
+      title: 'BlockTube: Block video titles containing "%s"',
+      contexts: ['selection'],
+      documentUrlPatterns: [
+        'https://www.youtube.com/*',
+        'https://m.youtube.com/*'
+      ]
+    });
+  });
+}
+
+function blockSelectedTitleText(info) {
+  const selectedText = utils.normalizeSelectedText(info.selectionText);
+  if (!selectedText) return;
+
+  const entries = utils.getContextBlockEntries(selectedText, [selectedText]);
+  utils.addFilterEntries('title', entries);
+}
+
+createContextMenus();
+
+if (chrome.contextMenus) {
+  chrome.contextMenus.onClicked.addListener((info) => {
+    if (info.menuItemId !== blockSelectedTitleMenuId) return;
+    blockSelectedTitleText(info);
+  });
+}
+
 chrome.storage.local.get(['storageData', 'enabled'], (data) => {
-  if (data !== undefined && Object.keys(data).length > 0) {
+  if (data !== undefined && has.call(data, 'storageData')) {
     storage = data.storageData;
     compiledStorage = utils.compileAll(data.storageData);
   }
@@ -128,8 +201,7 @@ chrome.storage.local.get(['storageData', 'enabled'], (data) => {
     port.onMessage.addListener((msg) => {
       switch (msg.type) {
         case 'contextBlock': {
-          storage.filterData[msg.data.type].push(...msg.data.entries);
-          chrome.storage.local.set({storageData: storage});
+          utils.addFilterEntries(msg.data.type, msg.data.entries);
           break;
         }
       }
