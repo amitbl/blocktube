@@ -39,6 +39,7 @@
     "open_in_tab": true
   },
   "permissions": [
+    "contextMenus",
     "storage",
     "unlimitedStorage"
   ],
