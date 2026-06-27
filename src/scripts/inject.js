@@ -158,13 +158,39 @@
 
   // TODO: add rules descriptions
   // !! Filter Rules definitions
+  const bylinePaths = [
+    'shortBylineText',
+    'longBylineText',
+    'ownerText',
+    'bylineText',
+  ];
+  const collaboratorDialogPath = 'runs.navigationEndpoint.showDialogCommand.panelLoadingStrategy.inlineContent.dialogViewModel.customContent.listViewModel.listItems.listItemViewModel';
+  const collaboratorChannelIdPaths = bylinePaths.map((path) =>
+    `${path}.${collaboratorDialogPath}.rendererContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId`);
+  const collaboratorChannelNamePaths = bylinePaths.map((path) =>
+    `${path}.${collaboratorDialogPath}.title.content`);
+  const avatarCollaboratorPath = 'avatar.avatarStackViewModel.rendererContext.commandContext.onTap.innertubeCommand.showDialogCommand.panelLoadingStrategy.inlineContent.dialogViewModel.customContent.listViewModel.listItems.listItemViewModel';
+
   const baseRules = {
     videoId: 'videoId',
-    channelId: 'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
+    channelId: [
+      'shortBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
+      'longBylineText.runs.navigationEndpoint.browseEndpoint.browseId',
+      'ownerText.runs.navigationEndpoint.browseEndpoint.browseId',
+      'bylineText.runs.navigationEndpoint.browseEndpoint.browseId',
+      'channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.navigationEndpoint.browseEndpoint.browseId',
+      'avatar.avatarStackViewModel.rendererContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId',
+      `${avatarCollaboratorPath}.rendererContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId`,
+      ...collaboratorChannelIdPaths,
+    ],
     channelBadges: 'ownerBadges',
     channelName: [
       'shortBylineText',
       'longBylineText',
+      'ownerText',
+      'bylineText',
+      `${avatarCollaboratorPath}.title.content`,
+      ...collaboratorChannelNamePaths,
     ],
     title: ['title'],
     vidLength: ['thumbnailOverlays.thumbnailOverlayTimeStatusRenderer.text'],
@@ -516,14 +542,20 @@
       const properties = storageData.filterData[h];
       if (regexProps.includes(h) && (properties === undefined || properties.length === 0 && !jsFilterEnabled)) return false;
 
-      let value = getFlattenByPath(obj, filterPath);
+      const isRegexFilter = regexProps.includes(h);
+      const shouldMatchAllValues = ['channelId', 'channelName'].includes(h);
+      const values = shouldMatchAllValues ? getFlattenByPathAll(obj, filterPath) : [];
+      let value = shouldMatchAllValues ? values[0] : getFlattenByPath(obj, filterPath);
       if (value === undefined) return false;
 
       if (h === 'percentWatched' && storageData.options.percent_watched_hide && objectType != 'playlistPanelVideoRenderer'
            && !['/feed/history', '/feed/library', '/playlist'].includes(document.location.pathname)
            && parseInt(value) >= storageData.options.percent_watched_hide) return true;
 
-      if (regexProps.includes(h) && properties.some(prop => prop && prop.test(value))) return true;
+      if (
+        isRegexFilter &&
+        matchRegexValues(properties, shouldMatchAllValues ? values : [value])
+      ) return true;
 
       if (h === 'vidLength') {
         const vidLen = parseTime(value);
@@ -938,6 +970,67 @@
       value = getObjectByPath(obj, filterPathArr[idx]);
       if (value !== undefined) return flattenRuns(value);
     }
+  }
+
+  function getFlattenByPathAll(obj, filterPath) {
+    if (filterPath === undefined) return [];
+    const filterPathArr = Array.isArray(filterPath) ? filterPath : [filterPath];
+    return filterPathArr.reduce((res, path) => {
+      getObjectsByPath(obj, path).forEach((value) => {
+        if (value !== undefined) res.push(flattenRuns(value));
+      });
+      return res;
+    }, []);
+  }
+
+  function matchRegexValues(properties, values) {
+    if (!Array.isArray(properties)) return false;
+    return properties.some((prop) => {
+      if (!prop) return false;
+      return values.some((value) => {
+        prop.lastIndex = 0;
+        return prop.test(value);
+      });
+    });
+  }
+
+  function getObjectsByPath(obj, path) {
+    const paths = Array.isArray(path) ? path : path.split('.');
+    return paths.reduce((values, v) => {
+      return values.reduce((res, value) => res.concat(getPathSegmentValues(value, v)), []);
+    }, [obj]);
+  }
+
+  function getPathSegmentValues(obj, path) {
+    if (obj === undefined || obj === null) return [];
+
+    if (/\[.*\]/.test(path)) {
+      const baseMatch = path.match(/^([^\[]+)/);
+      const base = baseMatch && baseMatch[1];
+      const idxMatches = [...path.matchAll(/\[(\d+)\]/g)].map(m => parseInt(m[1], 10));
+      let values = base ? getPathPropertyValues(obj, base) : [obj];
+
+      idxMatches.forEach((idx) => {
+        values = values.reduce((res, value) => {
+          if (Array.isArray(value) && idx >= 0 && idx < value.length) {
+            res.push(value[idx]);
+          }
+          return res;
+        }, []);
+      });
+
+      return values;
+    }
+
+    return getPathPropertyValues(obj, path);
+  }
+
+  function getPathPropertyValues(obj, prop) {
+    const values = Array.isArray(obj) ? obj : [obj];
+    return values.reduce((res, value) => {
+      if (value && has.call(value, prop)) res.push(value[prop]);
+      return res;
+    }, []);
   }
 
   function postMessage(type, data) {
