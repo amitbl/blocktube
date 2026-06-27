@@ -430,6 +430,7 @@ input#import {
 }
 
 #tabbed-filters-content {
+  position: relative;
   width:100%
 }
 

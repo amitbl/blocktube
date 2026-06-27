@@ -135,8 +135,8 @@
     });
 
     const vidLength = get('filterData.vidLength', [NaN, NaN], obj);
-    $('vidLength_0').value         = vidLength[0];
-    $('vidLength_1').value         = vidLength[1];
+    setNumberInputValue('vidLength_0', vidLength[0]);
+    setNumberInputValue('vidLength_1', vidLength[1]);
     $('vidLength_type').value      = get('options.vidLength_type', 'allow', obj);
 
     $('ui_theme').value            = get('uiTheme', 'light', obj);
@@ -153,7 +153,7 @@
     $('block_feedback').checked    = get('options.block_feedback', false, obj);
     $('enable_javascript').checked = get('options.enable_javascript', false, obj);
     $('block_message').value       = get('options.block_message', '', obj);
-    $('percent_watched_hide').value = get('options.percent_watched_hide', NaN, obj);
+    setNumberInputValue('percent_watched_hide', get('options.percent_watched_hide', NaN, obj));
 
     const jsContent = get('filterData.javascript', defaultJSFunction, obj);
     jsEditors['javascript'].setValue(jsContent);
@@ -202,6 +202,10 @@
       status.textContent = '';
       status.classList.remove('alert-animate');
     }, 1000);
+  }
+
+  function setNumberInputValue(id, value) {
+    $(id).value = value === undefined || value === null || Number.isNaN(Number(value)) ? '' : String(value);
   }
 
   function saveFile(data, fileName) {
@@ -269,6 +273,7 @@
       autoCloseBrackets: true,
       lineNumbers: true,
       styleActiveLine: true,
+      fixedGutter: false,
       lineWrapping: true,
       extraKeys: {
         F11: function(cm) {
@@ -340,6 +345,54 @@
     $('save_btn').classList.remove('disabled-btn');
   });
 
+  function refreshTabEditors(tab) {
+    tab.querySelectorAll('textarea').forEach((txtarea) => {
+      const areaName = txtarea.getAttribute('id');
+      if (has.call(jsEditors, areaName)) {
+        jsEditors[areaName].refresh()
+      }
+    });
+  }
+
+  function nextFrame() {
+    return new Promise(requestAnimationFrame);
+  }
+
+  async function warmHiddenTabs(element) {
+    const tabs = Array.from(element.querySelectorAll('section'))
+      .filter((tab) => tab.style.display !== 'block');
+    const styles = tabs.map((tab) => ({
+      display: tab.style.display,
+      visibility: tab.style.visibility,
+      position: tab.style.position,
+      left: tab.style.left,
+      right: tab.style.right,
+      top: tab.style.top,
+      width: tab.style.width,
+      pointerEvents: tab.style.pointerEvents
+    }));
+
+    tabs.forEach((tab) => {
+      tab.style.display = 'block';
+      tab.style.visibility = 'hidden';
+      tab.style.position = 'absolute';
+      tab.style.left = '0';
+      tab.style.right = '0';
+      tab.style.top = '0';
+      tab.style.width = '100%';
+      tab.style.pointerEvents = 'none';
+      refreshTabEditors(tab);
+    });
+
+    await nextFrame();
+    await nextFrame();
+    tabs.forEach(refreshTabEditors);
+
+    tabs.forEach((tab, index) => {
+      Object.assign(tab.style, styles[index]);
+    });
+  }
+
   function initTabs(name) {
     const element = document.getElementById(name);
     element.querySelectorAll("input[type='radio']").forEach((box) => {
@@ -351,13 +404,7 @@
         const tabName = e.target.getAttribute('aria-controls');
         const tab = document.getElementById(tabName);
         tab.style.display = 'block';
-
-        tab.querySelectorAll('textarea').forEach((txtarea) => {
-          const areaName = txtarea.getAttribute('id');
-          if (has.call(jsEditors, areaName)) {
-            jsEditors[areaName].refresh()
-          }
-        });
+        refreshTabEditors(tab);
 
       });
 
@@ -365,6 +412,8 @@
         box.click();
       }
     });
+
+    warmHiddenTabs(element);
   }
 
   initTabs('tabbed-filters-parent');
