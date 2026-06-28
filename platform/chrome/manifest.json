@@ -5,20 +5,20 @@
   "manifest_version": 3,
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
+      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*", "https://www.youtube-nocookie.com/*"],
       "js": ["src/scripts/content_script.js"],
       "run_at": "document_start",
       "all_frames": true
     },
     {
-      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
+      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*", "https://www.youtube-nocookie.com/*"],
       "js": ["src/scripts/seed.js"],
       "run_at": "document_start",
       "all_frames": true,
       "world": "MAIN"
     },
     {
-      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*"],
+      "matches": ["https://www.youtube.com/*", "https://m.youtube.com/*", "https://www.youtube-nocookie.com/*"],
       "js": ["src/scripts/inject.js"],
       "run_at": "document_start",
       "all_frames": true,
