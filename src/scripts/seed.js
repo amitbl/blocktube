@@ -127,6 +127,15 @@
     }
   }
 
+  function getPropertyDescriptor(obj, prop) {
+    while (obj) {
+      const descriptor = Object.getOwnPropertyDescriptor(obj, prop);
+      if (descriptor) return descriptor;
+      obj = Object.getPrototypeOf(obj);
+    }
+    return undefined;
+  }
+
   // Start
   if (window.writeEmbed || window.ytplayer || window.Polymer) {
     console.error('We may have lost the battle, but not the war');
@@ -158,18 +167,26 @@
   }
 
   if (window.location.pathname.startsWith('/embed/')) {
-    const XMLHttpRequestResponse = Object.getOwnPropertyDescriptor(XMLHttpRequest.prototype, 'response');
-    Object.defineProperty(XMLHttpRequest.prototype, 'response', {
-      get: function() {
-        if(!fetch_uris.some(u => this.responseURL.includes(u))) {
-          return XMLHttpRequestResponse.get.call(this);
-        }
-        let res = JSON.parse(XMLHttpRequestResponse.get.call(this).replace(')]}\'', ''));
-        window.btExports.fetchFilter(new URL(this.responseURL), res);
-        return JSON.stringify(res);
-      },
-      configurable: true
-    });
+    const XMLHttpRequestResponse = getPropertyDescriptor(XMLHttpRequest.prototype, 'response');
+    if (XMLHttpRequestResponse && XMLHttpRequestResponse.get) {
+      Object.defineProperty(XMLHttpRequest.prototype, 'response', {
+        get: function() {
+          const response = XMLHttpRequestResponse.get.call(this);
+          if(!this.responseURL || !fetch_uris.some(u => this.responseURL.includes(u))) {
+            return response;
+          }
+          if (typeof response !== 'string') return response;
+          try {
+            let res = JSON.parse(response.replace(')]}\'', ''));
+            window.btExports.fetchFilter(new URL(this.responseURL), res);
+            return JSON.stringify(res);
+          } catch (e) {
+            return response;
+          }
+        },
+        configurable: true
+      });
+    }
   }
 
   // Polymer elements modifications
