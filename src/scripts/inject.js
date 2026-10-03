@@ -358,11 +358,19 @@
         title: 'metadata.lockupMetadataViewModel.title.content',
         channelName: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.content',
         vidLength: 'contentImage.thumbnailViewModel.overlays.thumbnailOverlayBadgeViewModel.thumbnailBadges.thumbnailBadgeViewModel.text',
-        viewCount: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts.text.content',
+        viewCount: [
+          'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[0].metadataParts[1].accessibilityLabel',
+          'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[0].metadataParts[1].text.content',
+          'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts.text.content'
+        ],
         channelId: ['metadata.lockupMetadataViewModel.image.decoratedAvatarViewModel.rendererContext.commandContext.onTap.innertubeCommand.browseEndpoint.browseId', 
                     'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows.metadataParts.text.commandRuns.onTap.innertubeCommand.browseEndpoint.browseId'],
         percentWatched: 'contentImage.thumbnailViewModel.overlays.thumbnailBottomOverlayViewModel.progressBar.thumbnailOverlayProgressBarViewModel.startPercent',
-        publishTimeText: 'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts[1].text.content'
+        publishTimeText: [
+          'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[0].metadataParts[2].text.content',
+          'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[0].metadataParts[2].accessibilityLabel',
+          'metadata.lockupMetadataViewModel.metadata.contentMetadataViewModel.metadataRows[1].metadataParts[1].text.content'
+        ]
       },
 
       videoCardRenderer: {
@@ -542,7 +550,9 @@
 
       if (jsFilterEnabled) {
         if (h === 'viewCount') {
-          value = parseViewCount(value);
+          const parsed = parseViewCount(value);
+          friendlyVideoObj.rawViewCount = value;
+          value = (parsed !== undefined) ? parsed : value;
         } else if (h === 'channelBadges' || h === 'badges') {
           const badges = [];
           value.forEach(br => {
@@ -1012,29 +1022,50 @@
   }
 
   function parseViewCount(viewCount) {
-    const parts = viewCount.split(" ");
-    if (parts[1] !== "views" && parts[1] !== "view") return undefined; // Fail if not english formatting
-    let views = parts[0];
-    
-    // Handle abbreviated formats (K, M, B)
-    const multipliers = {
-      'K': 1000,
-      'M': 1000000,
-      'B': 1000000000
-    };
-    
-    // Check if it ends with a multiplier
-    const lastChar = views.slice(-1).toUpperCase();
-    let multiplier = 1;
-    let numericPart = views.replace(',', '');
-    
-    if (multipliers[lastChar]) {
-      multiplier = multipliers[lastChar];
-      numericPart = views.slice(0, -1); // Remove the letter
+    if (!viewCount || typeof viewCount !== 'string') return undefined;
+
+    // Normalize non-breaking spaces and trim whitespace
+    const normalized = viewCount.replace(/\u00a0/g, ' ').trim();
+
+    if (/^no\s+views?$/i.test(normalized)) return 0;
+
+    // 1. Spelled-out words from accessibilityLabel (e.g. "331 thousand views", "7.6 million views")
+    const wordMatch = normalized.match(/^([\d,.]+)\s+(thousand|million|billion)\s+views?$/i);
+    if (wordMatch) {
+      const num = parseFloat(wordMatch[1].replace(/,/g, ''));
+      const mult = {
+        thousand: 1e3,
+        million: 1e6,
+        billion: 1e9,
+      }[wordMatch[2].toLowerCase()];
+      return Math.round(num * mult);
     }
-    
-    // Return the final count
-    return (numericPart * multiplier);
+
+    // 2. Abbreviated suffixes or raw numbers with "views" (e.g. "331K views", "4M views", "1,250 views", "1 view")
+    const abbrMatch = normalized.match(/^([\d,.]+)\s*([KMBkmb]?)\s+views?$/i);
+    if (abbrMatch) {
+      const num = parseFloat(abbrMatch[1].replace(/,/g, ''));
+      const mult = {
+        K: 1e3,
+        M: 1e6,
+        B: 1e9,
+      }[abbrMatch[2].toUpperCase()] || 1;
+      return Math.round(num * mult);
+    }
+
+    // 3. Raw abbreviations without "views" (e.g. "331K", "7.6M" from text.content fallback)
+    const rawMatch = normalized.match(/^([\d,.]+)\s*([KMBkmb])$/);
+    if (rawMatch) {
+      const num = parseFloat(rawMatch[1].replace(/,/g, ''));
+      const mult = {
+        K: 1e3,
+        M: 1e6,
+        B: 1e9,
+      }[rawMatch[2].toUpperCase()];
+      return Math.round(num * mult);
+    }
+
+    return undefined;
   }
 
   function transformToRegExp(data) {
