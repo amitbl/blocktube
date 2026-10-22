@@ -14,6 +14,7 @@ Filter and block unwanted content from YouTube™.
 * Supports both keywords and raw Regex
 * Does not break or limit any features of YouTube like playlist or autoplay
 * Hide and block the Trending section
+* Hide community posts
 * Protect extension options with a password
 * Filtering is done before any DOM rendering
 

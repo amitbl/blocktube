@@ -86,6 +86,7 @@
     storageData.options.trending = $('disable_trending').checked;
     storageData.options.shorts = $('disable_shorts').checked;
     storageData.options.movies = $('disable_movies').checked;
+    storageData.options.community_posts = $('disable_community_posts').checked;
     storageData.options.mixes = $('disable_mixes').checked;
     storageData.options.autoplay = $('autoplay').checked;
     storageData.options.suggestions_only = $('suggestions_only').checked;
@@ -144,6 +145,7 @@
     $('disable_trending').checked  = get('options.trending', false, obj);
     $('disable_shorts').checked    = get('options.shorts', false, obj);
     $('disable_movies').checked    = get('options.movies', false, obj);
+    $('disable_community_posts').checked = get('options.community_posts', false, obj);
     $('disable_mixes').checked     = get('options.mixes', false, obj);
     $('autoplay').checked          = get('options.autoplay', false, obj);
     $('disable_db_normalize').checked = get('options.disable_db_normalize', false, obj);

@@ -22,6 +22,7 @@ let storage = {
     mixes: false,
     shorts: false,
     movies: false,
+    community_posts: false,
     suggestions_only: false,
     autoplay: false,
     enable_javascript: false,
