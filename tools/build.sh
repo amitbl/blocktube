@@ -1,30 +1,32 @@
 #!/usr/bin/env bash
 
-SCRIPT=`realpath $0`
-BASEDIR=$(dirname $(dirname $SCRIPT))
-VERSION="${2:-`cat $BASEDIR/VERSION`}"
+SCRIPT=$(realpath -- "$0")
+BASEDIR=$(dirname -- "$(dirname -- "$SCRIPT")")
+VERSION="${2:-$(cat "$BASEDIR/VERSION")}"
 
 copy_files() {
-    mkdir -p $DEST
-    cp -R $BASEDIR/src      $DEST
-    cp -R $BASEDIR/assets   $DEST
-    cp -R $BASEDIR/LICENSE  $DEST
-    cp -R $BASEDIR/VERSION  $DEST
-    cp platform/$BROWSER/manifest.json $DEST
+    mkdir -p "$DEST"
+    cp -R "$BASEDIR/src"      "$DEST"
+    cp -R "$BASEDIR/assets"   "$DEST"
+    cp -R "$BASEDIR/LICENSE"  "$DEST"
+    cp -R "$BASEDIR/VERSION"  "$DEST"
+    cp "$BASEDIR/platform/$BROWSER/manifest.json" "$DEST"
 }
 
 set_version() {
-    sed -i -e "s/{EXT_VERSION}/${VERSION}/" ${DEST}/manifest.json
-    sed -i -e "s/{EXT_VERSION}/${VERSION}/" ${DEST}/src/ui/options.html
+    sed -i -e "s/{EXT_VERSION}/${VERSION}/" "$DEST/manifest.json"
+    sed -i -e "s/{EXT_VERSION}/${VERSION}/" "$DEST/src/ui/options.html"
 }
 
 zipfile() {
-    cd $DEST
+    cd -- "$DEST" || return
     zip "$DEST/blocktube_${BROWSER}_v${VERSION}.zip" -qr ./*
 }
 
 clean() {
-    rm -rf $DEST
+    if [ -n "${DEST:-}" ]; then
+        rm -rf -- "$DEST"
+    fi
 }
 
 build() {
@@ -34,6 +36,7 @@ build() {
     zipfile
 }
 
+DEST=
 if [ "$1" == "firefox_selfhosted" ]; then
     DEST=$BASEDIR/dist/firefox_selfhosted
     BROWSER=firefox_selfhosted
