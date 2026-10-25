@@ -156,6 +156,14 @@
     'comment',
   ];
 
+  // renderers that hold YouTube's community posts
+  const communityPostRenderers = [
+    'backstagePostRenderer',
+    'backstagePostThreadRenderer',
+    'postRenderer',
+    'sharedPostRenderer',
+  ];
+
   // TODO: add rules descriptions
   // !! Filter Rules definitions
   const baseRules = {
@@ -211,6 +219,8 @@
         channelId: 'authorEndpoint.browseEndpoint.browseId',
         channelName: ['authorText']
       },
+      backstagePostThreadRenderer: {},
+      sharedPostRenderer: {},
 
       watchCardCompactVideoRenderer: {
         title: 'title',
@@ -492,6 +502,7 @@
 
   ObjectFilter.prototype.isDataEmpty = function () {
     if (storageData.options.shorts || storageData.options.movies || storageData.options.mixes) return false;
+    if (storageData.options.community_posts) return false;
     if (!isNaN(storageData.options.percent_watched_hide)) return false;
 
     if (!isNaN(storageData.filterData.vidLength[0]) ||
@@ -583,6 +594,10 @@
   };
 
   ObjectFilter.prototype.isExtendedMatched = function(filteredObject, h) {
+    // channel tabs ending in /posts or /community intentionally list posts -> left untouched
+    if (storageData.options.community_posts
+        && !/\/(posts|community)\/?$/.test(location.pathname)
+        && communityPostRenderers.includes(h)) return true;
     if (storageData.options.movies) {
       if (h === 'movieRenderer' || h === 'compactMovieRenderer') return true;
       if (h === 'videoRenderer' && !getObjectByPath(filteredObject, "shortBylineText.runs.navigationEndpoint.browseEndpoint") && filteredObject.longBylineText && filteredObject.badges) return true;
