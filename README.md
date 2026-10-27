@@ -19,8 +19,8 @@ Filter and block unwanted content from YouTube™.
 
 ## Install
 
-* [**Chrome Webstore**](https://chrome.google.com/webstore/detail/blocktube/bbeaicapbccfllodepmimpkgecanonai?hl=en-US)
-* [**Firefox AMO**](https://addons.mozilla.org/en-US/firefox/addon/blocktube/)
+* [**Chrome Webstore**](https://chrome.google.com/webstore/detail/blocktube/bbeaicapbccfllodepmimpkgecanonai)
+* [**Firefox AMO**](https://addons.mozilla.org/firefox/addon/blocktube/)
 
 ## FAQ
   
