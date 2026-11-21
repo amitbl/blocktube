@@ -516,6 +516,13 @@
       const properties = storageData.filterData[h];
       if (regexProps.includes(h) && (properties === undefined || properties.length === 0 && !jsFilterEnabled)) return false;
 
+      // collab videos: block if ANY of the video's channels is blocked
+      if (h === 'channelId' && properties && properties.length > 0 &&
+          (objectType === 'lockupViewModel' || objectType === 'videoRenderer' || objectType === 'compactVideoRenderer')) {
+        const allIds = collectChannelIds(obj, objectType);
+        if (allIds.some(id => properties.some(prop => prop && prop.test(id)))) return true;
+      }
+
       let value = getFlattenByPath(obj, filterPath);
       if (value === undefined) return false;
 
@@ -929,6 +936,30 @@
       return res;
     }, []).join(' ');
   };
+
+  // Collect every channel ID (UC...) found in a video's metadata.
+  // Needed for collab videos, which have several channels and no single-ID path.
+  function collectChannelIds(obj, objectType) {
+    const ids = [];
+    let root = obj;
+    if (objectType === 'lockupViewModel') {
+      root = getObjectByPath(obj, 'metadata.lockupMetadataViewModel');
+    } else if (obj) {
+      root = obj.shortBylineText || obj.bylineText || obj.longBylineText;
+    }
+    const walk = (o, depth) => {
+      if (!o || typeof o !== 'object' || depth > 25) return;
+      if (typeof o.browseId === 'string' && /^UC[\w-]{22}$/.test(o.browseId) && !ids.includes(o.browseId)) {
+        ids.push(o.browseId);
+      }
+      for (const k in o) {
+        if (k === 'menuButton') continue;
+        walk(o[k], depth + 1);
+      }
+    };
+    walk(root, 0);
+    return ids;
+  }
 
   function getFlattenByPath(obj, filterPath) {
     if (filterPath === undefined) return;
@@ -1493,7 +1524,7 @@
     if (!items) return null;
 
     const searchIn = mergedFilterRules['lockupViewModel'];
-    const channelId = getFlattenByPath(renderer, searchIn.channelId);
+    const channelId = getFlattenByPath(renderer, searchIn.channelId) || collectChannelIds(renderer, 'lockupViewModel')[0];
     const channelName = getFlattenByPath(renderer, searchIn.channelName);
     const videoId = getFlattenByPath(renderer, searchIn.videoId);
     const videoName = getFlattenByPath(renderer, searchIn.title);
